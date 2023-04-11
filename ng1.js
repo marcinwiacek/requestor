@@ -5,14 +5,26 @@ const http2 = require('http2');
 const path = require('path');
 const url = require('url');
 
-const Handlebars = require("handlebars");
-const parser = require("fast-xml-parser");
-
-var x = fs.readFileSync(path.normalize(__dirname + "/bela2.xml"), 'utf8');
+var x = fs.readFileSync(path.normalize(__dirname + "/bela3.json"), 'utf8');
 x = x.charCodeAt(0) == 65279 ? x.substring(1) : x;
-let jsonObj = parser.parse(x);
-console.log(JSON.stringify(jsonObj));
+let json = JSON.parse(x)
+console.log(JSON.stringify(json,null,2));
 
+console.log (json.project.name);
+console.log (json.project.testsuite[0].name);
+
+for (let tsnumber in json.project.testsuite) {
+  console.log("testsuite name "+json.project.testsuite[tsnumber].name);
+  for (let tcnumber in json.project.testsuite[tsnumber].testcase) {
+    console.log("testcase name "+json.project.testsuite[tsnumber].testcase[tcnumber].name);
+    for (let stepnumber in json.project.testsuite[tsnumber].testcase[tcnumber].step) {
+      console.log("step name "+json.project.testsuite[tsnumber].testcase[tcnumber].step[stepnumber].name);
+    }
+  }
+}
+
+
+/*
 let requestTemplates = []
 
 function request(req) {
@@ -212,3 +224,4 @@ async function execute(arr, data) {
 }
 
 execute(jsonObj.project, []);
+*/

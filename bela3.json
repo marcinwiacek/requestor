@@ -1,0 +1,66 @@
+{
+	"project": {
+		"name": "x",
+		"environment": [
+			{
+				"name": "a",
+				"function": [
+				    "function f(p) {",
+				    "  return p1 * 2;",
+				    "}"]
+			},
+			{
+				"name": "b",
+				"function": [
+				    "function f(p) {",
+				    "  return p1 * 2;",
+				    "}"]
+			}
+		],
+		"service": [{
+			"name": "service1",
+			"url": "http://",
+			"function": {
+				"name": "search",
+				"type": "http1get",
+				"url": "{{engine}}{{word}}",
+				"header": [
+					"Content-Type:charset=UTF-8",
+					"a:{{function#f#2}}"
+				],
+				"content": "",
+				"output": {
+					"type": "regular",
+					"value": "*"
+				},
+				"assert": {
+					"code": "200"
+				}
+			}
+		}],
+		"testsuite": [{
+			"name":"TS1",
+			"testcase": [{
+				"name" : "TC1",
+				"input": [
+				   "engine,word",
+				   "www.google.com/search?q=,test",
+				   "duckduckgo.com/?q=,test"
+				],
+				"step": [
+					{
+						"name": "step1",
+						"function": "search"
+					},
+					{
+						"name": "step2",
+						"type": "http1get",
+						"url": "{{engine}}{{word}}",
+						"header": "Content-Type:charset=UTF-8",
+						"content": ""
+					}
+				]
+			}]
+		}]
+	}
+}
