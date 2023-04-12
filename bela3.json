@@ -29,13 +29,13 @@
 					"a:{{function#f#2}}"
 				],
 				"content": "",
-				"output": {
+				"output": [{
 					"type": "regular",
 					"value": "*"
-				},
-				"assert": {
+				}],
+				"assert": [{
 					"code": "200"
-				}
+				}]
 			}
 		}],
 		"testsuite": [{
@@ -54,10 +54,17 @@
 					},
 					{
 						"name": "step2",
-						"type": "http1get",
-						"url": "http://{{engine}}{{word}}",
+						"type": "get",
+						"url": "https://{{engine}}{{word}}",
 						"header": "Content-Type:charset=UTF-8",
-						"content": ""
+						"content": "",
+				"output": [{
+					"type": "regular",
+					"value": "*"
+				}],
+				"assert": [{
+					"code": "200"
+				}]
 					}
 				]
 			}]
