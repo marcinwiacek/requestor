@@ -55,7 +55,7 @@
 					{
 						"name": "step2",
 						"type": "http1get",
-						"url": "{{engine}}{{word}}",
+						"url": "http://{{engine}}{{word}}",
 						"header": "Content-Type:charset=UTF-8",
 						"content": ""
 					}
