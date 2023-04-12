@@ -11,8 +11,7 @@ let jsonObj = JSON.parse(x)
 //console.log(JSON.stringify(json,null,2));
 
 async function executeRequest(req) {
-  
-  console.log(req);
+    console.log(req);
     console.log("request " + JSON.stringify(req));
     var q = url.parse(req.url, true);
     console.log("url " + JSON.stringify(q));
@@ -40,6 +39,7 @@ async function executeRequest(req) {
 
                     response.on('end', () => {
                         let response_body = Buffer.concat(chunks_of_data);
+//			console.log(response.headers);
                         resolve(response_body.toString());
                     });
 
@@ -107,47 +107,71 @@ async function executeRequest(req) {
 }
 
 async function executetestcase(arr, data) {
-    console.log (arr.name);
-    console.log (arr.testsuite[0].name);
+    console.log(arr.name);
+    console.log(arr.testsuite[0].name);
 
     for (let tsnumber in arr.testsuite) {
-      console.log("testsuite name "+arr.testsuite[tsnumber].name);
-      for (let tcnumber in arr.testsuite[tsnumber].testcase) {
-        console.log("testcase name "+arr.testsuite[tsnumber].testcase[tcnumber].name);
-	let lines = arr.testsuite[tsnumber].testcase[tcnumber].input;
-        let headers = []
-        for (let index2 in lines) {
-              let l = lines[index2];
-              if (headers.length == 0) {
-                  headers = l.split(",");
-              } else {
-                  let ll = l.split(",");
-                  let i = 0;
-                  let arra = [];
-                  headers.forEach(function(h) {
-                     arra[h] = ll[i];
-                      i++;
-                  });
-                  console.log(arra);
-                  for (let stepnumber in arr.testsuite[tsnumber].testcase[tcnumber].step) {
-         	     console.log("step name "+arr.testsuite[tsnumber].testcase[tcnumber].step[stepnumber].name); 
-         	     var stepcopy =JSON.parse(JSON.stringify(arr.testsuite[tsnumber].testcase[tcnumber].step[stepnumber]));
-         	     if (stepcopy.function != null) {
-    continue;
-  }
-         	    
-         	     for (let d in arra) {
-       console.log (d);
-       console.log (arra[d]);
-       stepcopy.url = stepcopy.url.replace("{{"+d+"}}",arra[d]);
+        console.log("testsuite name " + arr.testsuite[tsnumber].name);
+        for (let tcnumber in arr.testsuite[tsnumber].testcase) {
+            console.log("testcase name " + arr.testsuite[tsnumber].testcase[tcnumber].name);
+            let lines = arr.testsuite[tsnumber].testcase[tcnumber].input;
+            let headers = []
+            for (let index2 in lines) {
+                let l = lines[index2];
+                if (headers.length == 0) {
+                    headers = l.split(",");
+                } else {
+                    let ll = l.split(",");
+                    let i = 0;
+                    let arra = [];
+                    headers.forEach(function(h) {
+                        arra[h] = ll[i];
+                        i++;
+                    });
+                    console.log(arra);
+                    for (let stepnumber in arr.testsuite[tsnumber].testcase[tcnumber].step) {
+                        console.log("step name " + arr.testsuite[tsnumber].testcase[tcnumber].step[stepnumber].name);
+                        var stepcopy = JSON.parse(JSON.stringify(arr.testsuite[tsnumber].testcase[tcnumber].step[stepnumber]));
+                        if (stepcopy.function != null) {
+                            continue;
+                        }
+
+                        for (let d in arra) {
+                            console.log(d);
+                            console.log(arra[d]);
+                            stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                        }
+                        await request2(stepcopy);
+                    }
+                }
+            };
+        }
     }
-         	     console.log(stepcopy);
-var response = await    executeRequest(stepcopy);         	     
-console.log(response);
-	          }
-              }
-          };
-       }
+}
+
+function addToLog(str) {
+//<?xml version="1.0" encoding="utf-8"?>
+    fs.writeFileSync(path.normalize(__dirname + "/bela2log.xml"), str, {
+        "flag": "a"
+    });
+}
+
+async function request2(req) {
+    console.log("request " + JSON.stringify(req));
+    try {
+        addToLog("<request>\n");
+        addToLog("<url>" + req.url + "</url>\n");
+        addToLog("<headers>" + req.headers + "</headers>\n");
+        addToLog("<body><!CDATA[" + req.content + "]]></body>\n");
+        console.log("start");
+        var response_body = await executeRequest(req);
+        addToLog("<response>\n");
+        addToLog("<!CDATA["+response_body+"]]>");
+        addToLog("</response>\n");
+        console.log("end");
+        addToLog("</request>\n");
+    } catch (e) {
+        console.error(e);
     }
 }
 
