@@ -43,9 +43,10 @@ async function executeRequest(req) {
             });
 
             response.on('end', () => {
-                let response_body = Buffer.concat(chunks_of_data);
-                //			console.log(response.headers);
-                resolve(response_body.toString());
+		var resp = {}
+		resp.body = Buffer.concat(chunks_of_data).toString();
+                resp.headers = response.headers;
+                resolve(resp);
             });
 
             response.on('error', (error) => {
@@ -109,14 +110,21 @@ async function request2(req) {
     console.log("request " + JSON.stringify(req));
     try {
         addToLog("<request>\n");
-        addToLog("<url>" + req.url + "</url>\n");
-        addToLog("<headers>" + req.headers + "</headers>\n");
-        addToLog("<body><!CDATA[" + req.content + "]]></body>\n");
+        addToLog("  <url>" + req.url + "</url>\n");
+        for (let headername in req.headers) {
+          addToLog("  <header>" +req.headers[headername] + "</header>\n");
+	}
+        addToLog("  <body>\n");
+	addToLog("  <![CDATA[\n" + req.content.replace("]]>","]]]]><![CDATA[>") + "\n]]>\n");
+	addToLog("  </body>\n");
         console.log("start");
-        var response_body = await executeRequest(req);
-        addToLog("<response>\n");
-        addToLog("<!CDATA[" + response_body + "]]>");
-        addToLog("</response>\n");
+        var response = await executeRequest(req);
+        for (let headername in response.headers) {
+          addToLog("  <response_header>" + headername+": "+response.headers[headername] + "</response_header>\n");
+	}
+        addToLog("  <response_body>\n");
+        addToLog("  <![CDATA[\n" + response.body.replace("]]>","]]]]><![CDATA[>") + "\n]]>\n");
+        addToLog("  </response_body>\n");
         console.log("end");
         addToLog("</request>\n");
     } catch (e) {
