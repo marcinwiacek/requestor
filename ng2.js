@@ -36,16 +36,17 @@ async function executeRequest(req) {
 
     return new Promise((resolve, reject) => {
         method(req.url, (response) => {
-            let chunks_of_data = [];
+            let chunks = [];
 
             response.on('data', (fragments) => {
-                chunks_of_data.push(fragments);
+                chunks.push(fragments);
             });
 
             response.on('end', () => {
-		var resp = {}
-		resp.body = Buffer.concat(chunks_of_data).toString();
+                var resp = {}
+                resp.body = Buffer.concat(chunks).toString();
                 resp.headers = response.headers;
+                resp.code = response.statusCode;
                 resolve(resp);
             });
 
@@ -57,14 +58,11 @@ async function executeRequest(req) {
 }
 
 async function executetestcase(arr, data) {
-    console.log(arr.name);
-    console.log(arr.testsuite[0].name);
-
-    for (let tsnumber in arr.testsuite) {
-        console.log("testsuite name " + arr.testsuite[tsnumber].name);
-        for (let tcnumber in arr.testsuite[tsnumber].testcase) {
-            console.log("testcase name " + arr.testsuite[tsnumber].testcase[tcnumber].name);
-            let lines = arr.testsuite[tsnumber].testcase[tcnumber].input;
+    for (let tsnumber in arr.testsuites) {
+        console.log("testsuite name " + arr.testsuites[tsnumber].name);
+        for (let tcnumber in arr.testsuites[tsnumber].testcases) {
+            console.log("testcase name " + arr.testsuites[tsnumber].testcases[tcnumber].name);
+            let lines = arr.testsuites[tsnumber].testcases[tcnumber].input;
             let headers = []
             for (let index2 in lines) {
                 let l = lines[index2];
@@ -79,10 +77,22 @@ async function executetestcase(arr, data) {
                         i++;
                     });
                     console.log(arra);
-                    for (let stepnumber in arr.testsuite[tsnumber].testcase[tcnumber].step) {
-                        console.log("step name " + arr.testsuite[tsnumber].testcase[tcnumber].step[stepnumber].name);
-                        var stepcopy = JSON.parse(JSON.stringify(arr.testsuite[tsnumber].testcase[tcnumber].step[stepnumber]));
+                    for (let stepnumber in arr.testsuites[tsnumber].testcases[tcnumber].steps) {
+                        console.log("step name " + arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name);
+                        var stepcopy = JSON.parse(JSON.stringify(arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber]));
                         if (stepcopy.function != null) {
+                            for (let servicenumber in arr.services) {
+                                console.log("service name " + arr.services[servicenumber].name);
+                                for (let functionnumber in arr.services[servicenumber].functions) {
+                                    console.log("function name " + arr.services[servicenumber].functions[functionnumber].name);
+                                    if (arr.services[servicenumber].functions[functionnumber].name == stepcopy.function) {
+                                        stepcopy = JSON.parse(JSON.stringify(arr.services[servicenumber].functions[functionnumber]));
+                                        stepcopy.url = arr.services[servicenumber].url + stepcopy.url;
+                                    }
+                                }
+
+                            }
+                        } else {
                             continue;
                         }
 
@@ -112,18 +122,19 @@ async function request2(req) {
         addToLog("<request>\n");
         addToLog("  <url>" + req.url + "</url>\n");
         for (let headername in req.headers) {
-          addToLog("  <header>" +req.headers[headername] + "</header>\n");
-	}
+            addToLog("  <header>" + req.headers[headername] + "</header>\n");
+        }
         addToLog("  <body>\n");
-	addToLog("  <![CDATA[\n" + req.content.replace("]]>","]]]]><![CDATA[>") + "\n]]>\n");
-	addToLog("  </body>\n");
+        addToLog("  <![CDATA[\n" + req.content.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
+        addToLog("  </body>\n");
         console.log("start");
         var response = await executeRequest(req);
         for (let headername in response.headers) {
-          addToLog("  <response_header>" + headername+": "+response.headers[headername] + "</response_header>\n");
-	}
+            addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
+        }
+        addToLog("  <response_code>" + response.code + "</response_code>\n");
         addToLog("  <response_body>\n");
-        addToLog("  <![CDATA[\n" + response.body.replace("]]>","]]]]><![CDATA[>") + "\n]]>\n");
+        addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
         addToLog("  </response_body>\n");
         console.log("end");
         addToLog("</request>\n");
