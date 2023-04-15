@@ -1,73 +1,115 @@
 {
-	"project": {
-		"name": "x",
-		"environments": [
-			{
-				"name": "a",
-				"functions": [
-				    "function f(p) {",
-				    "  return p1 * 2;",
-				    "}"]
-			},
-			{
-				"name": "b",
-				"functions": [
-				    "function f(p) {",
-				    "  return p1 * 2;",
-				    "}"]
-			}
-		],
-		"services": [{
+	"name": "x",
+	"functions": [
+		"function f(p) {",
+		"  return p1 * 2;",
+	"}"
+	],
+	"environments": [
+		{
+			"name": "a",
+			"functions": [
+				"function f(p) {",
+				"  return p1 * 2;",
+				"}"
+			]
+		},
+		{
+			"name": "b",
+			"functions": [
+				"function f(p) {",
+				"  return p1 * 2;",
+				"}"
+			]
+		}
+	],
+	"services": [
+		{
 			"name": "service1",
 			"url": "http://",
-			"functions": [{
-				"name": "search",
-				"type": "get",
-				"url": "{{engine}}{{word}}",
-				"headers": [
-					"Content-Type:charset=UTF-8",
-					"a:{{function#f#2}}"
-				],
-				"content": "",
-				"outputs": [{
-					"type": "regular",
-					"value": "*"
-				}],
-				"asserts": [{
-					"code": "200"
-				}]
-			}]
-		}],
-		"testsuites": [{
-			"name":"TS1",
-			"testcases": [{
-				"name" : "TC1",
-				"input": [
-				   "engine,word",
-				   "www.google.com/search?q=,test",
-				   "duckduckgo.com/?q=,test"
-				],
-				"steps": [
-					{
-						"name": "step1",
-						"function": "search"
-					},
-					{
-						"name": "step2",
-						"type": "get",
-						"url": "https://{{engine}}{{word}}",
-						"headers": ["Content-Type:charset=UTF-8"],
-						"content": "",
-				"output": [{
-					"type": "regular",
-					"value": "*"
-				}],
-				"asserts": [{
-					"code": "200"
-				}]
+			"functions": [
+				{
+					"name": "search",
+					"type": "get",
+					"url": "{{engine}}{{word}}",
+					"headers": [
+						"Content-Type:charset=UTF-8",
+						"a:{{function#f#2}}"
+					],
+					"content": "",
+					"outputs": [
+						{
+							"type": "regular",
+							"value": "*"
+						}
+					],
+					"asserts": {
+						"code": "200"
 					}
-				]
-			}]
-		}]
-	}
+				}
+			]
+		}
+	],
+	"testsuites": [
+		{
+			"name": "TS1",
+			"testcases": [
+				{
+					"name": "TC1",
+					"input": [
+						"engine,word",
+						"www.google.com/search?q=,test",
+						"duckduckgo.com/?q=,test"
+					],
+					"steps": [
+						{
+							"name": "step1",
+							"function": "search",
+							"disabled": true
+						},
+						{
+							"disabled": true,
+							"name": "step2",
+							"type": "get",
+							"url": "https://{{engine}}{{word}}",
+							"headers": [
+								"Content-Type:charset=UTF-8"
+							],
+							"content": "",
+							"outputs": [
+								{
+									"type": "regular",
+									"value": "*"
+								}
+							],
+							"asserts": {
+								"code": "200"
+							}
+						},
+						{
+							"disabled": true,
+							"name": "step3",
+							"type": "get",
+							"url": "https://del.icio.us/api/peej/bookmarks/?start=1&end=2",
+							"ca":"",
+							"ignoreWrongSSL": false,
+							"headers": [
+								"Content-Type:charset=UTF-8"
+							],
+							"content": "",
+							"outputs": [
+								{
+									"type": "regular",
+									"value": "*"
+								}
+							],
+							"asserts": {
+								"code": "200"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
 }

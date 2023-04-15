@@ -6,6 +6,7 @@ const https = require('https');
 //const http2 = require('http2');
 const path = require('path');
 const url = require('url');
+const {spawn} = require('child_process');
 
 var x = fs.readFileSync(path.normalize(__dirname + "/bela3.json"), 'utf8');
 x = x.charCodeAt(0) == 65279 ? x.substring(1) : x;
@@ -23,7 +24,7 @@ async function executeRequest(req) {
         //        method:req.method
         //        req.headers
     };
-    console.log(options);
+    //reading ca
 
     var method = null;
     if (q.protocol == "http:") {
@@ -32,28 +33,32 @@ async function executeRequest(req) {
     } else if (q.protocol == "https:") {
         if (req.type == "get") method = https.get;
         if (req.type == "post") method = https.post;
+	if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
     }
+    console.log(options);
+    var agent = new https.Agent(options);
+
 
     return new Promise((resolve, reject) => {
-        method(req.url, (response) => {
-            let chunks = [];
+        method(req.url, options, (response) => {
+            let chunk = [];
 
             response.on('data', (fragments) => {
-                chunks.push(fragments);
+                chunk.push(fragments);
             });
-
-            response.on('end', () => {
+	    response.on('end', () => {
                 var resp = {}
-                resp.body = Buffer.concat(chunks).toString();
+                resp.body = Buffer.concat(chunk).toString();
                 resp.headers = response.headers;
                 resp.code = response.statusCode;
                 resolve(resp);
             });
-
-            response.on('error', (error) => {
-                reject(error);
-            });
-        });
+        }).on('error', (e) => {
+		console.log(e.message);
+                var resp = {}
+		resp.error = e.message;
+                resolve(resp);
+	    });
     });
 }
 
@@ -68,43 +73,42 @@ async function executetestcase(arr, data) {
                 let l = lines[index2];
                 if (headers.length == 0) {
                     headers = l.split(",");
-                } else {
-                    let ll = l.split(",");
-                    let i = 0;
-                    let arra = [];
-                    headers.forEach(function(h) {
-                        arra[h] = ll[i];
-                        i++;
-                    });
-                    console.log(arra);
-                    for (let stepnumber in arr.testsuites[tsnumber].testcases[tcnumber].steps) {
-                        console.log("step name " + arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name);
-                        var stepcopy = JSON.parse(JSON.stringify(arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber]));
-                        if (stepcopy.function != null) {
-                            for (let servicenumber in arr.services) {
-                                console.log("service name " + arr.services[servicenumber].name);
-                                for (let functionnumber in arr.services[servicenumber].functions) {
-                                    console.log("function name " + arr.services[servicenumber].functions[functionnumber].name);
-                                    if (arr.services[servicenumber].functions[functionnumber].name == stepcopy.function) {
-                                        stepcopy = JSON.parse(JSON.stringify(arr.services[servicenumber].functions[functionnumber]));
-                                        stepcopy.url = arr.services[servicenumber].url + stepcopy.url;
-                                    }
-                                }
-
-                            }
-                        } else {
-                            continue;
-                        }
-
-                        for (let d in arra) {
-                            console.log(d);
-                            console.log(arra[d]);
-                            stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                        }
-                        await request2(stepcopy);
-                    }
+                    continue;
                 }
-            };
+                let ll = l.split(",");
+                let i = 0;
+                let arra = [];
+                headers.forEach(function(h) {
+                    arra[h] = ll[i];
+                    i++;
+                });
+                console.log(arra);
+                for (let stepnumber in arr.testsuites[tsnumber].testcases[tcnumber].steps) {
+                    console.log("step name " + arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name);
+                    var stepcopy = JSON.parse(JSON.stringify(arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber]));
+                    if (stepcopy.disabled && stepcopy.disabled == true) {
+                        continue;
+                    }
+                    if (stepcopy.function != null) {
+                        for (let servicenumber in arr.services) {
+                            console.log("service name " + arr.services[servicenumber].name);
+                            for (let functionnumber in arr.services[servicenumber].functions) {
+                                console.log("function name " + arr.services[servicenumber].functions[functionnumber].name);
+                                if (arr.services[servicenumber].functions[functionnumber].name == stepcopy.function) {
+                                    stepcopy = JSON.parse(JSON.stringify(arr.services[servicenumber].functions[functionnumber]));
+                                    stepcopy.url = arr.services[servicenumber].url + stepcopy.url;
+                                }
+                            }
+                        }
+                    }
+                    for (let d in arra) {
+                        console.log(d);
+                        console.log(arra[d]);
+                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                    }
+                    await request2(stepcopy);
+                }
+            }
         }
     }
 }
@@ -118,7 +122,6 @@ function addToLog(str) {
 
 async function request2(req) {
     console.log("request " + JSON.stringify(req));
-    try {
         addToLog("<request>\n");
         addToLog("  <url>" + req.url + "</url>\n");
         for (let headername in req.headers) {
@@ -128,19 +131,36 @@ async function request2(req) {
         addToLog("  <![CDATA[\n" + req.content.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
         addToLog("  </body>\n");
         console.log("start");
-        var response = await executeRequest(req);
-        for (let headername in response.headers) {
-            addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
+        for (let assertnumber in req.asserts) {
+            addToLog("  <response_assert>" + assertnumber + ": " + req.asserts[assertnumber] + "</response_assert>\n");
         }
-        addToLog("  <response_code>" + response.code + "</response_code>\n");
-        addToLog("  <response_body>\n");
-        addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
-        addToLog("  </response_body>\n");
+        var response = await executeRequest(req);
+	if (response.error) {
+            addToLog("  <response_error>" + response.error + "</response_error>\n");
+	} else {
+            for (let headername in response.headers) {
+                addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
+            }
+            addToLog("  <response_code>" + response.code + "</response_code>\n");
+            addToLog("  <response_body>\n");
+            addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
+            addToLog("  </response_body>\n");
+	}
         console.log("end");
         addToLog("</request>\n");
-    } catch (e) {
-        console.error(e);
-    }
 }
 
-executetestcase(jsonObj.project, []);
+executetestcase(jsonObj, []);
+
+/*
+const ls = spawn('ls', ['/usr']);
+ls.stderr.on('data', (data) => {
+  console.error("stderr: "+data);
+});
+ls.stdout.on('data', (data) => {
+  console.log("stdout "+data);
+});
+ls.on('close', (code) => {
+  console.log("exit"+ code);
+});
+*/
