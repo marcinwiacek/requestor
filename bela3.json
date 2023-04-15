@@ -106,6 +106,44 @@
 							"asserts": {
 								"code": "200"
 							}
+						},
+						{
+							"name": "step4",
+							"type": "get",
+							"url": "https://1i5z0-8080.preview.csb.app/posts",
+							"ca":"",
+							"ignoreWrongSSL": false,
+							"headers": [
+								"Content-Type:charset=UTF-8"
+							],
+							"content": "",
+							"outputs": [
+								{
+									"type": "regular",
+									"value": "*"
+								}
+							],
+							"asserts": {
+								"code": "200"
+							}
+						},
+						{
+							"name": "step5",
+							"type": "get",
+							"url": "https://{{engine}}{{step4#$.userId[1]}}",
+							"headers": [
+								"Content-Type:charset=UTF-8"
+							],
+							"content": "",
+							"outputs": [
+								{
+									"type": "regular",
+									"value": "*"
+								}
+							],
+							"asserts": {
+								"code": "200"
+							}
 						}
 					]
 				}
