@@ -6,14 +6,33 @@ const https = require('https');
 const http2 = require('http2');
 const path = require('path');
 const url = require('url');
-const {spawn} = require('child_process');
+const zlib = require('zlib');
+const {
+    spawn
+} = require('child_process');
 
 const hostname = '127.0.0.1';
 const port = 3000;
 
-var x = fs.readFileSync(path.normalize(__dirname + "/bela3.json"), 'utf8');
-x = x.charCodeAt(0) == 65279 ? x.substring(1) : x;
-let jsonObj = JSON.parse(x)
+function readFileContentSync(fileName, callback) {
+    //FIXME: checking if path is going out
+    if (callback) {
+        fs.readFile(path.normalize(__dirname + fileName), 'utf8', (err, data) => {
+            if (err) {
+                callback("");
+            } else if (data.charCodeAt(0) == 65279) {
+                callback(data.substring(1));
+            } else {
+                callback(data);
+            }
+        });
+    } else {
+        const x = fs.readFileSync(path.normalize(__dirname + fileName), 'utf8');
+        return (x.charCodeAt(0) == 65279) ? x.substring(1) : x;
+    }
+}
+
+let jsonObj = JSON.parse(readFileContentSync("/bela3.json"));
 
 var all_responses = []
 
@@ -38,7 +57,7 @@ async function executeRequest(req) {
     } else if (q.protocol == "https:") {
         if (req.type == "get") method = https.get;
         if (req.type == "post") method = https.post;
-	if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
+        if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
     }
     console.log(options);
     var agent = new https.Agent(options);
@@ -50,7 +69,7 @@ async function executeRequest(req) {
             response.on('data', (fragments) => {
                 chunk.push(fragments);
             });
-	    response.on('end', () => {
+            response.on('end', () => {
                 var resp = {}
                 resp.body = Buffer.concat(chunk).toString();
                 resp.headers = response.headers;
@@ -58,11 +77,11 @@ async function executeRequest(req) {
                 resolve(resp);
             });
         }).on('error', (e) => {
-		console.log(e.message);
-                var resp = {}
-		resp.error = e.message;
-                resolve(resp);
-	    });
+            console.log(e.message);
+            var resp = {}
+            resp.error = e.message;
+            resolve(resp);
+        });
     });
 }
 
@@ -87,7 +106,7 @@ async function executetestcase(arr, data) {
                     i++;
                 });
                 console.log(arra);
-		all_responses = []
+                all_responses = []
                 for (let stepnumber in arr.testsuites[tsnumber].testcases[tcnumber].steps) {
                     console.log("step name " + arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name);
                     var stepcopy = JSON.parse(JSON.stringify(arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber]));
@@ -111,15 +130,15 @@ async function executetestcase(arr, data) {
                         console.log(arra[d]);
                         stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                     }
-for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
-  console.log(match)
-}
+                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
+                        console.log(match)
+                    }
                     await request2(stepcopy);
                 }
             }
         }
     }
-//    console.log(JSON.stringify(all_responses));
+    //    console.log(JSON.stringify(all_responses));
 }
 
 function addToLog(str) {
@@ -131,34 +150,34 @@ function addToLog(str) {
 
 async function request2(req) {
     console.log("request " + JSON.stringify(req));
-        addToLog("<request>\n");
-        addToLog("  <url>" + req.url + "</url>\n");
-        for (let headername in req.headers) {
-            addToLog("  <header>" + req.headers[headername] + "</header>\n");
+    addToLog("<request>\n");
+    addToLog("  <url>" + req.url + "</url>\n");
+    for (let headername in req.headers) {
+        addToLog("  <header>" + req.headers[headername] + "</header>\n");
+    }
+    addToLog("  <body>\n");
+    addToLog("  <![CDATA[\n" + req.content.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
+    addToLog("  </body>\n");
+    console.log("start");
+    for (let assertnumber in req.asserts) {
+        addToLog("  <response_assert>" + assertnumber + ": " + req.asserts[assertnumber] + "</response_assert>\n");
+    }
+    var response = await executeRequest(req);
+    if (response.error) {
+        addToLog("  <response_error>" + response.error + "</response_error>\n");
+    } else {
+        response.name = req.name;
+        all_responses.push(response);
+        for (let headername in response.headers) {
+            addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
         }
-        addToLog("  <body>\n");
-        addToLog("  <![CDATA[\n" + req.content.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
-        addToLog("  </body>\n");
-        console.log("start");
-        for (let assertnumber in req.asserts) {
-            addToLog("  <response_assert>" + assertnumber + ": " + req.asserts[assertnumber] + "</response_assert>\n");
-        }
-        var response = await executeRequest(req);
-	if (response.error) {
-            addToLog("  <response_error>" + response.error + "</response_error>\n");
-	} else {
-	    response.name = req.name;
-	    all_responses.push(response);
-            for (let headername in response.headers) {
-                addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
-            }
-            addToLog("  <response_code>" + response.code + "</response_code>\n");
-            addToLog("  <response_body>\n");
-            addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
-            addToLog("  </response_body>\n");
-	}
-        console.log("end");
-        addToLog("</request>\n");
+        addToLog("  <response_code>" + response.code + "</response_code>\n");
+        addToLog("  <response_body>\n");
+        addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
+        addToLog("  </response_body>\n");
+    }
+    console.log("end");
+    addToLog("</request>\n");
 }
 
 //executetestcase(jsonObj, []);
@@ -176,79 +195,32 @@ ls.on('close', (code) => {
 });
 */
 
+function sendHTMLHead(res) {
+    res.statusCode = 200;
+    //    res.setHeader('Cache-Control', 'no-store');
+    //  res.setHeader('Cache-Control', 'must-revalidate');
+    res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+}
+
+function sendHTMLBody(req, res, text) {
+    if (req.headers['accept-encoding'] && req.headers['accept-encoding'].includes('gzip')) {
+        res.setHeader('Content-Encoding', 'gzip');
+        res.end(zlib.gzipSync(text));
+    } else if (req.headers['accept-encoding'] && req.headers['accept-encoding'].includes('deflate')) {
+        res.setHeader('Content-Encoding', 'deflate');
+        res.end(zlib.deflateSync(text));
+    } else {
+        res.end(text);
+    }
+}
+
+function sendHTML(req, res, text) {
+    sendHTMLHead(res);
+    sendHTMLBody(req, res, text);
+}
+
 const onRequestHandler = (req, res) => {
-/*    if (processExternalFiles(req, res)) return;
-
-    console.log(' ');
-    let cookieSessionToken = "";
-    let userName = null;
-    //console.log(req.headers);
-    if (req.headers['cookie']) {
-        console.log(req.headers['cookie']);
-        req.headers['cookie'].split("; ").forEach(function(cookie) {
-            if (cookie.indexOf("session=") == 0) cookieSessionToken = cookie.substr(8);
-        });
-    }
-    if (cookieSessionToken != "") {
-        for (let index in sessions) {
-            session = sessions[index];
-            //            console.log("mamy sesję1 " + session[SessionField.SessionToken]);
-            if (session[SessionField.Expiry] < Date.now()) {
-                if (session[SessionField.RefreshCallback] != null) clearTimeout(session[SessionField.RefreshCallback]);
-                sessions.splice(index, 1);
-                continue;
-            }
-            //            console.log("mamy sesję2 " + session[SessionField.SessionToken]);
-            if (cookieSessionToken == session[SessionField.SessionToken]) {
-                userName = session[SessionField.UserName];
-                console.log("found user " + userName);
-                session[SessionField.Expiry] += sessionValidity;
-                break;
-            }
-        }
-    }
-    const newCookieSessionToken = (userName == null);
-    if (userName == null) {
-        userName = "";
-        const cookieSessionToken = crypto.randomBytes(32).toString('base64');
-
-        res.setHeader('Set-Cookie', 'session=' + cookieSessionToken + '; SameSite=Strict; Secure');
-
-        // order must be consistent with SessionField
-        sessions.push([cookieSessionToken, Date.now() + sessionValidity, '', null]); // non logged
-
-        console.log("nowa sesja " + cookieSessionToken);
-    }
-    console.log('user name is ' + userName);
-
-    if (req.method === 'GET') {
-        console.log(req.url);
-        const params = url.parse(req.url, true).query;
-        if (params["sse"]) { // PUSH functionality
-            parseGETWithSseParam(req, res, userName, cookieSessionToken);
-            if (newCookieSessionToken) {
-                setTimeout(function() {
-                    sendReloadToPage(res);
-                }, 2000); // 2 seconds
-            }
-        } else if (params["set"]) { // setting cookies with config
-            parseGETWithSetParam(req, res, params);
-        } else if (params["q"]) {
-            parseGETWithQParam(req, res, params, userName);
-        } else {
-            showMainPagePrzyp(req, res, 0, [], userName);
-        }
-    } else if (req.headers['content-type'] == "application/x-www-form-urlencoded" && cookieSessionToken != "") { // POST
-        let body = "";
-        req.on('data', function(data) {
-            body += data;
-            if (body.length > 1e6 * 6) req.connection.destroy(); // 6 MB 
-        });
-        req.on('end', function() {
-            console.log(body);
-            parsePOSTforms(url.parse("/?" + body, true).query, res, userName, cookieSessionToken);
-        });
-    }*/
+    sendHTML(req, res, readFileContentSync("/internal/index.txt"));
 };
 
 http2.createSecureServer({
