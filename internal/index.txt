@@ -1,0 +1,7 @@
+<!doctype html>
+<html>
+<head>
+<!--FILES-->
+</head>
+</body>
+</html>

@@ -7,9 +7,7 @@ const http2 = require('http2');
 const path = require('path');
 const url = require('url');
 const zlib = require('zlib');
-const {
-    spawn
-} = require('child_process');
+const child_process = require('child_process');
 
 const hostname = '127.0.0.1';
 const port = 3000;
@@ -31,8 +29,6 @@ function readFileContentSync(fileName, callback) {
         return (x.charCodeAt(0) == 65279) ? x.substring(1) : x;
     }
 }
-
-let jsonObj = JSON.parse(readFileContentSync("/bela3.json"));
 
 var all_responses = []
 
@@ -180,10 +176,9 @@ async function request2(req) {
     addToLog("</request>\n");
 }
 
-//executetestcase(jsonObj, []);
 
 /*
-const ls = spawn('ls', ['/usr']);
+const ls = child_process('ls', ['/usr']);
 ls.stderr.on('data', (data) => {
   console.error("stderr: "+data);
 });
@@ -219,8 +214,40 @@ function sendHTML(req, res, text) {
     sendHTMLBody(req, res, text);
 }
 
+let jsonObj = [];
+
 const onRequestHandler = (req, res) => {
-    sendHTML(req, res, readFileContentSync("/internal/index.txt"));
+    if (req.method === 'GET') {
+        const params = url.parse(req.url, true).query;
+        if (params['file'] && fs.existsSync(
+                path.normalize(__dirname + "/projects/" + params['file']))) {
+            jsonObj[params['file']] = JSON.parse(readFileContentSync("/projects/" + params['file']));
+
+            var tc = "";
+            for (let tsnumber in jsonObj[params['file']].testsuites) {
+                tc += "<br>testsuite name " +
+                    jsonObj[params['file']].testsuites[tsnumber].name;
+                for (let tcnumber in
+                        jsonObj[params['file']].testsuites[tsnumber].testcases) {
+                    tc += "<br>testcase name " +
+                        jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name;
+                }
+            }
+
+            sendHTML(req, res, readFileContentSync("/internal/project.txt")
+                .replace("<!--NAME-->", params['file'])
+                .replace("<!--TC-->", tc));
+            return;
+        }
+    }
+
+    let files = "";
+    let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
+    for (filenumber in all_files) {
+        files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a>";
+    }
+
+    sendHTML(req, res, readFileContentSync("/internal/index.txt").replace("<!--FILES-->", files));
 };
 
 http2.createSecureServer({
@@ -229,3 +256,6 @@ http2.createSecureServer({
 }, onRequestHandler).listen(port, hostname, () => {
     console.log(`Server running at https://${hostname}:${port}/`);
 });
+
+//let jsonObj = JSON.parse(readFileContentSync("/bela3.json"));
+//executetestcase(jsonObj, []);
