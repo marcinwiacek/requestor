@@ -3,6 +3,7 @@
 <head>
 <!--NAME-->
 <!--TC-->
+<!--RUN-->
 </head>
 </body>
 </html>

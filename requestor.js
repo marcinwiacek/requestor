@@ -221,7 +221,12 @@ const onRequestHandler = (req, res) => {
         const params = url.parse(req.url, true).query;
         if (params['file'] && fs.existsSync(
                 path.normalize(__dirname + "/projects/" + params['file']))) {
-            jsonObj[params['file']] = JSON.parse(readFileContentSync("/projects/" + params['file']));
+            if (!jsonObj[params['file']]) {
+                jsonObj[params['file']] = JSON.parse(readFileContentSync("/projects/" + params['file']));
+            }
+            if (params['run']) {
+                executetestcase(jsonObj[params['file']], []);
+            }
 
             var tc = "";
             for (let tsnumber in jsonObj[params['file']].testsuites) {
@@ -236,7 +241,8 @@ const onRequestHandler = (req, res) => {
 
             sendHTML(req, res, readFileContentSync("/internal/project.txt")
                 .replace("<!--NAME-->", params['file'])
-                .replace("<!--TC-->", tc));
+                .replace("<!--TC-->", tc)
+                .replace("<!--RUN-->", "<p><a href=?file=" + params['file'] + "&run=1>run all</a>"));
             return;
         }
     }
