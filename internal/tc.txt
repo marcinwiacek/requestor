@@ -1,0 +1,11 @@
+<!--NAME-->
+<form>
+URL: <!--URLPREFIX-->&nbsp;&nbsp;<input type="text" id="url" name="url" value="<!--URL-->">
+<p>Type: <select name="type" id="type">
+  <option value="GET">GET</option>
+  <option value="POST">POST</option>
+</select>
+<p>Header: <input type="text" id="header" name="header">
+<p>Body: <input type="text" id="body" name="body">
+<p><input type="submit">
+</form>

@@ -1,8 +1,13 @@
 <!doctype html>
 <html>
 <head>
-<!--NAME-->
-<!--TC-->
+<a href=.>back</a><p>
+File: <!--NAME-->
+<table><tr><td>
+<p><!--TC-->
+</td><td>
+<!--OBIEKT-->
+</td></tr></table>
 <!--RUN-->
 </head>
 </body>

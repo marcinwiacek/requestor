@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head>
+<form>
+URL: <input type="text" id="url" name="url">
+<p>Type: <select name="type" id="type">
+  <option value="GET">GET</option>
+  <option value="POST">POST</option>
+</select>
+<p>Header: <input type="text" id="header" name="header">
+<p><input type="submit">
+</form>
+</head>
+</body>
+</html>
