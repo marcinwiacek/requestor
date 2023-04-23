@@ -240,19 +240,37 @@ const onRequestHandler = (req, res) => {
             }
 
             var obiekt = "";
-
             var tc = "";
+            var env = "";
+
+            for (let environmentnumber in jsonObj[params['file']].environments) {
+                env += "<option value=\"" +
+                    jsonObj[params['file']].environments[environmentnumber].name + "\">" +
+                    jsonObj[params['file']].environments[environmentnumber].name + "</option>";
+            }
 
             for (let servicenumber in jsonObj[params['file']].services) {
                 tc += "<br>service " +
                     "<a href=?file=" + params['file'] + "&service=" +
                     jsonObj[params['file']].services[servicenumber].name + ">" +
                     jsonObj[params['file']].services[servicenumber].name + "</a>";
+
+                if (
+                    jsonObj[params['file']].services[servicenumber].name == params['service']) {
+                    obiekt = "<br>service ";
+                }
+
                 for (let functionnumber in jsonObj[params['file']].services[servicenumber].functions) {
                     tc += "<br>&nbsp;&nbsp; function " +
                         "<a href=?file=" + params['file'] + "&function=" +
                         jsonObj[params['file']].services[servicenumber].functions[functionnumber].name + ">" +
                         jsonObj[params['file']].services[servicenumber].functions[functionnumber].name + "</a>";
+
+                    if (
+                        jsonObj[params['file']].services[servicenumber].functions[functionnumber].name == params['function']) {
+                        obiekt = "<br>function ";
+                    }
+
                 }
             }
 
@@ -262,12 +280,24 @@ const onRequestHandler = (req, res) => {
                     "<a href=?file=" + params['file'] + "&ts=" +
                     jsonObj[params['file']].testsuites[tsnumber].name + ">" +
                     jsonObj[params['file']].testsuites[tsnumber].name + "</a>";
+
+                if (
+                    jsonObj[params['file']].testsuites[tsnumber].name == params['ts']) {
+                    obiekt = "<br>test suite";
+                }
+
                 for (let tcnumber in
                         jsonObj[params['file']].testsuites[tsnumber].testcases) {
                     tc += "<br>&nbsp;&nbsp;testcase name " +
                         "<a href=?file=" + params['file'] + "&tc=" +
                         jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name + ">" +
                         jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name + "</a>";
+
+                    if (
+                        jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name == params['tc']) {
+                        obiekt = "<br>test case";
+                    }
+
                     for (let stepnumber in jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].steps) {
                         tc += "<br>&nbsp;&nbsp;&nbsp;&nbsp;step name " +
                             "<a href=?file=" + params['file'] + "&step=" +
@@ -293,6 +323,7 @@ const onRequestHandler = (req, res) => {
                 .replace("<!--NAME-->", params['file'])
                 .replace("<!--TC-->", tc)
                 .replace("<!--OBIEKT-->", obiekt)
+                .replace("<!--ENV-->", env)
                 .replace("<!--RUN-->", "<p><a href=?file=" + params['file'] + "&run=1>run all</a>"));
             return;
         }

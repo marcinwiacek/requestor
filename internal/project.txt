@@ -3,9 +3,16 @@
 <head>
 <a href=.>back</a><p>
 File: <!--NAME-->
-<table><tr><td>
-<p><!--TC-->
-</td><td>
+<p>
+<form>
+Environment:
+<select name="environment" id="environment">
+<!--ENV-->
+</select>
+</form>
+<table><tr><td valign=top>
+<!--TC-->
+</td><td valign=top>
 <!--OBIEKT-->
 </td></tr></table>
 <!--RUN-->
