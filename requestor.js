@@ -268,7 +268,26 @@ const onRequestHandler = (req, res) => {
 
                     if (
                         jsonObj[params['file']].services[servicenumber].functions[functionnumber].name == params['function']) {
-                        obiekt = "<br>function ";
+
+                        obiekt = readFileContentSync("/internal/function.txt").replace("<!--NAME-->",
+                            jsonObj[params['file']].services[servicenumber].functions[functionnumber].name);
+
+                        obiekt = obiekt.replace("<!--URL-->",
+                            jsonObj[params['file']].services[servicenumber].functions[functionnumber].url);
+                        var xxxx = "";
+                        for (var headernumber in
+                                jsonObj[params['file']].services[servicenumber].functions[functionnumber].headers) {
+                            xxxx +=
+                                jsonObj[params['file']].services[servicenumber].functions[functionnumber].headers[headernumber];
+                        }
+                        obiekt = obiekt.replace("<!--HEADER-->", xxxx);
+                        var xxxx = "";
+                        for (var bodynumber in
+                                jsonObj[params['file']].services[servicenumber].functions[functionnumber].content) {
+                            xxxx +=
+                                jsonObj[params['file']].services[servicenumber].functions[functionnumber].content[contentnumber];
+                        }
+                        obiekt = obiekt.replace("<!--BODY-->", xxxx);
                     }
 
                 }
@@ -283,7 +302,8 @@ const onRequestHandler = (req, res) => {
 
                 if (
                     jsonObj[params['file']].testsuites[tsnumber].name == params['ts']) {
-                    obiekt = "<br>test suite";
+                    obiekt = readFileContentSync("/internal/ts.txt").replace("<!--NAME-->",
+                        jsonObj[params['file']].testsuites[tsnumber].name);
                 }
 
                 for (let tcnumber in
@@ -295,7 +315,15 @@ const onRequestHandler = (req, res) => {
 
                     if (
                         jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name == params['tc']) {
-                        obiekt = "<br>test case";
+                        obiekt = readFileContentSync("/internal/tc.txt").replace("<!--NAME-->",
+                            jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name);
+                        var xxxx = "";
+                        for (var inputnumber in
+                                jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].input) {
+                            xxxx +=
+                                jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].input[inputnumber];
+                        }
+                        obiekt = obiekt.replace("<!--DATA-->", xxxx);
                     }
 
                     for (let stepnumber in jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].steps) {
@@ -305,16 +333,25 @@ const onRequestHandler = (req, res) => {
                             jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + "</a>";
 
                         if (jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name == params['step']) {
-
                             var stepcopy = findtc(jsonObj[params['file']],
                                 jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].steps[stepnumber]
                             );
 
-                            obiekt = readFileContentSync("/internal/tc.txt").replace("<!--NAME-->",
+                            obiekt = readFileContentSync("/internal/step.txt").replace("<!--NAME-->",
                                 stepcopy.name);
                             if (stepcopy.urlprefix) obiekt = obiekt.replace("<!--URLPREFIX-->", stepcopy.urlprefix);
+                            obiekt = obiekt.replace("<!--URL-->", stepcopy.url);
+                            var xxxx = "";
+                            for (var headernumber in stepcopy.headers) {
+                                xxxx += stepcopy.headers[headernumber];
+                            }
+                            obiekt = obiekt.replace("<!--HEADER-->", xxxx);
+                            var xxxx = "";
+                            for (var bodynumber in stepcopy.content) {
+                                xxxx += stepcopy.body[bodynumber];
+                            }
+                            obiekt = obiekt.replace("<!--BODY-->", xxxx);
                         }
-
                     }
                 }
             }

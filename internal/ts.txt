@@ -1,6 +1,5 @@
 <br>
 <form>
 Name: <input type="text" id="name" name="name" value="<!--NAME-->">
-<p>Input data: <textarea cols=80 rows=5 id="data" name="data"><!--DATA--></textarea>
 <p><input type="submit">
 </form>
