@@ -227,6 +227,86 @@ function sendHTML(req, res, text) {
 
 let jsonObj = [];
 
+function directToOKFileNotFoundNoRet(res, txt, ok) {
+    res.statusCode = ok ? 200 : 404;
+    res.setHeader('Content-Type', 'text/plain');
+    res.end(txt);
+}
+
+// return values from sub functions are ignored.
+async function parsePOSTforms(params, res, jsonObj) {
+    console.log(params);
+    if (params["runstep"]) {
+        return parsePOSTRunStep(params, res, jsonObj);
+
+    }
+}
+
+async function parsePOSTRunStep(params, res, jsonObj2) {
+//    if (!params["text"] || !params["state"] || !params["type"] || !params["title"]) {
+//        return directToOKFileNotFoundNoRet(res, '', false);
+//    }
+
+console.log(jsonObj);
+let arr = jsonObj[params['file']];
+
+    for (let tsnumber in arr.testsuites) {
+        console.log("testsuite name " + arr.testsuites[tsnumber].name);
+        for (let tcnumber in arr.testsuites[tsnumber].testcases) {
+            console.log("testcase name " + arr.testsuites[tsnumber].testcases[tcnumber].name);
+            let lines = arr.testsuites[tsnumber].testcases[tcnumber].input;
+            let headers = []
+            for (let index2 in lines) {
+                let l = lines[index2];
+                if (headers.length == 0) {
+                    headers = l.split(",");
+                    continue;
+                }
+                let ll = l.split(",");
+                let i = 0;
+                let arra = [];
+                headers.forEach(function(h) {
+                    arra[h] = ll[i];
+                    i++;
+                });
+                console.log(arra);
+                all_responses = []
+                for (let stepnumber in arr.testsuites[tsnumber].testcases[tcnumber].steps) {
+                    if (
+                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].disabled &&
+                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].disabled == true) {
+                        continue;
+                    }
+console.log(arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + " vs "+ params['runstep']);
+
+                    if (
+                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name.localeCompare(  params['runstep'])!=0) {
+                        continue;
+                    }
+console.log("starting "+arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + " vs "+ params['runstep']);
+                    var stepcopy = findtc(arr,
+                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber]
+                    );
+                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
+                    for (let d in arra) {
+                        console.log(d);
+                        console.log(arra[d]);
+                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                    }
+                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
+                        console.log(match)
+                    }
+                    await request2(stepcopy);
+                }
+            }
+        }
+    }
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+            res.end('cos');
+
+}
+
 const onRequestHandler = (req, res) => {
     if (req.method === 'GET') {
         const params = url.parse(req.url, true).query;
@@ -364,6 +444,18 @@ const onRequestHandler = (req, res) => {
                 .replace("<!--RUN-->", "<p><a href=?file=" + params['file'] + "&run=1>run all</a>"));
             return;
         }
+    } else if (req.headers['content-type'] == "application/x-www-form-urlencoded") { // POST
+        let body = "";
+        req.on('data', function(data) {
+            body += data;
+            if (body.length > 1e6 * 6) req.connection.destroy(); // 6 MB 
+        });
+        req.on('end', function() {
+            console.log(body);
+            parsePOSTforms(url.parse("/?" + body, true).query, res, jsonObj);
+
+        });
+	return;
     }
 
     let files = "";

@@ -1,5 +1,24 @@
 <br>
-<form>
+<script async=async>
+  function sendStep() {
+     http = createPOST();
+     http.onload = function() {
+   if (http.status != 200) {
+     alert(http.response);
+   }
+alert('jest odpowiedz '+http.response);
+  };
+  http.onerror = function() {
+   alert('login error');
+  };
+const params = new URLSearchParams(window.location.search);
+http.send("file="+params.get('file')+"&runstep="+document.getElementById("name").value);
+//  http.send("login=1&user=" + sha256(loginhash + user) + "&password=" + sha256(loginhash + sha256(password)));
+  return false;
+  };
+</script>
+<table><tr><td>
+<form onsubmit="return sendStep()">
 Name: <input type="text" id="name" name="name" value="<!--NAME-->">
 <p>URL: <!--URLPREFIX-->&nbsp;&nbsp;<input type="text" id="url" name="url" value="<!--URL-->">
 <p>Type: <select name="type" id="type">
@@ -8,5 +27,6 @@ Name: <input type="text" id="name" name="name" value="<!--NAME-->">
 </select>
 <p>Header: <textarea cols=80 rows=5 id="header" name="header"><!--HEADER--></textarea>
 <p>Body: <textarea cols=80 rows=5  id="body" name="body"><!--BODY--></textarea>
-<p><input type="submit">
+<p><button type="submit">Run</button>
 </form>
+</td><td><div id=lastrequest><div id=lastresponse></td></tr></table>
