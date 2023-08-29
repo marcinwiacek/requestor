@@ -140,7 +140,7 @@ async function executetestcase(arr, data) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    await request2(stepcopy);
+                    await request2(stepcopy,null);
                 }
             }
         }
@@ -155,7 +155,8 @@ function addToLog(str) {
     });
 }
 
-async function request2(req) {
+async function request2(req, res) {
+    let s = JSON.stringify(req);
     console.log("request " + JSON.stringify(req));
     addToLog("<request>\n");
     addToLog("  <url>" + req.url + "</url>\n");
@@ -171,6 +172,7 @@ async function request2(req) {
     }
     var response = await executeRequest(req);
     if (response.error) {
+	s+=response.error;
         addToLog("  <response_error>" + response.error + "</response_error>\n");
     } else {
         response.name = req.name;
@@ -182,8 +184,10 @@ async function request2(req) {
         addToLog("  <response_body>\n");
         addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
         addToLog("  </response_body>\n");
+	s+=response.body;
     }
     console.log("end");
+    if (res!=null) res.end(s);
     addToLog("</request>\n");
 }
 
@@ -249,6 +253,8 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
 
 console.log(jsonObj);
 let arr = jsonObj[params['file']];
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
 
     for (let tsnumber in arr.testsuites) {
         console.log("testsuite name " + arr.testsuites[tsnumber].name);
@@ -296,14 +302,12 @@ console.log("starting "+arr.testsuites[tsnumber].testcases[tcnumber].steps[stepn
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    await request2(stepcopy);
+                    await request2(stepcopy,res);
                 }
             }
         }
     }
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-            res.end('cos');
+//            res.end('cos');
 
 }
 
