@@ -88,12 +88,11 @@
               }
             },
             {
-              "disabled": true,
               "name": "step3",
               "type": "get",
               "url": "https://del.icio.us/api/peej/bookmarks/?start=1&end=2",
               "ca": "",
-              "ignoreWrongSSL": false,
+              "ignoreWrongSSL": true,
               "headers": [
                 "Content-Type:charset=UTF-8"
               ],

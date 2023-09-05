@@ -8,6 +8,7 @@ const path = require('path');
 const url = require('url');
 const zlib = require('zlib');
 const child_process = require('child_process');
+const sqlite3 = require('sqlite3');
 
 const hostname = '127.0.0.1';
 const port = 3000;
@@ -55,6 +56,7 @@ async function executeRequest(req) {
         if (req.type == "post") method = https.post;
         if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
     }
+    options.timeout = 3000;
     console.log(options);
     var agent = new https.Agent(options);
 
@@ -140,7 +142,7 @@ async function executetestcase(arr, data) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    await request2(stepcopy,null);
+                    await request2(stepcopy, null);
                 }
             }
         }
@@ -156,7 +158,8 @@ function addToLog(str) {
 }
 
 async function request2(req, res) {
-    let s = JSON.stringify(req);
+    //let s = JSON.stringify(req);
+    let s = "{\"datetime\":\"1234\",";
     console.log("request " + JSON.stringify(req));
     addToLog("<request>\n");
     addToLog("  <url>" + req.url + "</url>\n");
@@ -172,22 +175,29 @@ async function request2(req, res) {
     }
     var response = await executeRequest(req);
     if (response.error) {
-	s+=response.error;
+        s += response.error;
         addToLog("  <response_error>" + response.error + "</response_error>\n");
     } else {
         response.name = req.name;
         all_responses.push(response);
+        var headers = "";
+s+="\"headers\":[";
         for (let headername in response.headers) {
             addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
+            headers += headername + ": " + response.headers[headername] + "\n";
+	    s+= "\""+ headername + ": " + response.headers[headername].replaceAll("\"","") + "\",";
         }
+s+="\"\"]";
         addToLog("  <response_code>" + response.code + "</response_code>\n");
         addToLog("  <response_body>\n");
         addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
         addToLog("  </response_body>\n");
-	s+=response.body;
+//        s += response.body;
+s+="}";
+        db.exec(`insert into requests (dt, name, url, headers) values(datetime('now','localtime'),'abc','` + req.url + `','` + headers + `');`, () => {});
     }
     console.log("end");
-    if (res!=null) res.end(s);
+    if (res != null) res.end(s);
     addToLog("</request>\n");
 }
 
@@ -247,12 +257,12 @@ async function parsePOSTforms(params, res, jsonObj) {
 }
 
 async function parsePOSTRunStep(params, res, jsonObj2) {
-//    if (!params["text"] || !params["state"] || !params["type"] || !params["title"]) {
-//        return directToOKFileNotFoundNoRet(res, '', false);
-//    }
+    //    if (!params["text"] || !params["state"] || !params["type"] || !params["title"]) {
+    //        return directToOKFileNotFoundNoRet(res, '', false);
+    //    }
 
-console.log(jsonObj);
-let arr = jsonObj[params['file']];
+    console.log(jsonObj);
+    let arr = jsonObj[params['file']];
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
 
@@ -283,13 +293,13 @@ let arr = jsonObj[params['file']];
                         arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].disabled == true) {
                         continue;
                     }
-console.log(arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + " vs "+ params['runstep']);
+                    console.log(arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + " vs " + params['runstep']);
 
                     if (
-                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name.localeCompare(  params['runstep'])!=0) {
+                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name.localeCompare(params['runstep']) != 0) {
                         continue;
                     }
-console.log("starting "+arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + " vs "+ params['runstep']);
+                    console.log("starting " + arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + " vs " + params['runstep']);
                     var stepcopy = findtc(arr,
                         arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber]
                     );
@@ -302,12 +312,12 @@ console.log("starting "+arr.testsuites[tsnumber].testcases[tcnumber].steps[stepn
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    await request2(stepcopy,res);
+                    await request2(stepcopy, res);
                 }
             }
         }
     }
-//            res.end('cos');
+    //            res.end('cos');
 
 }
 
@@ -459,7 +469,7 @@ const onRequestHandler = (req, res) => {
             parsePOSTforms(url.parse("/?" + body, true).query, res, jsonObj);
 
         });
-	return;
+        return;
     }
 
     let files = "";
@@ -470,6 +480,20 @@ const onRequestHandler = (req, res) => {
 
     sendHTML(req, res, readFileContentSync("/internal/index.txt").replace("<!--FILES-->", files));
 };
+
+var db = new sqlite3.Database('m.db', (err) => {
+    if (err) {
+        console.log("DB error " + err);
+        exit(1);
+    }
+    db.exec(`
+    create table requests (
+        dt text not null,
+        name text not null,
+        url text not null,
+        headers text not null
+    );`, () => {});
+});
 
 http2.createSecureServer({
     key: fs.readFileSync(__dirname + '//internal//localhost-privkey.pem'),

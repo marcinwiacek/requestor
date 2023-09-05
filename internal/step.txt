@@ -6,8 +6,13 @@
    if (http.status != 200) {
      alert(http.response);
    }
-document.getElementById("lastresponsebody").value = http.response;
+//document.getElementById("lastresponsebody").value = http.response;
 alert('jest odpowiedz '+http.response);
+const obj = JSON.parse(http.response);
+for (var i =0;i<obj.headers.length;i++) 
+document.getElementById("lastresponseheaders").value =
+document.getElementById("lastresponseheaders").value+obj.headers[i]+"\n";
+
   };
   http.onerror = function() {
    alert('login error');
@@ -23,21 +28,43 @@ http.send("file="+params.get('file')+"&runstep="+document.getElementById("name")
 </script>
 <table><tr><td>
 <form onsubmit="return sendStep()">
-Name<br><input type="text" id="name" name="name" value="<!--NAME-->" size=70>
+Name<br><input type="text" id="name" name="name" value="<!--NAME-->" size=61>
 <p><select name="type" id="type">
   <option value="GET">GET</option>
   <option value="POST">POST</option>
-</select> <!--URLPREFIX-->&nbsp;&nbsp;<input type="text" id="url" name="url" value="<!--URL-->" size=70>
+</select> <!--URLPREFIX-->&nbsp;&nbsp;
+<input type="text" id="url" name="url" value="<!--URL-->" size=70>
 <p>Headers<br><textarea cols=80 rows=5 id="header" name="header"><!--HEADER--></textarea>
 <p>Body<br><textarea cols=80 rows=5  id="body" name="body"><!--BODY--></textarea>
+<p><input type="checkbox" id="ignorewrongssl" />Ignore SSL errors
+<p>Asserts
+<p><select name="x" id="x">
+  <option value="GET">HTTP code</option>
+  <option value="POST">Headers</option>
+  <option value="POST">Body</option>
+</select>
+<input type="text" id="url2" name="url2" value="200" size=40>
 <p><button type="submit">Run</button>
 </form>
 </td><td>
-<textarea cols=80 rows=5 id=lastrequestheaders></textarea>
+<p>When <select name="whenlast" id="whenlast">
+  <option value="GET">1234</option>
+  <option value="POST">1456</option>
+</select>
+<p><select name="lastrequesttype" id="type">
+  <option value="GET">GET</option>
+  <option value="POST">POST</option>
+</select> <!--URLPREFIX-->
+&nbsp;&nbsp;<input type="text" id="url" name="lastrequesturl" value="<!--URL-->" size=61>
 <br>
+Headers<br><textarea cols=80 rows=5 id=lastrequestheaders></textarea>
+<br>
+Body<br>
 <textarea cols=80 rows=5 id=lastrequestbody></textarea>
-<br>
+<br><input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
+<p>
+Headers<br>
 <textarea cols=80 rows=5 id=lastresponseheaders></textarea>
 <br>
-<textarea cols=80 rows=5 id=lastresponsebody></textarea>
+Body<br><textarea cols=80 rows=5 id=lastresponsebody></textarea>
 </td></tr></table>
