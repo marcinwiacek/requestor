@@ -152,9 +152,9 @@ async function executetestcase(arr, data) {
 
 function addToLog(str) {
     //<?xml version="1.0" encoding="utf-8"?>
-    fs.writeFileSync(path.normalize(__dirname + "/bela2log.xml"), str, {
-        "flag": "a"
-    });
+//    fs.writeFileSync(path.normalize(__dirname + "/bela2log.xml"), str, {
+//        "flag": "a"
+//    });
 }
 
 async function request2(req, res) {
