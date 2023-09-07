@@ -187,7 +187,7 @@ s+="\"headers\":[";
             headers += headername + ": " + response.headers[headername] + "\n";
 	    s+= "\""+ headername + ": " + response.headers[headername].replaceAll("\"","") + "\",";
         }
-s+="\"\"]";
+s+="\"\"],\"body\":\""+encodeURIComponent(response.body)+"\"";
         addToLog("  <response_code>" + response.code + "</response_code>\n");
         addToLog("  <response_body>\n");
         addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");

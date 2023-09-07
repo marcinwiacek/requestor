@@ -9,20 +9,23 @@ function sendStep() {
     //document.getElementById("lastresponsebody").value = http.response;
     alert('jest odpowiedz '+http.response);
     const obj = JSON.parse(http.response);
-    for (var i =0;i<obj.headers.length;i++) 
+    for (var i =0;i<obj.headers.length;i++) {
       document.getElementById("lastresponseheaders").value =
       document.getElementById("lastresponseheaders").value+obj.headers[i]+"\n";
-    };
-    http.onerror = function() {
-      alert('login error');
-    };
+    }
+    document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body);
+  }
 
-    document.getElementById("lastrequestheaders").value = document.getElementById("header").value;
-    document.getElementById("lastrequestbody").value  = document.getElementById("body").value;
-    const params = new URLSearchParams(window.location.search);
-    http.send("file="+params.get('file')+"&runstep="+document.getElementById("name").value);
-    //  http.send("login=1&user=" + sha256(loginhash + user) + "&password=" + sha256(loginhash + sha256(password)));
-    return false;
+  http.onerror = function() {
+    alert('login error');
+  };
+
+  document.getElementById("lastrequestheaders").value = document.getElementById("header").value;
+  document.getElementById("lastrequestbody").value  = document.getElementById("body").value;
+  const params = new URLSearchParams(window.location.search);
+  http.send("file="+params.get('file')+"&runstep="+document.getElementById("name").value);
+  //  http.send("login=1&user=" + sha256(loginhash + user) + "&password=" + sha256(loginhash + sha256(password)));
+  return false;
 };
 </script>
 <table><tr><td>
