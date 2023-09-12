@@ -1,6 +1,6 @@
 <br>
 <script async=async>
-function sendStep() {
+function sendNewStep() {
   http = createPOST();
   http.onload = function() {
     if (http.status != 200) {
@@ -9,6 +9,19 @@ function sendStep() {
     //document.getElementById("lastresponsebody").value = http.response;
     alert('jest odpowiedz '+http.response);
     const obj = JSON.parse(http.response);
+    var option = document.createElement("option");
+    option.value = obj.datetime;
+    option.text = obj.datetime;
+    var selObj = document.getElementById("whenlast");
+selObj.prepend(option);
+
+for (var i = 0; i < selObj.options.length; i++) {
+        if (selObj.options[i].text==obj.datetime) {
+            selObj.options[i].selected = true;
+            break;
+        }
+    }
+
     for (var i =0;i<obj.headers.length;i++) {
       document.getElementById("lastresponseheaders").value =
       document.getElementById("lastresponseheaders").value+obj.headers[i]+"\n";
@@ -29,7 +42,7 @@ function sendStep() {
 };
 </script>
 <table><tr><td>
-<form onsubmit="return sendStep()">
+<form onsubmit="return sendNewStep()">
   Name<br><input type="text" id="name" name="name" value="<!--NAME-->" size=61>
   <p><select name="type" id="type">
     <option value="GET">GET</option>
@@ -50,8 +63,7 @@ function sendStep() {
 </form>
 </td><td>
   <p>When <select name="whenlast" id="whenlast">
-    <option value="GET">1234</option>
-    <option value="POST">1456</option>
+<!--WHENLAST-->
   </select>
   <p><select name="lastrequesttype" id="type">
     <option value="GET">GET</option>

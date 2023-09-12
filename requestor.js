@@ -152,14 +152,15 @@ async function executetestcase(arr, data) {
 
 function addToLog(str) {
     //<?xml version="1.0" encoding="utf-8"?>
-//    fs.writeFileSync(path.normalize(__dirname + "/bela2log.xml"), str, {
-//        "flag": "a"
-//    });
+    //    fs.writeFileSync(path.normalize(__dirname + "/bela2log.xml"), str, {
+    //        "flag": "a"
+    //    });
 }
 
 async function request2(req, res) {
     //let s = JSON.stringify(req);
-    let s = "{\"datetime\":\"1234\",";
+    let curDT = new Date().toLocaleString();
+    let s = "{\"datetime\":\"" + curDT + "\",";
     console.log("request " + JSON.stringify(req));
     addToLog("<request>\n");
     addToLog("  <url>" + req.url + "</url>\n");
@@ -181,20 +182,20 @@ async function request2(req, res) {
         response.name = req.name;
         all_responses.push(response);
         var headers = "";
-s+="\"headers\":[";
+        s += "\"headers\":[";
         for (let headername in response.headers) {
             addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
             headers += headername + ": " + response.headers[headername] + "\n";
-	    s+= "\""+ headername + ": " + response.headers[headername].replaceAll("\"","") + "\",";
+            s += "\"" + headername + ": " + response.headers[headername].replaceAll("\"", "") + "\",";
         }
-s+="\"\"],\"body\":\""+encodeURIComponent(response.body)+"\"";
+        s += "\"\"],\"body\":\"" + encodeURIComponent(response.body) + "\"";
         addToLog("  <response_code>" + response.code + "</response_code>\n");
         addToLog("  <response_body>\n");
         addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
         addToLog("  </response_body>\n");
-//        s += response.body;
-s+="}";
-        db.exec(`insert into requests (dt, name, url, headers) values(datetime('now','localtime'),'abc','` + req.url + `','` + headers + `');`, () => {});
+        //        s += response.body;
+        s += "}";
+        db.exec(`insert into requests (dt, name, url, headers) values('` + curDT + `','abc','` + req.url + `','` + headers + `');`, () => {});
     }
     console.log("end");
     if (res != null) res.end(s);
@@ -318,10 +319,27 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
         }
     }
     //            res.end('cos');
-
 }
 
-const onRequestHandler = (req, res) => {
+function db_all(sql) {
+    return new Promise((resolve, reject) => {
+        const q = [];
+        db.each(sql, (err, row) => {
+                if (err) {
+                    reject(err);
+                }
+                q.push(row);
+            },
+            (err, n) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(q);
+            });
+    });
+}
+
+const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
         const params = url.parse(req.url, true).query;
         if (params['file'] && fs.existsSync(
@@ -445,6 +463,12 @@ const onRequestHandler = (req, res) => {
                                 xxxx += stepcopy.body[bodynumber];
                             }
                             obiekt = obiekt.replace("<!--BODY-->", xxxx);
+                            var xxxx = "";
+                            let rows = await db_all("SELECT dt from requests where url =\"" + stepcopy.url + "\" order by dt desc");
+                            for (let row in rows) {
+                                xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
+                            }
+                            obiekt = obiekt.replace("<!--WHENLAST-->", xxxx);
                         }
                     }
                 }
@@ -467,7 +491,6 @@ const onRequestHandler = (req, res) => {
         req.on('end', function() {
             console.log(body);
             parsePOSTforms(url.parse("/?" + body, true).query, res, jsonObj);
-
         });
         return;
     }
@@ -480,6 +503,7 @@ const onRequestHandler = (req, res) => {
 
     sendHTML(req, res, readFileContentSync("/internal/index.txt").replace("<!--FILES-->", files));
 };
+
 
 var db = new sqlite3.Database('m.db', (err) => {
     if (err) {
