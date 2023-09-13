@@ -161,6 +161,8 @@ async function request2(req, res) {
     //let s = JSON.stringify(req);
     let curDT = new Date().toLocaleString();
     let s = "{\"datetime\":\"" + curDT + "\",";
+    s+= "\"url\":\"" + req.url + "\",";
+
     console.log("request " + JSON.stringify(req));
     addToLog("<request>\n");
     addToLog("  <url>" + req.url + "</url>\n");
@@ -181,21 +183,30 @@ async function request2(req, res) {
     } else {
         response.name = req.name;
         all_responses.push(response);
+
         var headers = "";
         s += "\"headers\":[";
+        for (let headername in req.headers) {
+            headers +=  req.headers[headername] + "\n";
+            s += "\"" + req.headers[headername].replaceAll("\"", "") + "\",";
+        }
+        s += "\"\"],\"body\":\"" + encodeURIComponent(req.content) + "\",";
+
+        var headers_res = "";
+        s += "\"headers_res\":[";
         for (let headername in response.headers) {
             addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
-            headers += headername + ": " + response.headers[headername] + "\n";
+            headers_res += headername + ": " + response.headers[headername] + "\n";
             s += "\"" + headername + ": " + response.headers[headername].replaceAll("\"", "") + "\",";
         }
-        s += "\"\"],\"body\":\"" + encodeURIComponent(response.body) + "\"";
+        s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"";
         addToLog("  <response_code>" + response.code + "</response_code>\n");
         addToLog("  <response_body>\n");
         addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
         addToLog("  </response_body>\n");
         //        s += response.body;
         s += "}";
-        db.exec(`insert into requests (dt, name, url, headers,body) values('` + curDT + `','abc','` + req.url + `','` + headers + `','`+response.body+`');`, () => {});
+        db.exec(`insert into requests (dt, name, url, headers,body,headers_res,body_res) values('` + curDT + `','abc','` + req.url + `','` + headers + `','`+req.content+`','` + headers_res + `','`+response.body+`');`, () => {});
     }
     console.log("end");
     if (res != null) res.end(s);
@@ -383,8 +394,11 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                             let rows = await db_all("SELECT * from requests where url =\"" + stepcopy.url + "\" and dt=\""+decodeURIComponent(params["dt"])+"\"");
 console.log(rows);
     let s = "{\"datetime\":\"" + decodeURIComponent(params["dt"]) + "\",";
+s+= "\"url\":\""+rows[0].url+"\",";
         s += "\"headers\":[\""+rows[0]["headers"].replaceAll("\"","").replaceAll("\n","\",\"");
-        s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\"";
+        s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
+        s += "\"headers_res\":[\""+rows[0]["headers_res"].replaceAll("\"","").replaceAll("\n","\",\"");
+        s += "\"],\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
         s += "}";
     if (res != null) res.end(s);
                 }
@@ -589,7 +603,9 @@ var db = new sqlite3.Database('m.db', (err) => {
         name text not null,
         url text not null,
         headers text not null,
-body text not null
+body text not null,
+        headers_res text not null,
+body_res text not null
     );`, () => {});
 });
 

@@ -6,15 +6,24 @@ function selectLastDate() {
     if (http.status != 200) {
       alert(http.response);
     }
+//alert(http.response);
     const obj = JSON.parse(http.response);
 
-      document.getElementById("lastresponseheaders").value ="";
-    for (var i =0;i<obj.headers.length;i++) {
-      document.getElementById("lastresponseheaders").value =
-      document.getElementById("lastresponseheaders").value+obj.headers[i]+"\n";
-    }
+      document.getElementById("lastrequesturl").value =obj.url;
 
-    document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body);
+      document.getElementById("lastrequestheaders").value ="";
+    for (var i =0;i<obj.headers.length;i++) {
+      document.getElementById("lastrequestheaders").value =
+      document.getElementById("lastrequestheaders").value+obj.headers[i]+"\n";
+    }
+    document.getElementById("lastrequestbody").value  = decodeURIComponent(obj.body);
+
+      document.getElementById("lastresponseheaders").value ="";
+    for (var i =0;i<obj.headers_res.length;i++) {
+      document.getElementById("lastresponseheaders").value =
+      document.getElementById("lastresponseheaders").value+obj.headers_res[i]+"\n";
+    }
+    document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body_res);
   }
 
   http.onerror = function() {
@@ -50,11 +59,21 @@ for (var i = 0; i < selObj.options.length; i++) {
         }
     }
 
+      document.getElementById("lastrequesturl").value =obj.url;
+
+      document.getElementById("lastrequestheaders").value ="";
     for (var i =0;i<obj.headers.length;i++) {
-      document.getElementById("lastresponseheaders").value =
-      document.getElementById("lastresponseheaders").value+obj.headers[i]+"\n";
+      document.getElementById("lastrequestheaders").value =
+      document.getElementById("lastrequestheaders").value+obj.headers[i]+"\n";
     }
-    document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body);
+    document.getElementById("lastrequestbody").value  = decodeURIComponent(obj.body);
+
+      document.getElementById("lastresponseheaders").value ="";
+    for (var i =0;i<obj.headers_res.length;i++) {
+      document.getElementById("lastresponseheaders").value =
+      document.getElementById("lastresponseheaders").value+obj.headers_res[i]+"\n";
+    }
+    document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body_res);
   }
 
   http.onerror = function() {
@@ -97,7 +116,7 @@ for (var i = 0; i < selObj.options.length; i++) {
     <option value="GET">GET</option>
     <option value="POST">POST</option>
   </select> <!--URLPREFIX-->
-  &nbsp;&nbsp;<input type="text" id="url" name="lastrequesturl" value="<!--URL-->" size=61>
+  &nbsp;&nbsp;<input type="text" id="lastrequesturl" name="lastrequesturl" value="<!--URL-->" size=61>
   <br>Headers<br><textarea cols=80 rows=5 id=lastrequestheaders></textarea>
   <br>Body<br><textarea cols=80 rows=5 id=lastrequestbody></textarea>
   <br><input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
