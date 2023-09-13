@@ -1,5 +1,33 @@
 <br>
 <script async=async>
+function selectLastDate() {
+  http = createPOST();
+  http.onload = function() {
+    if (http.status != 200) {
+      alert(http.response);
+    }
+    const obj = JSON.parse(http.response);
+
+      document.getElementById("lastresponseheaders").value ="";
+    for (var i =0;i<obj.headers.length;i++) {
+      document.getElementById("lastresponseheaders").value =
+      document.getElementById("lastresponseheaders").value+obj.headers[i]+"\n";
+    }
+
+    document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body);
+  }
+
+  http.onerror = function() {
+    alert('login error');
+  };
+
+//  document.getElementById("lastrequestheaders").value = document.getElementById("header").value;
+//  document.getElementById("lastrequestbody").value  = document.getElementById("body").value;
+  const params = new URLSearchParams(window.location.search);
+  http.send("file="+params.get('file')+"&getstep="+document.getElementById("name").value+"&dt="+encodeURIComponent(document.getElementById("whenlast").value));
+  return false;
+}
+
 function sendNewStep() {
   http = createPOST();
   http.onload = function() {
@@ -62,7 +90,7 @@ for (var i = 0; i < selObj.options.length; i++) {
   <p><button type="submit">Run</button>
 </form>
 </td><td>
-  <p>When <select name="whenlast" id="whenlast">
+  <p>When <select name="whenlast" id="whenlast" onchange="selectLastDate()">
 <!--WHENLAST-->
   </select>
   <p><select name="lastrequesttype" id="type">

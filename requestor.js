@@ -195,7 +195,7 @@ async function request2(req, res) {
         addToLog("  </response_body>\n");
         //        s += response.body;
         s += "}";
-        db.exec(`insert into requests (dt, name, url, headers) values('` + curDT + `','abc','` + req.url + `','` + headers + `');`, () => {});
+        db.exec(`insert into requests (dt, name, url, headers,body) values('` + curDT + `','abc','` + req.url + `','` + headers + `','`+response.body+`');`, () => {});
     }
     console.log("end");
     if (res != null) res.end(s);
@@ -253,7 +253,8 @@ async function parsePOSTforms(params, res, jsonObj) {
     console.log(params);
     if (params["runstep"]) {
         return parsePOSTRunStep(params, res, jsonObj);
-
+    } else if (params["getstep"] && params["dt"]) {
+        return parsePOSTGetStep(params, res, jsonObj);
     }
 }
 
@@ -262,6 +263,7 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
     //        return directToOKFileNotFoundNoRet(res, '', false);
     //    }
 
+console.log(params);
     console.log(jsonObj);
     let arr = jsonObj[params['file']];
     res.statusCode = 200;
@@ -314,6 +316,77 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                         console.log(match)
                     }
                     await request2(stepcopy, res);
+                }
+            }
+        }
+    }
+    //            res.end('cos');
+}
+
+async function parsePOSTGetStep(params, res, jsonObj2) {
+    //    if (!params["text"] || !params["state"] || !params["type"] || !params["title"]) {
+    //        return directToOKFileNotFoundNoRet(res, '', false);
+    //    }
+
+    console.log(jsonObj);
+    let arr = jsonObj[params['file']];
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+
+    for (let tsnumber in arr.testsuites) {
+        console.log("testsuite name " + arr.testsuites[tsnumber].name);
+        for (let tcnumber in arr.testsuites[tsnumber].testcases) {
+            console.log("testcase name " + arr.testsuites[tsnumber].testcases[tcnumber].name);
+            let lines = arr.testsuites[tsnumber].testcases[tcnumber].input;
+            let headers = []
+            for (let index2 in lines) {
+                let l = lines[index2];
+                if (headers.length == 0) {
+                    headers = l.split(",");
+                    continue;
+                }
+                let ll = l.split(",");
+                let i = 0;
+                let arra = [];
+                headers.forEach(function(h) {
+                    arra[h] = ll[i];
+                    i++;
+                });
+                console.log(arra);
+                all_responses = []
+                for (let stepnumber in arr.testsuites[tsnumber].testcases[tcnumber].steps) {
+                    if (
+                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].disabled &&
+                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].disabled == true) {
+                        continue;
+                    }
+                    console.log(arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + " vs " + params['getstep']);
+
+                    if (
+                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name.localeCompare(params['getstep']) != 0) {
+                        continue;
+                    }
+                    console.log("starting " + arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + " vs " + params['getstep']);
+                    var stepcopy = findtc(arr,
+                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber]
+                    );
+                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
+                    for (let d in arra) {
+                        console.log(d);
+                        console.log(arra[d]);
+                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                    }
+                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
+                        console.log(match)
+                    }
+
+                            let rows = await db_all("SELECT * from requests where url =\"" + stepcopy.url + "\" and dt=\""+decodeURIComponent(params["dt"])+"\"");
+console.log(rows);
+    let s = "{\"datetime\":\"" + decodeURIComponent(params["dt"]) + "\",";
+        s += "\"headers\":[\""+rows[0]["headers"].replaceAll("\"","").replaceAll("\n","\",\"");
+        s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\"";
+        s += "}";
+    if (res != null) res.end(s);
                 }
             }
         }
@@ -515,7 +588,8 @@ var db = new sqlite3.Database('m.db', (err) => {
         dt text not null,
         name text not null,
         url text not null,
-        headers text not null
+        headers text not null,
+body text not null
     );`, () => {});
 });
 
