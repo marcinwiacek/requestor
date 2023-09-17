@@ -3,6 +3,9 @@
 <form>
 <div>
     <button onclick='table.clearData();return false;'>Clear data</button>
+    <button onclick='table.addRow({});return false;'>Add row</button>
+    <button onclick='table.addColumn({title:"x", field:"x"}, true, "name");return false;'>Add column</button>
+    <button onclick='table.deleteColumn("name");return false;'>Delete column</button>
 </div>
 
 <div id="data-table"></div>
