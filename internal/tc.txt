@@ -12,18 +12,20 @@
 <script>
 
 function addColumn() {
-console.log(table.getColumnDefinitions());
-console.log(table.getColumnDefinitions()[0].title);
-console.log("pi");
-  var x = prompt("Please enter unique column name");
+  while (true) {
+    var x = prompt("Please enter unique column name");
     if (x != null) {
-/*for (column of table.getColumns()){
-        field = table.getColumns()[column].getField();
-        console.log(data.field);
-    }*/
+      for (columnNum in table.getColumnDefinitions()){
+          if (table.getColumnDefinitions()[columnNum].title == x) {
+             x = "";
+             break;
+          }
+      }
     }
-table.addColumn({title:"x", field:"x"}, true, "name");return false;
-
+    if (x == null || x == "") continue;
+    table.addColumn({title:x, field:x}, true, x);
+    break;
+  }
 }
 
 var tabledata = [
@@ -40,11 +42,16 @@ movableColumns:true,
 history:true,
 addRowPos:"top",
 paginationSize:7,
-    paginationCounter:"rows"
+    paginationCounter:"rows",
+ movableRows: true,
+    movableRowsConnectedElements: "#drop-area",
+movableColumns: true
 });
 
-table.on("rowClick", function(e, row){ 
-    alert("click on row " + row.getData().id);
+table.on("movableRowsElementDrop", function(e, element, row){
+        var div = document.createElement("div");
+        div.textContent = row.getData().name;
+        element.appendChild(div);
 });
 
 </script>
