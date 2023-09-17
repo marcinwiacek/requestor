@@ -1,6 +1,10 @@
 <!doctype html>
 <html>
 <head>
+<script src="../external/split.min.js"></script>
+<link href="../external/tabulator_midnight.min.css" rel="stylesheet">
+ <script type="text/javascript" src="../external/tabulator.min.js"></script>
+ 
 <style>
         .flex {
             display: flex;
@@ -45,6 +49,45 @@
   http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   return http;
  }
+
+function loadRightPart(url) {
+  http = createPOST();
+  http.onload = function() {
+    if (http.status != 200) {
+      alert(http.response);
+    }
+
+var tmp=  document.createElement('div');
+
+    tmp.innerHTML = http.response;
+
+const scriptElements = tmp.querySelectorAll("script");
+
+  Array.from(scriptElements).forEach((scriptElement) => {
+    const clonedElement = document.createElement("script");
+
+    Array.from(scriptElement.attributes).forEach((attribute) => {
+      clonedElement.setAttribute(attribute.name, attribute.value);
+    });
+
+    clonedElement.text = scriptElement.text;
+
+    scriptElement.parentNode.replaceChild(clonedElement, scriptElement);
+  });
+document.getElementById("two").innerHTML="";
+
+document.getElementById("two").appendChild(tmp);
+}
+
+  http.onerror = function() {
+    alert('login error');
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  http.send(url);
+  return false;
+}
+
 </script>
 <a href=.>back</a><p>
 File: <!--NAME-->
@@ -55,7 +98,6 @@ Environment:
 <!--ENV-->
 </select>
 </form>
-<script src="../external/split.js"></script>
 <div class="flex">
         <div id="one" class="split">
 <!--TC-->

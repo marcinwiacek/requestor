@@ -1,5 +1,36 @@
 <br>
+
 <form>
+<div>
+    <button onclick='table.clearData();return false;'>Clear data</button>
+</div>
+
+<div id="data-table"></div>
+<script>
+
+var tabledata = [
+    {id:1, name:"abc", age:"12"},
+    {id:1, name:"def", age:"14"},
+ ];
+
+var table = new Tabulator("#data-table", {
+    height:205,
+    data:tabledata,
+    layout:"fitColumns",
+    autoColumns:true,
+movableColumns:true,
+history:true,
+addRowPos:"top",
+paginationSize:7,
+    paginationCounter:"rows"
+});
+
+table.on("rowClick", function(e, row){ 
+    alert("click on row " + row.getData().id);
+});
+
+</script>
+
 Name: <input type="text" id="name" name="name" value="<!--NAME-->">
 <p>Input data: <textarea cols=80 rows=5 id="data" name="data"><!--DATA--></textarea>
 <p><input type="submit">
