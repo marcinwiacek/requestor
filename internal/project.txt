@@ -1,6 +1,42 @@
 <!doctype html>
 <html>
 <head>
+<style>
+        .flex {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .flex>.split {
+            height: 100vh;
+            overflow-y: scroll;
+        }
+
+        .gutter.gutter-horizontal {
+            cursor: ew-resize;
+        }
+
+        .gutter {
+            background-color: #eee;
+            background-repeat: no-repeat;
+            background-position: 50%;
+        }
+
+        .gutter.gutter-horizontal {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+        }
+
+        .heading {
+            padding: 15px;
+            background: #eeeeee;
+            text-align: center;
+            font-weight: 800;
+            color: #0062cc;
+            letter-spacing: 2px;
+        }
+
+
+</style>
 <script>
  function createPOST() {
   var http = new XMLHttpRequest();
@@ -19,12 +55,21 @@ Environment:
 <!--ENV-->
 </select>
 </form>
-<table><tr><td valign=top>
+<script src="../external/split.js"></script>
+<div class="flex">
+        <div id="one" class="split">
 <!--TC-->
-</td><td valign=top>
+</div>
+        <div id="two" class="split">
 <!--OBIEKT-->
-</td></tr></table>
 <!--RUN-->
+</div>
+</div>
+ <script>
+        Split(['#one', '#two'], {
+            sizes: [20, 80]
+        });
+    </script>
 </head>
 </body>
 </html>

@@ -246,8 +246,20 @@ function sendHTMLBody(req, res, text) {
     }
 }
 
+function sendJSHead(res) {
+    res.statusCode = 200;
+    //    res.setHeader('Cache-Control', 'no-store');
+    //  res.setHeader('Cache-Control', 'must-revalidate');
+    res.setHeader('Content-Type', 'application/javascript; charset=UTF-8');
+}
+
 function sendHTML(req, res, text) {
     sendHTMLHead(res);
+    sendHTMLBody(req, res, text);
+}
+
+function sendJS(req, res, text) {
+    sendJSHead(res);
     sendHTMLBody(req, res, text);
 }
 
@@ -428,6 +440,11 @@ function db_all(sql) {
 
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
+if (req.url == "/external/split.js") {
+    sendJS(req, res, readFileContentSync("/external/split.js"));
+return;
+}
+
         const params = url.parse(req.url, true).query;
         if (params['file'] && fs.existsSync(
                 path.normalize(__dirname + "/projects/" + params['file']))) {
