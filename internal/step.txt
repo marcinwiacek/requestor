@@ -6,19 +6,18 @@ function selectLastDate() {
     if (http.status != 200) {
       alert(http.response);
     }
-//alert(http.response);
     const obj = JSON.parse(http.response);
 
-      document.getElementById("lastrequesturl").value =obj.url;
+    document.getElementById("lastrequesturl").value =obj.url;
 
-      document.getElementById("lastrequestheaders").value ="";
+    document.getElementById("lastrequestheaders").value ="";
     for (var i =0;i<obj.headers.length;i++) {
       document.getElementById("lastrequestheaders").value =
       document.getElementById("lastrequestheaders").value+obj.headers[i]+"\n";
     }
     document.getElementById("lastrequestbody").value  = decodeURIComponent(obj.body);
 
-      document.getElementById("lastresponseheaders").value ="";
+    document.getElementById("lastresponseheaders").value ="";
     for (var i =0;i<obj.headers_res.length;i++) {
       document.getElementById("lastresponseheaders").value =
       document.getElementById("lastresponseheaders").value+obj.headers_res[i]+"\n";
@@ -50,25 +49,25 @@ function sendNewStep() {
     option.value = obj.datetime;
     option.text = obj.datetime;
     var selObj = document.getElementById("whenlast");
-selObj.prepend(option);
+    selObj.prepend(option);
 
-for (var i = 0; i < selObj.options.length; i++) {
+    for (var i = 0; i < selObj.options.length; i++) {
         if (selObj.options[i].text==obj.datetime) {
             selObj.options[i].selected = true;
             break;
         }
     }
 
-      document.getElementById("lastrequesturl").value =obj.url;
+    document.getElementById("lastrequesturl").value =obj.url;
 
-      document.getElementById("lastrequestheaders").value ="";
+    document.getElementById("lastrequestheaders").value ="";
     for (var i =0;i<obj.headers.length;i++) {
       document.getElementById("lastrequestheaders").value =
       document.getElementById("lastrequestheaders").value+obj.headers[i]+"\n";
     }
     document.getElementById("lastrequestbody").value  = decodeURIComponent(obj.body);
 
-      document.getElementById("lastresponseheaders").value ="";
+    document.getElementById("lastresponseheaders").value ="";
     for (var i =0;i<obj.headers_res.length;i++) {
       document.getElementById("lastresponseheaders").value =
       document.getElementById("lastresponseheaders").value+obj.headers_res[i]+"\n";

@@ -375,12 +375,13 @@ async function parsePOSTforms(params, res, jsonObj) {
                         jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name == params['tc']) {
                         obiekt = readFileContentSync("/internal/tc.txt").replace("<!--NAME-->",
                             jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name);
-                        var xxxx = "";
+                        var xxxx = "<script>var csvData =`";
                         for (var inputnumber in
                                 jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].input) {
                             xxxx +=
-                                jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].input[inputnumber];
+                                jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].input[inputnumber]+"\n";
                         }
+xxxx+="`;</script>";
                         obiekt = obiekt.replace("<!--DATA-->", xxxx);
                     }
 
@@ -701,7 +702,7 @@ return;
                         for (var inputnumber in
                                 jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].input) {
                             xxxx +=
-                                jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].input[inputnumber];
+                                jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].input[inputnumber]+"\r\n";
                         }
                         obiekt = obiekt.replace("<!--DATA-->", xxxx);
                     }
@@ -778,13 +779,13 @@ var db = new sqlite3.Database('m.db', (err) => {
     }
     db.exec(`
     create table requests (
-        dt text not null,
+	dt text not null,
         name text not null,
         url text not null,
         headers text not null,
-body text not null,
+	body text not null,
         headers_res text not null,
-body_res text not null
+	body_res text not null
     );`, () => {});
 });
 

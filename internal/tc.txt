@@ -6,46 +6,45 @@
     <button onclick='table.addRow({});return false;'>Add row</button>
     <button onclick='addColumn();return false;'>Add column</button>
     <button onclick='table.deleteColumn("name");return false;'>Delete column</button>
+    <button onclick='table.import("csv",".csv");return false;'>Load from CSV file</button>
+    <button onclick='table.download("csv", "data.csv", {delimiter:","});return false;'>Save to CSV file</button>
 </div>
 
 <div id="data-table"></div>
+<!--DATA-->
 <script>
 
 function addColumn() {
   while (true) {
     var x = prompt("Please enter unique column name");
-    if (x != null) {
+    if (x == null) break;
+    if (x=="") continue;
       for (columnNum in table.getColumnDefinitions()){
           if (table.getColumnDefinitions()[columnNum].title == x) {
              x = "";
              break;
           }
       }
-    }
-    if (x == null || x == "") continue;
+    if (x=="") continue;
     table.addColumn({title:x, field:x}, true, x);
     break;
   }
 }
 
-var tabledata = [
-    {id:1, name:"abc", age:"12"},
-    {id:1, name:"def", age:"14"},
- ];
-
 var table = new Tabulator("#data-table", {
     height:205,
-    data:tabledata,
+    data:csvData,
+    importFormat:"csv",
     layout:"fitColumns",
     autoColumns:true,
-movableColumns:true,
-history:true,
-addRowPos:"top",
-paginationSize:7,
+    movableColumns:true,
+//    history:true,
+    addRowPos:"top",
+    paginationSize:7,
     paginationCounter:"rows",
- movableRows: true,
-    movableRowsConnectedElements: "#drop-area",
-movableColumns: true
+//    movableRows: true,
+//    movableRowsConnectedElements: "#drop-area",
+//    movableColumns: true
 });
 
 table.on("movableRowsElementDrop", function(e, element, row){
@@ -54,9 +53,30 @@ table.on("movableRowsElementDrop", function(e, element, row){
         element.appendChild(div);
 });
 
+table.on("dataProcessed", function(){
+    var newColumns = [];
+    var aColumns = table.getColumns();
+    for (var i = 0; i < aColumns.length; i++) {
+        aColumns[i]._column.definition.editor = "input";
+        aColumns[i]._column.definition.headerDblClick = function(e, column){
+    	    let name = prompt("Please enter column name", column._column.definition.title);
+	    var newColumns = [];
+	    var aColumns = table.getColumns();
+	    for (var i = 0; i < aColumns.length; i++) {
+		if (aColumns[i]._column.definition == column._column.definition) {
+		    aColumns[i]._column.definition.title = name;
+	        };
+    		newColumns.push(aColumns[i]._column.definition);
+	    }
+	    table.setColumns(newColumns);
+	};
+        newColumns.push(aColumns[i]._column.definition);
+    }
+    table.setColumns(newColumns);
+});
+
 </script>
 
-Name: <input type="text" id="name" name="name" value="<!--NAME-->">
-<p>Input data: <textarea cols=80 rows=5 id="data" name="data"><!--DATA--></textarea>
+<p>Name: <input type="text" id="name" name="name" value="<!--NAME-->">
 <p><input type="submit">
 </form>
