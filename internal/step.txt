@@ -32,6 +32,7 @@ function selectLastDate() {
 //  document.getElementById("lastrequestheaders").value = document.getElementById("header").value;
 //  document.getElementById("lastrequestbody").value  = document.getElementById("body").value;
   const params = new URLSearchParams(window.location.search);
+console.log(params);
   http.send("file="+params.get('file')+"&getstep="+document.getElementById("name").value+"&dt="+encodeURIComponent(document.getElementById("whenlast").value));
   return false;
 }
