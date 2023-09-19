@@ -69,7 +69,6 @@
               "disabled": true
             },
             {
-              "disabled": true,
               "name": "step2",
               "type": "get",
               "url": "https://{{engine}}{{word}}",

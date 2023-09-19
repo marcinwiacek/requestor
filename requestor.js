@@ -195,9 +195,16 @@ async function request2(req, res) {
         var headers_res = "";
         s += "\"headers_res\":[";
         for (let headername in response.headers) {
-            addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
-            headers_res += headername + ": " + response.headers[headername] + "\n";
+//            addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
+//            headers_res += headername + ": " + response.headers[headername] + "\n";
+if (Array.isArray(response.headers[headername])) {
+for (let headerx in response.headers[headername]) {
+            s += "\"" + headername + ": " + response.headers[headername][headerx].replaceAll("\"", "") + "\",";
+}
+} else {
             s += "\"" + headername + ": " + response.headers[headername].replaceAll("\"", "") + "\",";
+}
+
         }
         s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"";
         addToLog("  <response_code>" + response.code + "</response_code>\n");
