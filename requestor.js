@@ -196,13 +196,14 @@ async function request2(req, res) {
         s += "\"headers_res\":[";
         for (let headername in response.headers) {
 //            addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
-//            headers_res += headername + ": " + response.headers[headername] + "\n";
 if (Array.isArray(response.headers[headername])) {
 for (let headerx in response.headers[headername]) {
             s += "\"" + headername + ": " + response.headers[headername][headerx].replaceAll("\"", "") + "\",";
+            headers_res += headername + ": " + response.headers[headername][headerx] + "\n";
 }
 } else {
             s += "\"" + headername + ": " + response.headers[headername].replaceAll("\"", "") + "\",";
+            headers_res += headername + ": " + response.headers[headername] + "\n";
 }
 
         }
@@ -776,7 +777,7 @@ const onRequestHandler = async (req, res) => {
     let files = "";
     let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
     for (filenumber in all_files) {
-        files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a>";
+        files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a><br>";
     }
 
     sendHTML(req, res, readFileContentSync("/internal/index.txt").replace("<!--FILES-->", files));

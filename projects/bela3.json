@@ -53,10 +53,10 @@
   ],
   "testsuites": [
     {
-      "name": "TS1",
+      "name": "TestSuite1",
       "testcases": [
         {
-          "name": "TC1",
+          "name": "TestCase1",
           "input": [
             "engine,word",
             "www.google.com/search?q=,test",
