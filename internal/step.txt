@@ -32,7 +32,7 @@ function selectLastDate() {
 //  document.getElementById("lastrequestheaders").value = document.getElementById("header").value;
 //  document.getElementById("lastrequestbody").value  = document.getElementById("body").value;
   const params = new URLSearchParams(window.location.search);
-console.log(params);
+  console.log(params);
   http.send("file="+params.get('file')+"&getstep="+document.getElementById("name").value+"&dt="+encodeURIComponent(document.getElementById("whenlast").value));
   return false;
 }
@@ -109,13 +109,15 @@ function sendNewStep() {
   <p><button type="submit">Run</button>
 </form>
 </td><td>
-  <p>When <select name="whenlast" id="whenlast" onchange="selectLastDate()">
-<!--WHENLAST-->
+  <p>When 
+  <select name="whenlast" id="whenlast" onchange="selectLastDate()">
+      <!--WHENLAST-->
   </select>
   <p><select name="lastrequesttype" id="type">
     <option value="GET">GET</option>
     <option value="POST">POST</option>
-  </select> <!--URLPREFIX-->
+  </select>
+  <!--URLPREFIX-->
   &nbsp;&nbsp;<input type="text" id="lastrequesturl" name="lastrequesturl" value="<!--URL-->" size=61>
   <br>Headers<br><textarea cols=80 rows=5 id=lastrequestheaders></textarea>
   <br>Body<br><textarea cols=80 rows=5 id=lastrequestbody></textarea>
