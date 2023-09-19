@@ -300,110 +300,75 @@ async function parsePOSTforms(params, res, jsonObj) {
         return parsePOSTGetStep(params, res, jsonObj);
     }
 
-
-
-    if (params['file'] && fs.existsSync(
-            path.normalize(__dirname + "/projects/" + params['file']))) {
-
+    if (!(params['file'] && fs.existsSync(
+            path.normalize(__dirname + "/projects/" + params['file'])))) {
+return;
+}
         var obiekt = "";
-        var tc = "<script></script>";
-        var env = "";
-
-        for (let environmentnumber in jsonObj[params['file']].environments) {
-            env += "<option value=\"" +
-                jsonObj[params['file']].environments[environmentnumber].name + "\">" +
-                jsonObj[params['file']].environments[environmentnumber].name + "</option>";
-        }
 
         for (let servicenumber in jsonObj[params['file']].services) {
-            tc += "<br>service " +
-                "<a onclick=loadRightPart(\"file=" + params['file'] + "&service=" +
-                jsonObj[params['file']].services[servicenumber].name + "\")>" +
-                jsonObj[params['file']].services[servicenumber].name + "</a>";
+	    var service = jsonObj[params['file']].services[servicenumber];
+            if (service.name == params['service']) { 
+		obiekt = "<br>service ";
+	        res.statusCode = 200;
+	        res.setHeader('Content-Type', 'text/plain');
+	        if (res != null) res.end(obiekt);
+		return;
+	    }
 
-            if (
-                jsonObj[params['file']].services[servicenumber].name == params['service']) {
-                obiekt = "<br>service ";
-            }
+            for (let functionnumber in service.functions) {
+		var func = service.functions[functionnumber];
+                if (func.name == params['function']) {
+                    obiekt = readFileContentSync("/internal/function.txt").replace("<!--NAME-->",func.name);
 
-            for (let functionnumber in jsonObj[params['file']].services[servicenumber].functions) {
-                tc += "<br>&nbsp;&nbsp; function " +
-                    "<a onclick=loadRightPart(\"file=" + params['file'] + "&function=" +
-                    jsonObj[params['file']].services[servicenumber].functions[functionnumber].name + "\")>" +
-                    jsonObj[params['file']].services[servicenumber].functions[functionnumber].name + "</a>";
-
-                if (
-                    jsonObj[params['file']].services[servicenumber].functions[functionnumber].name == params['function']) {
-
-                    obiekt = readFileContentSync("/internal/function.txt").replace("<!--NAME-->",
-                        jsonObj[params['file']].services[servicenumber].functions[functionnumber].name);
-
-                    obiekt = obiekt.replace("<!--URL-->",
-                        jsonObj[params['file']].services[servicenumber].functions[functionnumber].url);
+                    obiekt = obiekt.replace("<!--URL-->",func.url);
                     var xxxx = "";
-                    for (var headernumber in
-                            jsonObj[params['file']].services[servicenumber].functions[functionnumber].headers) {
-                        xxxx +=
-                            jsonObj[params['file']].services[servicenumber].functions[functionnumber].headers[headernumber];
+                    for (var headernumber in func.headers) {
+                        xxxx += func.headers[headernumber];
                     }
                     obiekt = obiekt.replace("<!--HEADER-->", xxxx);
                     var xxxx = "";
-                    for (var bodynumber in
-                            jsonObj[params['file']].services[servicenumber].functions[functionnumber].content) {
-                        xxxx +=
-                            jsonObj[params['file']].services[servicenumber].functions[functionnumber].content[contentnumber];
+                    for (var bodynumber in func.content) {
+                        xxxx += func.content[bodynumber];
                     }
                     obiekt = obiekt.replace("<!--BODY-->", xxxx);
+    	    	    res.statusCode = 200;
+	    	    res.setHeader('Content-Type', 'text/plain');
+	    	    if (res != null) res.end(obiekt);
+		    return;
                 }
-
             }
         }
 
-
         for (let tsnumber in jsonObj[params['file']].testsuites) {
-            tc += "<br>testsuite name " +
-                "<a onclick=loadRightPart(\"file=" + params['file'] + "&ts=" +
-                jsonObj[params['file']].testsuites[tsnumber].name + "\")>" +
-                jsonObj[params['file']].testsuites[tsnumber].name + "</a>";
-
-            if (
-                jsonObj[params['file']].testsuites[tsnumber].name == params['ts']) {
-                obiekt = readFileContentSync("/internal/ts.txt").replace("<!--NAME-->",
-                    jsonObj[params['file']].testsuites[tsnumber].name);
+	    var suite =  jsonObj[params['file']].testsuites[tsnumber];
+            if (suite.name == params['ts']) {
+                obiekt = readFileContentSync("/internal/ts.txt").replace("<!--NAME-->", suite.name);
+    	    	res.statusCode = 200;
+	    	res.setHeader('Content-Type', 'text/plain');
+	    	if (res != null) res.end(obiekt);
+		return;
             }
 
-            for (let tcnumber in
-                    jsonObj[params['file']].testsuites[tsnumber].testcases) {
-                tc += "<br>&nbsp;&nbsp;testcase name " +
-                    "<a onclick=loadRightPart(\"file=" + params['file'] + "&tc=" +
-                    jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name + "\")>" +
-                    jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name + "</a>";
-
-                if (
-                    jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name == params['tc']) {
-                    obiekt = readFileContentSync("/internal/tc.txt").replace("<!--NAME-->",
-                        jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].name);
+            for (let tcnumber in suite.testcases) {
+		var tc = suite.testcases[tcnumber];
+                if (tc.name == params['tc']) {
+                    obiekt = readFileContentSync("/internal/tc.txt").replace("<!--NAME-->", tc.name);
                     var xxxx = "<script>var csvData =`";
-                    for (var inputnumber in
-                            jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].input) {
-                        xxxx +=
-                            jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].input[inputnumber] + "\n";
+                    for (var inputnumber in                            tc.input) {
+                        xxxx +=                            tc.input[inputnumber] + "\n";
                     }
                     xxxx += "`;</script>";
                     obiekt = obiekt.replace("<!--DATA-->", xxxx);
+    	    	    res.statusCode = 200;
+	    	    res.setHeader('Content-Type', 'text/plain');
+	    	    if (res != null) res.end(obiekt);
+		    return;
                 }
-
-                for (let stepnumber in jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].steps) {
-                    tc += "<br>&nbsp;&nbsp;&nbsp;&nbsp;step name " +
-                        "<a onlick=loadRightPart(\"file=" + params['file'] + "&step=" +
-                        jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + "\")>" +
-                        jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + "</a>";
-
-                    if (jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name == params['step']) {
-                        var stepcopy = findtc(jsonObj[params['file']],
-                            jsonObj[params['file']].testsuites[tsnumber].testcases[tcnumber].steps[stepnumber]
-                        );
-
+                for (let stepnumber in tc.steps) {
+		    var step = tc.steps[stepnumber];
+                    if (step.name == params['step']) {
+                        var stepcopy = findtc(jsonObj[params['file']],                        step);
                         obiekt = readFileContentSync("/internal/step.txt").replace("<!--NAME-->",
                             stepcopy.name);
                         if (stepcopy.urlprefix) obiekt = obiekt.replace("<!--URLPREFIX-->", stepcopy.urlprefix);
@@ -419,11 +384,15 @@ async function parsePOSTforms(params, res, jsonObj) {
                         }
                         obiekt = obiekt.replace("<!--BODY-->", xxxx);
                         var xxxx = "";
-                        let rows = await db_all("SELECT dt from requests where url =\"" + stepcopy.url + "\" order by dt desc");
+                        let rows = await db_all("SELECT dt from requests where url =\"" + step.url + "\" order by dt desc");
                         for (let row in rows) {
                             xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
                         }
                         obiekt = obiekt.replace("<!--WHENLAST-->", xxxx);
+        	    	res.statusCode = 200;
+	    		res.setHeader('Content-Type', 'text/plain');
+	    		if (res != null) res.end(obiekt);
+			return;
                     }
                 }
             }
@@ -432,9 +401,6 @@ async function parsePOSTforms(params, res, jsonObj) {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/plain');
         if (res != null) res.end(obiekt);
-        return;
-    }
-
 }
 
 async function parsePOSTRunStep(params, res, jsonObj2) {
@@ -513,10 +479,12 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
     res.setHeader('Content-Type', 'text/plain');
 
     for (let tsnumber in arr.testsuites) {
-        console.log("testsuite name " + arr.testsuites[tsnumber].name);
-        for (let tcnumber in arr.testsuites[tsnumber].testcases) {
-            console.log("testcase name " + arr.testsuites[tsnumber].testcases[tcnumber].name);
-            let lines = arr.testsuites[tsnumber].testcases[tcnumber].input;
+	var ts = arr.testsuites[tsnumber];
+        console.log("testsuite name " + ts.name);
+        for (let tcnumber in ts.testcases) {
+	    var tc = ts.testcases[tcnumber];
+            console.log("testcase name " + tc.name);
+            let lines = tc.input;
             let headers = []
             for (let index2 in lines) {
                 let l = lines[index2];
@@ -533,22 +501,18 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                 });
                 console.log(arra);
                 all_responses = []
-                for (let stepnumber in arr.testsuites[tsnumber].testcases[tcnumber].steps) {
-                    if (
-                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].disabled &&
-                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].disabled == true) {
+                for (let stepnumber in tc.steps) {
+		    var step = tc.steps[stepnumber];
+                    if (                        step.disabled && step.disabled == true) {
                         continue;
                     }
-                    console.log(arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + " vs " + params['getstep']);
+                    console.log(step.name + " vs " + params['getstep']);
 
-                    if (
-                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name.localeCompare(params['getstep']) != 0) {
+                    if (                        step.name.localeCompare(params['getstep']) != 0) {
                         continue;
                     }
-                    console.log("starting " + arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber].name + " vs " + params['getstep']);
-                    var stepcopy = findtc(arr,
-                        arr.testsuites[tsnumber].testcases[tcnumber].steps[stepnumber]
-                    );
+                    console.log("starting " + step.name + " vs " + params['getstep']);
+                    var stepcopy = findtc(arr,                        step);
                     if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
                     for (let d in arra) {
                         console.log(d);
