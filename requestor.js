@@ -109,29 +109,29 @@ function addToLog(str) {
     //    });
 }
 
-async function request2(req, res, name) {
-    //let s = JSON.stringify(req);
-    let curDT = new Date().toLocaleString();
-    let s = "{\"datetime\":\"" + curDT + "\",";
-    s += "\"url\":\"" + req.url + "\",";
+function digits(a,b) {
+    let x = a.toString();
+    while (x.length<b) {
+	x = "0"+x;
+    }
+    return x;
+}
 
+async function request2(req, res, name, times) {
+    //let s = JSON.stringify(req);
+    let dt = new Date();
+    let curDT=dt.getFullYear()+"-"+digits(dt.getMonth()+1,2)+"-"+
+	digits(dt.getDate(),2)+" "+
+	digits(dt.getHours(),2)+":"+
+	digits(dt.getMinutes(),2)+":"+
+	digits(dt.getSeconds(),2)+" "+digits(dt.getMilliseconds(),3);
+    let s = "{\"oldtimes\":"+JSON.stringify(times)+",\"datetime\":\"" + curDT + "\",";
+    s += "\"url\":\"" + req.url + "\",";
     console.log("request " + JSON.stringify(req));
-    addToLog("<request>\n");
-    addToLog("  <url>" + req.url + "</url>\n");
-    for (let headername in req.headers) {
-        addToLog("  <header>" + req.headers[headername] + "</header>\n");
-    }
-    addToLog("  <body>\n");
-    addToLog("  <![CDATA[\n" + req.content.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
-    addToLog("  </body>\n");
     console.log("start");
-    for (let assertnumber in req.asserts) {
-        addToLog("  <response_assert>" + assertnumber + ": " + req.asserts[assertnumber] + "</response_assert>\n");
-    }
     var response = await executeRequest(req);
     if (response.error) {
         s += response.error;
-        addToLog("  <response_error>" + response.error + "</response_error>\n");
     } else {
         response.name = req.name;
         all_responses.push(response);
@@ -139,37 +139,30 @@ async function request2(req, res, name) {
         var headers = "";
         s += "\"headers\":[";
         for (let headername in req.headers) {
+            s += "\""+encodeURIComponent(req.headers[headername]) + "\",";
             headers += req.headers[headername] + "\n";
-            s += "\"" + req.headers[headername].replaceAll("\"", "") + "\",";
         }
         s += "\"\"],\"body\":\"" + encodeURIComponent(req.content) + "\",";
 
         var headers_res = "";
         s += "\"headers_res\":[";
         for (let headername in response.headers) {
-            //            addToLog("  <response_header>" + headername + ": " + response.headers[headername] + "</response_header>\n");
             if (Array.isArray(response.headers[headername])) {
                 for (let headerx in response.headers[headername]) {
-                    s += "\"" + headername + ": " + response.headers[headername][headerx].replaceAll("\"", "") + "\",";
-                    headers_res += headername + ": " + response.headers[headername][headerx] + "\n";
+                    s += "\"" + encodeURIComponent(headername + ": " + response.headers[headername][headerx]) + "\",";
+                    headers_res += headername + ": " + response.headers[headername][headerx]+"\n";
                 }
             } else {
-                s += "\"" + headername + ": " + response.headers[headername].replaceAll("\"", "") + "\",";
-                headers_res += headername + ": " + response.headers[headername] + "\n";
+                s += "\"" + encodeURIComponent(headername + ": " + response.headers[headername]) + "\",";
+                headers_res += headername + ": " + response.headers[headername]+"\n";
             }
         }
-        s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"";
-        addToLog("  <response_code>" + response.code + "</response_code>\n");
-        addToLog("  <response_body>\n");
-        addToLog("  <![CDATA[\n" + response.body.replace("]]>", "]]]]><![CDATA[>") + "\n]]>\n");
-        addToLog("  </response_body>\n");
-        //        s += response.body;
-        s += "}";
-        console.log(`insert into requests (dt, name, url, headers,body,headers_res,body_res) values('` + curDT + `','` + name + `','` + req.url + `','` + headers + `','` + req.content + `','` + headers_res + `','` + response.body + `');`, () => {});
-        db.exec(`insert into requests (dt, name, url, headers,body,headers_res,body_res) values('` + curDT + `','` + name + `','` + req.url + `','` + headers + `','` + req.content + `','` + headers_res + `','` + response.body + `');`, () => {});
+        s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"}";
+        db.run(`insert into requests (dt, name, url, headers,body,headers_res,body_res) values(?,?,?,?,?,?,?)`,
+ curDT , name , req.url , headers , req.content , headers_res , response.body,
+err => {console.log("error "+err)});
     }
     console.log("end");
-    addToLog("</request>\n");
     return s;
 }
 
@@ -349,6 +342,8 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
 
+    let times = [];
+
     for (let tsnumber in arr.testsuites) {
         var ts = arr.testsuites[tsnumber];
         console.log("testsuite name " + ts.name);
@@ -392,7 +387,8 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    sss = await request2(stepcopy, res, step.name);
+                    sss = await request2(stepcopy, res, step.name, times);
+		    times.push(JSON.parse(sss).datetime);
                 }
             }
         }

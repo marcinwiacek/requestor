@@ -43,9 +43,19 @@ function sendNewStep() {
     if (http.status != 200) {
       alert(http.response);
     }
+
     //document.getElementById("lastresponsebody").value = http.response;
     alert('jest odpowiedz '+http.response);
     const obj = JSON.parse(http.response);
+
+    for (var i=0;i<obj.oldtimes.length;i++) {
+        var option1 = document.createElement("option");
+        option1.value = obj.oldtimes[i];
+        option1.text = obj.oldtimes[i];
+        var selObj1 = document.getElementById("whenlast");
+        selObj1.prepend(option1);
+    }
+
     var option = document.createElement("option");
     option.value = obj.datetime;
     option.text = obj.datetime;
@@ -64,14 +74,14 @@ function sendNewStep() {
     document.getElementById("lastrequestheaders").value ="";
     for (var i =0;i<obj.headers.length;i++) {
       document.getElementById("lastrequestheaders").value =
-      document.getElementById("lastrequestheaders").value+obj.headers[i]+"\n";
+      document.getElementById("lastrequestheaders").value+decodeURIComponent(obj.headers[i])+"\n";
     }
     document.getElementById("lastrequestbody").value  = decodeURIComponent(obj.body);
 
     document.getElementById("lastresponseheaders").value ="";
     for (var i =0;i<obj.headers_res.length;i++) {
       document.getElementById("lastresponseheaders").value =
-      document.getElementById("lastresponseheaders").value+obj.headers_res[i]+"\n";
+      document.getElementById("lastresponseheaders").value+decodeURIComponent(obj.headers_res[i])+"\n";
     }
     document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body_res);
   }
