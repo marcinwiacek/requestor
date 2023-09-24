@@ -117,7 +117,7 @@ function digits(a, b) {
     return x;
 }
 
-async function request2(req, res, name, times) {
+async function request2(req, res, name, times, filename) {
     //let s = JSON.stringify(req);
     let dt = new Date();
     let curDT = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
@@ -158,7 +158,7 @@ async function request2(req, res, name, times) {
             }
         }
         s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"}";
-        db.run(`insert into requests (dt, name, url, headers,body,headers_res,body_res) values(?,?,?,?,?,?,?)`,
+        dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res) values(?,?,?,?,?,?,?)`,
             curDT, name, req.url, headers, req.content, headers_res, response.body,
             err => {
                 console.log("error " + err)
@@ -231,6 +231,7 @@ function sendCSS(req, res, text) {
 }
 
 let jsonObj = [];
+let dbObj = [];
 
 function directToOKFileNotFoundNoRet(res, txt, ok) {
     res.statusCode = ok ? 200 : 404;
@@ -249,10 +250,8 @@ async function parsePOSTforms(params, res, jsonObj) {
             path.normalize(__dirname + "/projects/" + params['file'])))) {
         return;
     }
-
-            if (!jsonObj[params['file']]) {
-                jsonObj[params['file']] = JSON.parse(readFileContentSync("/projects/" + params['file']));
-            }
+    loadFile(params['file']);
+    loadDB(params['file']);
 
     var obiekt = "";
     res.statusCode = 200;
@@ -323,7 +322,7 @@ async function parsePOSTforms(params, res, jsonObj) {
                 }
                 obiekt = obiekt.replace("<!--BODY-->", xxxx);
                 var xxxx = "";
-                let rows = await db_all("SELECT dt from requests where name =\"" + step.name + "\" order by dt desc");
+                let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + step.name + "\" order by dt desc");
                 for (let row in rows) {
                     xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
                 }
@@ -394,7 +393,7 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    sss = await request2(stepcopy, res, step.name, times);
+                    sss = await request2(stepcopy, res, step.name, times, params['file']);
                     times.push(JSON.parse(sss).datetime);
 
                     if (stepcopy.url == step.url) break;
@@ -406,18 +405,46 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
     if (res != null) res.end(sss);
 }
 
+function loadDB(name) {
+    if (!dbObj[name]) {
+        dbObj[name] = new sqlite3.Database(path.normalize(__dirname + "/projects/" + name + ".db"), async (err) => {
+            if (err) {
+                console.log("DB error " + err);
+                exit(1);
+            }
+            let v = await db_all(name, "SELECT sqlite_version();");
+            console.log(JSON.stringify(v));
+            dbObj[name].exec(`
+    create table requests (
+	dt text not null,
+        name text not null,
+        url text not null,
+        headers text not null,
+	body text not null,
+        headers_res text not null,
+	body_res text not null
+    );`, () => {});
+        });
+    }
+}
+
+function loadFile(name) {
+    if (!jsonObj[name]) {
+        jsonObj[name] = JSON.parse(readFileContentSync("/projects/" + name));
+    }
+}
+
 async function parsePOSTGetStep(params, res, jsonObj2) {
     //    if (!params["text"] || !params["state"] || !params["type"] || !params["title"]) {
     //        return directToOKFileNotFoundNoRet(res, '', false);
     //    }
 
     console.log(jsonObj);
-    let arr = jsonObj[params['file']];
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
 
-    for (let tsnumber in arr.testsuites) {
-        var ts = arr.testsuites[tsnumber];
+    for (let tsnumber in jsonObj[params['file']].testsuites) {
+        var ts = jsonObj[params['file']].testsuites[tsnumber];
         console.log("testsuite name " + ts.name);
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
@@ -450,7 +477,7 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                         continue;
                     }
                     console.log("starting " + step.name + " vs " + params['getstep']);
-                    var stepcopy = findtc(arr, step);
+                    var stepcopy = findtc(jsonObj[params['file']], step);
                     if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
                     for (let d in arra) {
                         console.log(d);
@@ -461,7 +488,7 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                         console.log(match)
                     }
 
-                    let rows = await db_all("SELECT * from requests where name =\"" + step.name + "\" and dt=\"" + decodeURIComponent(params["dt"]) + "\"");
+                    let rows = await db_all(params['file'], "SELECT * from requests where name =\"" + step.name + "\" and dt=\"" + decodeURIComponent(params["dt"]) + "\"");
                     console.log(rows);
                     let s = "{\"datetime\":\"" + decodeURIComponent(params["dt"]) + "\",";
                     s += "\"url\":\"" + rows[0].url + "\",";
@@ -478,10 +505,10 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
     //            res.end('cos');
 }
 
-function db_all(sql) {
+function db_all(filename, sql) {
     return new Promise((resolve, reject) => {
         const q = [];
-        db.each(sql, (err, row) => {
+        dbObj[filename].each(sql, (err, row) => {
                 if (err) {
                     reject(err);
                 }
@@ -513,9 +540,8 @@ const onRequestHandler = async (req, res) => {
         const params = url.parse(req.url, true).query;
         if (params['file'] && fs.existsSync(
                 path.normalize(__dirname + "/projects/" + params['file']))) {
-            if (!jsonObj[params['file']]) {
-                jsonObj[params['file']] = JSON.parse(readFileContentSync("/projects/" + params['file']));
-            }
+            loadFile(params['file']);
+            loadDB(params['file']);
 
             var list = "<ul>";
             for (let servicenumber in jsonObj[params['file']].services) {
@@ -584,27 +610,14 @@ const onRequestHandler = async (req, res) => {
 };
 
 
-var db = new sqlite3.Database('m.db', (err) => {
-    if (err) {
-        console.log("DB error " + err);
-        exit(1);
-    }
-    db.exec(`
-    create table requests (
-	dt text not null,
-        name text not null,
-        url text not null,
-        headers text not null,
-	body text not null,
-        headers_res text not null,
-	body_res text not null
-    );`, () => {});
-});
 
 http2.createSecureServer({
     key: fs.readFileSync(__dirname + '//internal//localhost-privkey.pem'),
     cert: fs.readFileSync(__dirname + '//internal//localhost-cert.pem')
 }, onRequestHandler).listen(port, hostname, async () => {
-    let v = await db_all("SELECT sqlite_version();");
-    console.log(`Server running at https://${hostname}:${port}/, Node.js `+process.version+`, `+JSON.stringify(v));
+    //    loadDB("12345678901234567890");
+    //    let v = await db_all("12345678901234567890","SELECT sqlite_version();");
+    console.log(`Server running at https://${hostname}:${port}/, Node.js ` + process.version);
+    //JSON.stringify(v));
+    //    console.log(path.normalize(__dirname + "/projects/12345678901234567890.db"));
 });
