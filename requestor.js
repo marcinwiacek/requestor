@@ -604,6 +604,7 @@ var db = new sqlite3.Database('m.db', (err) => {
 http2.createSecureServer({
     key: fs.readFileSync(__dirname + '//internal//localhost-privkey.pem'),
     cert: fs.readFileSync(__dirname + '//internal//localhost-cert.pem')
-}, onRequestHandler).listen(port, hostname, () => {
-    console.log(`Server running at https://${hostname}:${port}/`);
+}, onRequestHandler).listen(port, hostname, async () => {
+    let v = await db_all("SELECT sqlite_version();");
+    console.log(`Server running at https://${hostname}:${port}/, Node.js `+process.version+`, `+JSON.stringify(v));
 });
