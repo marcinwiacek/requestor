@@ -109,10 +109,10 @@ function addToLog(str) {
     //    });
 }
 
-function digits(a,b) {
+function digits(a, b) {
     let x = a.toString();
-    while (x.length<b) {
-	x = "0"+x;
+    while (x.length < b) {
+        x = "0" + x;
     }
     return x;
 }
@@ -120,12 +120,12 @@ function digits(a,b) {
 async function request2(req, res, name, times) {
     //let s = JSON.stringify(req);
     let dt = new Date();
-    let curDT=dt.getFullYear()+"-"+digits(dt.getMonth()+1,2)+"-"+
-	digits(dt.getDate(),2)+" "+
-	digits(dt.getHours(),2)+":"+
-	digits(dt.getMinutes(),2)+":"+
-	digits(dt.getSeconds(),2)+" "+digits(dt.getMilliseconds(),3);
-    let s = "{\"oldtimes\":"+JSON.stringify(times)+",\"datetime\":\"" + curDT + "\",";
+    let curDT = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
+        digits(dt.getDate(), 2) + " " +
+        digits(dt.getHours(), 2) + ":" +
+        digits(dt.getMinutes(), 2) + ":" +
+        digits(dt.getSeconds(), 2) + " " + digits(dt.getMilliseconds(), 3);
+    let s = "{\"oldtimes\":" + JSON.stringify(times) + ",\"datetime\":\"" + curDT + "\",";
     s += "\"url\":\"" + req.url + "\",";
     console.log("request " + JSON.stringify(req));
     console.log("start");
@@ -139,7 +139,7 @@ async function request2(req, res, name, times) {
         var headers = "";
         s += "\"headers\":[";
         for (let headername in req.headers) {
-            s += "\""+encodeURIComponent(req.headers[headername]) + "\",";
+            s += "\"" + encodeURIComponent(req.headers[headername]) + "\",";
             headers += req.headers[headername] + "\n";
         }
         s += "\"\"],\"body\":\"" + encodeURIComponent(req.content) + "\",";
@@ -150,17 +150,19 @@ async function request2(req, res, name, times) {
             if (Array.isArray(response.headers[headername])) {
                 for (let headerx in response.headers[headername]) {
                     s += "\"" + encodeURIComponent(headername + ": " + response.headers[headername][headerx]) + "\",";
-                    headers_res += headername + ": " + response.headers[headername][headerx]+"\n";
+                    headers_res += headername + ": " + response.headers[headername][headerx] + "\n";
                 }
             } else {
                 s += "\"" + encodeURIComponent(headername + ": " + response.headers[headername]) + "\",";
-                headers_res += headername + ": " + response.headers[headername]+"\n";
+                headers_res += headername + ": " + response.headers[headername] + "\n";
             }
         }
         s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"}";
         db.run(`insert into requests (dt, name, url, headers,body,headers_res,body_res) values(?,?,?,?,?,?,?)`,
- curDT , name , req.url , headers , req.content , headers_res , response.body,
-err => {console.log("error "+err)});
+            curDT, name, req.url, headers, req.content, headers_res, response.body,
+            err => {
+                console.log("error " + err)
+            });
     }
     console.log("end");
     return s;
@@ -247,6 +249,10 @@ async function parsePOSTforms(params, res, jsonObj) {
             path.normalize(__dirname + "/projects/" + params['file'])))) {
         return;
     }
+
+            if (!jsonObj[params['file']]) {
+                jsonObj[params['file']] = JSON.parse(readFileContentSync("/projects/" + params['file']));
+            }
 
     var obiekt = "";
     res.statusCode = 200;
@@ -350,33 +356,34 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
             console.log("testcase name " + tc.name);
-            let lines = tc.input;
-            let headers = []
-            for (let index2 in lines) {
-                let l = lines[index2];
-                if (headers.length == 0) {
-                    headers = l.split(",");
+
+            for (let stepnumber in tc.steps) {
+                var step = tc.steps[stepnumber];
+                if (tc.disabled && tc.disabled == true) {
                     continue;
                 }
-                let ll = l.split(",");
-                let i = 0;
-                let arra = [];
-                headers.forEach(function(h) {
-                    arra[h] = ll[i];
-                    i++;
-                });
-                console.log(arra);
-                all_responses = []
-                for (let stepnumber in tc.steps) {
-                    var step = tc.steps[stepnumber];
-                    if (tc.disabled && tc.disabled == true) {
+                console.log(step.name + " vs " + params['runstep']);
+                if (step.name.localeCompare(params['runstep']) != 0) {
+                    continue;
+                }
+                console.log("starting " + step.name + " vs " + params['runstep']);
+
+                let lines = tc.input;
+                let headers = []
+                for (let index2 in lines) {
+                    let l = lines[index2];
+                    if (headers.length == 0) {
+                        headers = l.split(",");
                         continue;
                     }
-                    console.log(step.name + " vs " + params['runstep']);
-                    if (step.name.localeCompare(params['runstep']) != 0) {
-                        continue;
-                    }
-                    console.log("starting " + step.name + " vs " + params['runstep']);
+                    let ll = l.split(",");
+                    let i = 0;
+                    let arra = [];
+                    headers.forEach(function(h) {
+                        arra[h] = ll[i];
+                        i++;
+                    });
+                    console.log(arra);
                     var stepcopy = findtc(arr, step);
                     if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
                     for (let d in arra) {
@@ -388,8 +395,11 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                         console.log(match)
                     }
                     sss = await request2(stepcopy, res, step.name, times);
-		    times.push(JSON.parse(sss).datetime);
+                    times.push(JSON.parse(sss).datetime);
+
+                    if (stepcopy.url == step.url) break;
                 }
+
             }
         }
     }

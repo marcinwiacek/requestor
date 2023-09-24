@@ -128,10 +128,14 @@ function sendNewStep() {
     <option value="POST">POST</option>
   </select>
   <!--URLPREFIX-->
-  &nbsp;&nbsp;<input type="text" id="lastrequesturl" name="lastrequesturl" value="<!--URL-->" size=61>
+  &nbsp;&nbsp;<input type="text" id="lastrequesturl" name="lastrequesturl" value="" size=61>
   <br>Headers<br><textarea cols=80 rows=5 id=lastrequestheaders></textarea>
   <br>Body<br><textarea cols=80 rows=5 id=lastrequestbody></textarea>
   <br><input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
   <p>Headers<br><textarea cols=80 rows=5 id=lastresponseheaders></textarea>
   <br>Body<br><textarea cols=80 rows=5 id=lastresponsebody></textarea>
+
+<script>
+selectLastDate();
+</script>
 </td></tr></table>
