@@ -572,7 +572,8 @@ const onRequestHandler = async (req, res) => {
                     for (let stepnumber in tc.steps) {
                         var step = tc.steps[stepnumber];
                         list += "<li class=\"file\">" +
-                            "<a onclick=loadRightPart(\"file=" + params['file'] + "&step=" +
+                            "<a class=\"step "+(step.disabled?"disabled":"")+
+			    "\" onclick=loadRightPart(\"file=" + params['file'] + "&step=" +
                             step.name + "\")>" + step.name + "</a></li>";
                     }
                     list += "</li></ul>";

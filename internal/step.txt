@@ -1,6 +1,8 @@
 <br>
 <script async=async>
 function selectLastDate() {
+  if (document.getElementById("whenlast").value=="") return;
+
   http = createPOST();
   http.onload = function() {
     if (http.status != 200) {

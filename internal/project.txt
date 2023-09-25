@@ -71,6 +71,22 @@
         	border-left: 2px solid $color-grey;
     	    }
 	}
+
+	.hide {
+    	  display: none;
+            position: absolute;
+            z-index: 10;
+	}
+
+	.show {
+    	  display: block;
+            position: absolute;
+            z-index: 10;
+	}
+
+	.disabled {
+	    color:grey;
+	}
 </style>
 <script>
 
@@ -135,6 +151,10 @@ Environment:
   </div>
 </div>
 
+<div class="hide" id="cnt">
+   context menu for step
+</div>
+
 <script>
 
 Split(['#one', '#two'], {
@@ -150,6 +170,25 @@ for (var i = 0; i < toggler.length; i++) {
       this.parentElement.classList.toggle("folder-open");
   });
   toggler[i].prepend(node);
+} 
+
+var toggler = document.getElementsByClassName("step");
+console.log("steps "+toggler.length);
+for (var i = 0; i < toggler.length; i++) {
+    toggler[i].addEventListener("contextmenu", (e) => {
+console.log("showing");
+//	document.getElementById("cnt").classList.toggle("hide");
+	document.getElementById("cnt").classList.toggle("show");
+console.log(document.getElementById("cnt").classList);
+
+e.preventDefault();
+  });
+toggler[i].addEventListener('mousemove', (e) => {
+if (!e) e = window.event;
+      document.getElementById("cnt").style.top = e.pageY + 'px';
+      document.getElementById("cnt").style.left = e.pageX + 'px';
+//console.log(e.pageY+" "+e.pageX);
+        });
 } 
 
 </script>
