@@ -95,22 +95,32 @@ function sendNewStep() {
   document.getElementById("lastrequestheaders").value = document.getElementById("header").value;
   document.getElementById("lastrequestbody").value  = document.getElementById("body").value;
   const params = new URLSearchParams(window.location.search);
-  http.send("file="+params.get('file')+"&runstep="+document.getElementById("name").value);
+  http.send("file="+params.get('file')+"&runstep="+document.getElementById("name").value+"&headers="+encodeURIComponent(document.getElementById("header").value)+
+    "&body="+encodeURIComponent(document.getElementById("body").value)+
+    "&url="+encodeURIComponent(document.getElementById("url").value));
   //  http.send("login=1&user=" + sha256(loginhash + user) + "&password=" + sha256(loginhash + sha256(password)));
   return false;
 };
 </script>
 <table><tr><td>
 <form onsubmit="return sendNewStep()">
+  <p><input type="checkbox" id="disabled" />Disabled
   Name<br><input type="text" id="name" name="name" value="<!--NAME-->" size=61>
   <p><select name="type" id="type">
     <option value="GET">GET</option>
+    <option value="HEAD">HEAD</option>
     <option value="POST">POST</option>
+    <option value="PUT">PUT</option>
+    <option value="DELETE">DELETE</option>
+    <option value="CONNECT">CONNECT</option>
+    <option value="OPTIONS">OPTIONS</option>
+    <option value="TRACE">TRACE</option>
+    <option value="PATCH">PATCH</option>
   </select> <!--URLPREFIX-->&nbsp;&nbsp;
   <input type="text" id="url" name="url" value="<!--URL-->" size=70>
   <p>Headers<br><textarea cols=80 rows=5 id="header" name="header"><!--HEADER--></textarea>
   <p>Body<br><textarea cols=80 rows=5  id="body" name="body"><!--BODY--></textarea>
-  <p><input type="checkbox" id="ignorewrongssl" />Ignore SSL errors
+  <p><input type="checkbox" id="ignorewrongssl"  <!--SSLIGNORE--> />Ignore SSL errors
   <p>Asserts
   <p><select name="x" id="x">
     <option value="GET">HTTP code</option>
@@ -127,7 +137,14 @@ function sendNewStep() {
   </select>
   <p><select name="lastrequesttype" id="type">
     <option value="GET">GET</option>
+    <option value="HEAD">HEAD</option>
     <option value="POST">POST</option>
+    <option value="PUT">PUT</option>
+    <option value="DELETE">DELETE</option>
+    <option value="CONNECT">CONNECT</option>
+    <option value="OPTIONS">OPTIONS</option>
+    <option value="TRACE">TRACE</option>
+    <option value="PATCH">PATCH</option>
   </select>
   <!--URLPREFIX-->
   &nbsp;&nbsp;<input type="text" id="lastrequesturl" name="lastrequesturl" value="" size=61>

@@ -306,7 +306,9 @@ async function parsePOSTforms(params, res, jsonObj) {
                 if (!(step.name == params['step'])) {
                     continue;
                 }
+
                 var stepcopy = findtc(jsonObj[params['file']], step);
+
                 obiekt = readFileContentSync("/internal/step.txt").replace("<!--NAME-->",
                     stepcopy.name);
                 if (stepcopy.urlprefix) obiekt = obiekt.replace("<!--URLPREFIX-->", stepcopy.urlprefix);
@@ -321,6 +323,7 @@ async function parsePOSTforms(params, res, jsonObj) {
                     xxxx += stepcopy.body[bodynumber];
                 }
                 obiekt = obiekt.replace("<!--BODY-->", xxxx);
+            	    obiekt = obiekt.replace("<!--SSLIGNORE-->", 		stepcopy.ignoreWrongSSL?"checked":"");
                 var xxxx = "";
                 let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + step.name + "\" order by dt desc");
                 for (let row in rows) {
@@ -366,7 +369,9 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                     continue;
                 }
                 console.log("starting " + step.name + " vs " + params['runstep']);
-
+step.headers = decodeURIComponent(params['headers']).split("\n");
+step.content = decodeURIComponent(params['body']);
+step.url = decodeURIComponent(params['url']);
                 let lines = tc.input;
                 let headers = []
                 for (let index2 in lines) {
