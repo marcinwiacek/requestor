@@ -1,5 +1,15 @@
 <br>
 <script async=async>
+function selectMethod(name,name2) {
+    var selObj = document.getElementById(name);
+    for (var i = 0; i < selObj.options.length; i++) {
+        if (selObj.options[i].text.toUpperCase()==name2.toUpperCase()) {
+            selObj.options[i].selected = true;
+            break;
+        }
+    }
+}
+
 function selectLastDate() {
   if (document.getElementById("whenlast").value=="") return;
 
@@ -116,7 +126,9 @@ function sendNewStep() {
     <option value="OPTIONS">OPTIONS</option>
     <option value="TRACE">TRACE</option>
     <option value="PATCH">PATCH</option>
-  </select> <!--URLPREFIX-->&nbsp;&nbsp;
+  </select> 
+<script>selectMethod("type","<!--METHOD-->");</script>
+<!--URLPREFIX-->&nbsp;&nbsp;
   <input type="text" id="url" name="url" value="<!--URL-->" size=70>
   <p>Headers<br><textarea cols=80 rows=5 id="header" name="header"><!--HEADER--></textarea>
   <p>Body<br><textarea cols=80 rows=5  id="body" name="body"><!--BODY--></textarea>

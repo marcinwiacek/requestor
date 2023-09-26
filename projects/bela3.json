@@ -88,7 +88,7 @@
             },
             {
               "name": "step3",
-              "method": "get",
+              "method": "post",
               "url": "https://del.icio.us/api/peej/bookmarks/?start=1&end=2",
               "ca": "",
               "ignoreWrongSSL": true,
