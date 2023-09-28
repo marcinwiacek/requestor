@@ -47,26 +47,24 @@ async function executeRequest(req) {
     };
     //reading ca
 
-    var method = null;
+console.log("-"+req.method +"-"+q.protocol+"-");
+    var method2 = null;
     if (q.protocol == "http:") {
-        if (req.type == "get") method = http.get;
-        if (req.type == "post") method = http.post;
+        if (req.method == "get") method2 = http.get;
+        if (req.method == "post") method2 = http.request;
     } else if (q.protocol == "https:") {
-        if (req.type == "get") method = https.get;
-        if (req.type == "post") method = https.post;
+        if (req.method == "get") method2 = https.get;
+        if (req.method == "post") method2 = https.request;
         if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
     }
+    options.method = req.method;
     options.timeout = 3000;
     console.log(options);
-    var agent = new https.Agent(options);
-
+//    var agent = new https.Agent(options);
     return new Promise((resolve, reject) => {
-        method(req.url, options, (response) => {
-            let chunk = [];
-
-            response.on('data', (fragments) => {
-                chunk.push(fragments);
-            });
+        const r = method2(req.url, options, (response) => {
+            const chunk = []
+            response.on('data', (fragments) => chunk.push(fragments));
             response.on('end', () => {
                 var resp = {}
                 resp.body = Buffer.concat(chunk).toString();
@@ -80,6 +78,10 @@ async function executeRequest(req) {
             resp.error = e.message;
             resolve(resp);
         });
+	if (req.method == "post") {
+	    r.write(req.content);
+	    r.end();
+	}
     });
 }
 
@@ -158,8 +160,8 @@ async function request2(req, res, name, times, filename) {
             }
         }
         s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"}";
-        dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res) values(?,?,?,?,?,?,?)`,
-            curDT, name, req.url, headers, req.content, headers_res, response.body,
+        dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method) values(?,?,?,?,?,?,?,?)`,
+            curDT, name, req.url, headers, req.content, headers_res, response.body,req.method,
             err => {
                 console.log("error " + err)
             });
@@ -370,8 +372,10 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                     continue;
                 }
                 console.log("starting " + step.name + " vs " + params['runstep']);
+step.method = params['method'];
 step.headers = decodeURIComponent(params['headers']).split("\n");
 step.content = decodeURIComponent(params['body']);
+step.ignoreWrongSSL = params['ssl']=="true";
 step.url = decodeURIComponent(params['url']);
                 let lines = tc.input;
                 let headers = []
@@ -418,8 +422,6 @@ function loadDB(name) {
                 console.log("DB error " + err);
                 exit(1);
             }
-            let v = await db_all(name, "SELECT sqlite_version();");
-            console.log(JSON.stringify(v));
             dbObj[name].exec(`
     create table requests (
 	dt text not null,
@@ -428,8 +430,11 @@ function loadDB(name) {
         headers text not null,
 	body text not null,
         headers_res text not null,
-	body_res text not null
+	body_res text not null,
+	method text not null
     );`, () => {});
+            let v = await db_all(name, "SELECT sqlite_version();");
+            console.log(JSON.stringify(v));
         });
     }
 }
@@ -498,6 +503,7 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     console.log(rows);
                     let s = "{\"datetime\":\"" + decodeURIComponent(params["dt"]) + "\",";
                     s += "\"url\":\"" + rows[0].url + "\",";
+s+="\"method\":\""+rows[0]["method"]+"\",";
                     s += "\"headers\":[\"" + rows[0]["headers"].replaceAll("\"", "").replaceAll("\n", "\",\"");
                     s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
                     s += "\"headers_res\":[\"" + rows[0]["headers_res"].replaceAll("\"", "").replaceAll("\n", "\",\"");
