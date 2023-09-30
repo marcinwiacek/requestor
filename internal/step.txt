@@ -10,6 +10,25 @@ function selectMethod(name,name2) {
     }
 }
 
+function setupLast(obj) {
+      console.log(http.response);
+
+    document.getElementById("lastrequesttype").value =obj.method.toUpperCase();
+    document.getElementById("lastrequesturl").value =obj.url;
+    document.getElementById("lastrequestheaders").value ="";
+    for (var i =0;i<obj.headers.length;i++) {
+      document.getElementById("lastrequestheaders").value =
+      document.getElementById("lastrequestheaders").value+decodeURIComponent(obj.headers[i])+"\n";
+    }
+    document.getElementById("lastrequestbody").value  = decodeURIComponent(obj.body);
+    document.getElementById("lastresponseheaders").value ="";
+    for (var i =0;i<obj.headers_res.length;i++) {
+      document.getElementById("lastresponseheaders").value =
+      document.getElementById("lastresponseheaders").value+decodeURIComponent(obj.headers_res[i])+"\n";
+    }
+    document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body_res);
+}
+
 function selectLastDate() {
   if (document.getElementById("whenlast").value=="") return;
 
@@ -17,34 +36,16 @@ function selectLastDate() {
   http.onload = function() {
     if (http.status != 200) {
       alert(http.response);
+    } else {
+      setupLast(JSON.parse(http.response));
     }
-    const obj = JSON.parse(http.response);
-
-    document.getElementById("lastrequesturl").value =obj.url;
-
-    document.getElementById("lastrequestheaders").value ="";
-    for (var i =0;i<obj.headers.length;i++) {
-      document.getElementById("lastrequestheaders").value =
-      document.getElementById("lastrequestheaders").value+obj.headers[i]+"\n";
-    }
-    document.getElementById("lastrequestbody").value  = decodeURIComponent(obj.body);
-
-    document.getElementById("lastresponseheaders").value ="";
-    for (var i =0;i<obj.headers_res.length;i++) {
-      document.getElementById("lastresponseheaders").value =
-      document.getElementById("lastresponseheaders").value+obj.headers_res[i]+"\n";
-    }
-    document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body_res);
   }
 
   http.onerror = function() {
     alert('login error');
   };
 
-//  document.getElementById("lastrequestheaders").value = document.getElementById("header").value;
-//  document.getElementById("lastrequestbody").value  = document.getElementById("body").value;
   const params = new URLSearchParams(window.location.search);
-  console.log(params);
   http.send("file="+params.get('file')+"&getstep="+document.getElementById("name").value+"&dt="+encodeURIComponent(document.getElementById("whenlast").value));
   return false;
 }
@@ -54,80 +55,69 @@ function sendNewStep() {
   http.onload = function() {
     if (http.status != 200) {
       alert(http.response);
-    }
+    } else {
+      var obj = JSON.parse(http.response);
 
-    //document.getElementById("lastresponsebody").value = http.response;
-    alert('jest odpowiedz '+http.response);
-    const obj = JSON.parse(http.response);
-
-    for (var i=0;i<obj.oldtimes.length;i++) {
+      for (var i=0;i<obj.oldtimes.length;i++) {
         var option1 = document.createElement("option");
         option1.value = obj.oldtimes[i];
         option1.text = obj.oldtimes[i];
         var selObj1 = document.getElementById("whenlast");
         selObj1.prepend(option1);
-    }
+      }
 
-    var option = document.createElement("option");
-    option.value = obj.datetime;
-    option.text = obj.datetime;
-    var selObj = document.getElementById("whenlast");
-    selObj.prepend(option);
+      var option = document.createElement("option");
+      option.value = obj.datetime;
+      option.text = obj.datetime;
+      var selObj = document.getElementById("whenlast");
+      selObj.prepend(option);
 
-    for (var i = 0; i < selObj.options.length; i++) {
-        if (selObj.options[i].text==obj.datetime) {
+      for (var i = 0; i < selObj.options.length; i++) {
+          if (selObj.options[i].text==obj.datetime) {
             selObj.options[i].selected = true;
             break;
-        }
-    }
+          }
+      }
 
-    document.getElementById("lastrequesturl").value =obj.url;
-
-    document.getElementById("lastrequestheaders").value ="";
-    for (var i =0;i<obj.headers.length;i++) {
-      document.getElementById("lastrequestheaders").value =
-      document.getElementById("lastrequestheaders").value+decodeURIComponent(obj.headers[i])+"\n";
+      setupLast(obj);
     }
-    document.getElementById("lastrequestbody").value  = decodeURIComponent(obj.body);
-
-    document.getElementById("lastresponseheaders").value ="";
-    for (var i =0;i<obj.headers_res.length;i++) {
-      document.getElementById("lastresponseheaders").value =
-      document.getElementById("lastresponseheaders").value+decodeURIComponent(obj.headers_res[i])+"\n";
-    }
-    document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body_res);
   }
 
   http.onerror = function() {
     alert('login error');
   };
 
-var method ="";
-    var selObj = document.getElementById("type");
-    for (var i = 0; i < selObj.options.length; i++) {
+  var method ="";
+  var selObj = document.getElementById("type");
+  for (var i = 0; i < selObj.options.length; i++) {
         if (selObj.options[i].selected) { 
             method = selObj.options[i].value;
             break;
         }
-    }
+  }
 
-  document.getElementById("lastrequestheaders").value = document.getElementById("header").value;
-  document.getElementById("lastrequestbody").value  = document.getElementById("body").value;
   const params = new URLSearchParams(window.location.search);
   http.send("file="+params.get('file')+"&runstep="+document.getElementById("name").value+"&headers="+encodeURIComponent(document.getElementById("header").value)+
     "&body="+encodeURIComponent(document.getElementById("body").value)+
     "&url="+encodeURIComponent(document.getElementById("url").value)+
     "&ssl="+document.getElementById("ignorewrongssl").checked+
     "&method="+method);
-  //  http.send("login=1&user=" + sha256(loginhash + user) + "&password=" + sha256(loginhash + sha256(password)));
+
   return false;
 };
 </script>
-<table><tr><td>
 <form onsubmit="return sendNewStep()">
+<table><tr><td valign=bottom>
   <p><input type="checkbox" id="disabled" />Disabled
-  Name<br><input type="text" id="name" name="name" value="<!--NAME-->" size=61>
-  <p><select name="type" id="type">
+  <br>Name <input type="text" id="name" value="<!--NAME-->" size=61>
+</td><td valign=bottom>
+  <p>When 
+  <select id="whenlast" onchange="selectLastDate()">
+      <!--WHENLAST-->
+  </select>
+</td></tr>
+<tr><td valign=top>
+  <select id="type">
     <option value="get">GET</option>
     <option value="head">HEAD</option>
     <option value="post">POST</option>
@@ -140,44 +130,29 @@ var method ="";
   </select> 
 <script>selectMethod("type","<!--METHOD-->");</script>
 <!--URLPREFIX-->&nbsp;&nbsp;
-  <input type="text" id="url" name="url" value="<!--URL-->" size=70>
-  <p>Headers<br><textarea cols=80 rows=5 id="header" name="header"><!--HEADER--></textarea>
-  <p>Body<br><textarea cols=80 rows=5  id="body" name="body"><!--BODY--></textarea>
-  <p><input type="checkbox" id="ignorewrongssl"  <!--SSLIGNORE--> />Ignore SSL errors
+  <input type="text" id="url" value="<!--URL-->" size=57>
+  <p>Headers<br><textarea cols=80 rows=5 id="header"><!--HEADER--></textarea>
+  <p>Body<br><textarea cols=80 rows=5  id="body"><!--BODY--></textarea>
+  <p><input type="checkbox" id="ignorewrongssl" <!--SSLIGNORE--> />Ignore SSL errors
   <p>Asserts
-  <p><select name="x" id="x">
+  <p><select id="x">
     <option value="GET">HTTP code</option>
     <option value="POST">Headers</option>
     <option value="POST">Body</option>
   </select>
-  <input type="text" id="url2" name="url2" value="200" size=40>
+  <input type="text" id="url2" value="200" size=40>
   <p><button type="submit">Run</button>
-</form>
-</td><td>
-  <p>When 
-  <select name="whenlast" id="whenlast" onchange="selectLastDate()">
-      <!--WHENLAST-->
-  </select>
-  <p><select name="lastrequesttype" id="type">
-    <option value="get">GET</option>
-    <option value="head">HEAD</option>
-    <option value="post">POST</option>
-    <option value="put">PUT</option>
-    <option value="delete">DELETE</option>
-    <option value="connect">CONNECT</option>
-    <option value="options">OPTIONS</option>
-    <option value="trace">TRACE</option>
-    <option value="patch">PATCH</option>
-  </select>
+</td><td valign=top>
+  <input type=text id="lastrequesttype" size=6>
   <!--URLPREFIX-->
-  &nbsp;&nbsp;<input type="text" id="lastrequesturl" name="lastrequesturl" value="" size=61>
-  <br>Headers<br><textarea cols=80 rows=5 id=lastrequestheaders></textarea>
-  <br>Body<br><textarea cols=80 rows=5 id=lastrequestbody></textarea>
-  <br><input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
+  &nbsp;&nbsp;<input type="text" id="lastrequesturl" value="" size=61>
+  <p>Headers<br><textarea cols=80 rows=5 id=lastrequestheaders></textarea>
+  <p>Body<br><textarea cols=80 rows=5 id=lastrequestbody></textarea>
+  <p><input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
   <p>Headers<br><textarea cols=80 rows=5 id=lastresponseheaders></textarea>
-  <br>Body<br><textarea cols=80 rows=5 id=lastresponsebody></textarea>
-
+  <p>Body<br><textarea cols=80 rows=5 id=lastresponsebody></textarea>
+</td></tr></table>
+</form>
 <script>
 selectLastDate();
 </script>
-</td></tr></table>

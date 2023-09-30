@@ -31,8 +31,6 @@ function readFileContentSync(fileName, callback) {
     }
 }
 
-var all_responses = []
-
 async function executeRequest(req) {
     console.log(req);
     console.log("request " + JSON.stringify(req));
@@ -47,7 +45,6 @@ async function executeRequest(req) {
     };
     //reading ca
 
-console.log("-"+req.method +"-"+q.protocol+"-");
     var method2 = null;
     if (q.protocol == "http:") {
         if (req.method == "get") method2 = http.get;
@@ -136,7 +133,8 @@ async function request2(req, res, name, times, filename) {
         s += response.error;
     } else {
         response.name = req.name;
-        all_responses.push(response);
+
+	s+="\"method\":\""+req.method+"\",";
 
         var headers = "";
         s += "\"headers\":[";
@@ -476,7 +474,6 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     i++;
                 });
                 console.log(arra);
-                all_responses = []
                 for (let stepnumber in tc.steps) {
                     var step = tc.steps[stepnumber];
                     if (step.disabled && step.disabled == true) {
@@ -504,9 +501,9 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     let s = "{\"datetime\":\"" + decodeURIComponent(params["dt"]) + "\",";
                     s += "\"url\":\"" + rows[0].url + "\",";
 s+="\"method\":\""+rows[0]["method"]+"\",";
-                    s += "\"headers\":[\"" + rows[0]["headers"].replaceAll("\"", "").replaceAll("\n", "\",\"");
+                    s += "\"headers\":[\"" + encodeURIComponent(rows[0]["headers"]);
                     s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
-                    s += "\"headers_res\":[\"" + rows[0]["headers_res"].replaceAll("\"", "").replaceAll("\n", "\",\"");
+                    s += "\"headers_res\":[\"" + encodeURIComponent(rows[0]["headers_res"]);
                     s += "\"],\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
                     s += "}";
                     if (res != null) res.end(s);
