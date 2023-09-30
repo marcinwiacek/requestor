@@ -76,7 +76,7 @@ async function executeRequest(req) {
             resolve(resp);
         });
 	if (req.method == "post") {
-	    r.write(req.content);
+	    r.write(req.body);
 	    r.end();
 	}
     });
@@ -135,6 +135,7 @@ async function request2(req, res, name, times, filename) {
         response.name = req.name;
 
 	s+="\"method\":\""+req.method+"\",";
+	s+="\"ssl\":\""+req.ignoreWrongSSL+"\",";
 
         var headers = "";
         s += "\"headers\":[";
@@ -142,7 +143,7 @@ async function request2(req, res, name, times, filename) {
             s += "\"" + encodeURIComponent(req.headers[headername]) + "\",";
             headers += req.headers[headername] + "\n";
         }
-        s += "\"\"],\"body\":\"" + encodeURIComponent(req.content) + "\",";
+        s += "\"\"],\"body\":\"" + encodeURIComponent(req.body) + "\",";
 
         var headers_res = "";
         s += "\"headers_res\":[";
@@ -159,7 +160,7 @@ async function request2(req, res, name, times, filename) {
         }
         s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"}";
         dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method) values(?,?,?,?,?,?,?,?)`,
-            curDT, name, req.url, headers, req.content, headers_res, response.body,req.method,
+            curDT, name, req.url, headers, req.body, headers_res, response.body,req.method,
             err => {
                 console.log("error " + err)
             });
@@ -272,7 +273,7 @@ async function parsePOSTforms(params, res, jsonObj) {
                 }
                 obiekt = obiekt.replace("<!--HEADER-->", xxxx);
                 var xxxx = "";
-                for (var bodynumber in func.content) {
+                for (var bodynumber in func.body) {
                     xxxx += func.content[bodynumber];
                 }
                 if (res != null) res.end(obiekt.replace("<!--BODY-->", xxxx));
@@ -319,7 +320,7 @@ async function parsePOSTforms(params, res, jsonObj) {
                 }
                 obiekt = obiekt.replace("<!--HEADER-->", xxxx);
                 var xxxx = "";
-                for (var bodynumber in stepcopy.content) {
+                for (var bodynumber in stepcopy.body) {
                     xxxx += stepcopy.body[bodynumber];
                 }
                 obiekt = obiekt.replace("<!--BODY-->", xxxx);
@@ -372,7 +373,7 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                 console.log("starting " + step.name + " vs " + params['runstep']);
 step.method = params['method'];
 step.headers = decodeURIComponent(params['headers']).split("\n");
-step.content = decodeURIComponent(params['body']);
+step.body = decodeURIComponent(params['body']);
 step.ignoreWrongSSL = params['ssl']=="true";
 step.url = decodeURIComponent(params['url']);
                 let lines = tc.input;
@@ -439,8 +440,14 @@ function loadDB(name) {
 
 function loadFile(name) {
     if (!jsonObj[name]) {
+try {
         jsonObj[name] = JSON.parse(readFileContentSync("/projects/" + name));
+  } catch (e) {
+	return false;
+  }
     }
+    return true;
+
 }
 
 async function parsePOSTGetStep(params, res, jsonObj2) {
@@ -549,7 +556,12 @@ const onRequestHandler = async (req, res) => {
         const params = url.parse(req.url, true).query;
         if (params['file'] && fs.existsSync(
                 path.normalize(__dirname + "/projects/" + params['file']))) {
-            loadFile(params['file']);
+            if (!loadFile(params['file'])) {
+               sendHTML(req, res, readFileContentSync("/internal/project.txt")
+                .replace("<!--TC-->", "")
+                .replace("<!--NAME-->", "Error reading file"));
+		return;
+	    }
             loadDB(params['file']);
 
             var list = "<ul>";
