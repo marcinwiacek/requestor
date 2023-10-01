@@ -9,6 +9,7 @@ const url = require('url');
 const zlib = require('zlib');
 const child_process = require('child_process');
 const sqlite3 = require('sqlite3');
+const tls = require('node:tls');
 
 const hostname = '127.0.0.1';
 const port = 3000;
@@ -37,13 +38,29 @@ async function executeRequest(req) {
     var q = url.parse(req.url, true);
     console.log("url " + JSON.stringify(q));
     const options = {
+        checkServerIdentity: function(host, cert) {
+            const err = tls.checkServerIdentity(host, cert);
+            if (err) {
+                return err;
+            }
+            do {
+                console.log('subject CN ' + cert.subject.CN + ', O ' + cert.subject.O);
+                console.log('  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O);
+                //      console.log('  Subject alt name '+ cert.subjectaltname);
+                console.log('  Valid ' + cert.valid_from + " - " + cert.valid_to);
+                console.log('  SHA256:' + cert.fingerprint256);
+                lastprint256 = cert.fingerprint256;
+                cert = cert.issuerCertificate;
+            } while (cert.fingerprint256 !== lastprint256);
+        },
         //	hostname:q.hostname,
         //	port:443,
         //	path:q.path,
         //        method:req.method
         //        req.headers
+        //key:
+        //cert:
     };
-    //reading ca
 
     var method2 = null;
     if (q.protocol == "http:") {
@@ -56,8 +73,7 @@ async function executeRequest(req) {
     }
     options.method = req.method;
     options.timeout = 3000;
-    console.log(options);
-//    var agent = new https.Agent(options);
+    options.globalAgent = new https.Agent(options);
     return new Promise((resolve, reject) => {
         const r = method2(req.url, options, (response) => {
             const chunk = []
@@ -67,6 +83,7 @@ async function executeRequest(req) {
                 resp.body = Buffer.concat(chunk).toString();
                 resp.headers = response.headers;
                 resp.code = response.statusCode;
+                resp.error = "";
                 resolve(resp);
             });
         }).on('error', (e) => {
@@ -75,10 +92,10 @@ async function executeRequest(req) {
             resp.error = e.message;
             resolve(resp);
         });
-	if (req.method == "post") {
-	    r.write(req.body);
-	    r.end();
-	}
+        if (req.method == "post") {
+            r.write(req.body);
+            r.end();
+        }
     });
 }
 
@@ -117,6 +134,7 @@ function digits(a, b) {
 }
 
 async function request2(req, res, name, times, filename) {
+
     //let s = JSON.stringify(req);
     let dt = new Date();
     let curDT = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
@@ -130,12 +148,12 @@ async function request2(req, res, name, times, filename) {
     console.log("start");
     var response = await executeRequest(req);
     if (response.error) {
-        s += response.error;
+        s += "\"error\":\"" + response.error + "\"}";
     } else {
         response.name = req.name;
 
-	s+="\"method\":\""+req.method+"\",";
-	s+="\"ssl\":\""+req.ignoreWrongSSL+"\",";
+        s += "\"method\":\"" + req.method + "\",";
+        s += "\"ssl\":\"" + req.ignoreWrongSSL + "\",";
 
         var headers = "";
         s += "\"headers\":[";
@@ -159,8 +177,8 @@ async function request2(req, res, name, times, filename) {
             }
         }
         s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"}";
-        dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method) values(?,?,?,?,?,?,?,?)`,
-            curDT, name, req.url, headers, req.body, headers_res, response.body,req.method,
+        dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl,code_res) values(?,?,?,?,?,?,?,?,?,?)`,
+            curDT, name, req.url, headers, req.body, headers_res, response.body, req.method,req.ignoreWrongSSL,response.code,
             err => {
                 console.log("error " + err)
             });
@@ -324,8 +342,8 @@ async function parsePOSTforms(params, res, jsonObj) {
                     xxxx += stepcopy.body[bodynumber];
                 }
                 obiekt = obiekt.replace("<!--BODY-->", xxxx);
-            	    obiekt = obiekt.replace("<!--SSLIGNORE-->", 		stepcopy.ignoreWrongSSL?"checked":"");
-obiekt = obiekt.replace("<!--METHOD-->",stepcopy.method);
+                obiekt = obiekt.replace("<!--SSLIGNORE-->", stepcopy.ignoreWrongSSL ? "checked" : "");
+                obiekt = obiekt.replace("<!--METHOD-->", stepcopy.method);
                 var xxxx = "";
                 let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + step.name + "\" order by dt desc");
                 for (let row in rows) {
@@ -371,11 +389,11 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                     continue;
                 }
                 console.log("starting " + step.name + " vs " + params['runstep']);
-step.method = params['method'];
-step.headers = decodeURIComponent(params['headers']).split("\n");
-step.body = decodeURIComponent(params['body']);
-step.ignoreWrongSSL = params['ssl']=="true";
-step.url = decodeURIComponent(params['url']);
+                step.method = params['method'];
+                step.headers = decodeURIComponent(params['headers']).split("\n");
+                step.body = decodeURIComponent(params['body']);
+                step.ignoreWrongSSL = params['ssl'] == "true";
+                step.url = decodeURIComponent(params['url']);
                 let lines = tc.input;
                 let headers = []
                 for (let index2 in lines) {
@@ -425,12 +443,15 @@ function loadDB(name) {
     create table requests (
 	dt text not null,
         name text not null,
+	method text not null,
         url text not null,
         headers text not null,
 	body text not null,
+        ssl smallint not null,
+	error_res text,
         headers_res text not null,
 	body_res text not null,
-	method text not null
+	code_res SMALLINT not null
     );`, () => {});
             let v = await db_all(name, "SELECT sqlite_version();");
             console.log(JSON.stringify(v));
@@ -440,11 +461,11 @@ function loadDB(name) {
 
 function loadFile(name) {
     if (!jsonObj[name]) {
-try {
-        jsonObj[name] = JSON.parse(readFileContentSync("/projects/" + name));
-  } catch (e) {
-	return false;
-  }
+        try {
+            jsonObj[name] = JSON.parse(readFileContentSync("/projects/" + name));
+        } catch (e) {
+            return false;
+        }
     }
     return true;
 
@@ -506,8 +527,9 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     let rows = await db_all(params['file'], "SELECT * from requests where name =\"" + step.name + "\" and dt=\"" + decodeURIComponent(params["dt"]) + "\"");
                     console.log(rows);
                     let s = "{\"datetime\":\"" + decodeURIComponent(params["dt"]) + "\",";
+                    s += "\"ssl\":\"" + rows[0].ssl + "\",";
                     s += "\"url\":\"" + rows[0].url + "\",";
-s+="\"method\":\""+rows[0]["method"]+"\",";
+                    s += "\"method\":\"" + rows[0]["method"] + "\",";
                     s += "\"headers\":[\"" + encodeURIComponent(rows[0]["headers"]);
                     s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
                     s += "\"headers_res\":[\"" + encodeURIComponent(rows[0]["headers_res"]);
@@ -557,11 +579,11 @@ const onRequestHandler = async (req, res) => {
         if (params['file'] && fs.existsSync(
                 path.normalize(__dirname + "/projects/" + params['file']))) {
             if (!loadFile(params['file'])) {
-               sendHTML(req, res, readFileContentSync("/internal/project.txt")
-                .replace("<!--TC-->", "")
-                .replace("<!--NAME-->", "Error reading file"));
-		return;
-	    }
+                sendHTML(req, res, readFileContentSync("/internal/project.txt")
+                    .replace("<!--TC-->", "")
+                    .replace("<!--NAME-->", "Error reading file"));
+                return;
+            }
             loadDB(params['file']);
 
             var list = "<ul>";
@@ -593,8 +615,8 @@ const onRequestHandler = async (req, res) => {
                     for (let stepnumber in tc.steps) {
                         var step = tc.steps[stepnumber];
                         list += "<li class=\"file\">" +
-                            "<a class=\"step "+(step.disabled?"disabled":"")+
-			    "\" onclick=loadRightPart(\"file=" + params['file'] + "&step=" +
+                            "<a class=\"step " + (step.disabled ? "disabled" : "") +
+                            "\" onclick=loadRightPart(\"file=" + params['file'] + "&step=" +
                             step.name + "\")>" + step.name + "</a></li>";
                     }
                     list += "</li></ul>";
@@ -630,8 +652,6 @@ const onRequestHandler = async (req, res) => {
 
     sendHTML(req, res, readFileContentSync("/internal/index.txt").replace("<!--FILES-->", files));
 };
-
-
 
 http2.createSecureServer({
     key: fs.readFileSync(__dirname + '//internal//localhost-privkey.pem'),
