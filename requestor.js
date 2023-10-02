@@ -37,6 +37,7 @@ async function executeRequest(req) {
     console.log("request " + JSON.stringify(req));
     var q = url.parse(req.url, true);
     console.log("url " + JSON.stringify(q));
+var certinfo='';
     const options = {
         checkServerIdentity: function(host, cert) {
             const err = tls.checkServerIdentity(host, cert);
@@ -44,11 +45,11 @@ async function executeRequest(req) {
                 return err;
             }
             do {
-                console.log('subject CN ' + cert.subject.CN + ', O ' + cert.subject.O);
-                console.log('  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O);
-                //      console.log('  Subject alt name '+ cert.subjectaltname);
-                console.log('  Valid ' + cert.valid_from + " - " + cert.valid_to);
-                console.log('  SHA256:' + cert.fingerprint256);
+                certinfo+='subject CN ' + cert.subject.CN + ', O ' + cert.subject.O+"\n";
+                certinfo+='  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O+"\n";
+                //      console.log('  Subject alt name '+ cert.subjectaltname)+"\n";
+                certinfo+='  Valid ' + cert.valid_from + " - " + cert.valid_to+"\n";
+                certinfo+='  SHA256 ' + cert.fingerprint256+"\n\n";
                 lastprint256 = cert.fingerprint256;
                 cert = cert.issuerCertificate;
             } while (cert.fingerprint256 !== lastprint256);
@@ -84,6 +85,7 @@ async function executeRequest(req) {
                 resp.headers = response.headers;
                 resp.code = response.statusCode;
                 resp.error = "";
+		resp.certinfo = certinfo;
                 resolve(resp);
             });
         }).on('error', (e) => {
@@ -152,8 +154,10 @@ async function request2(req, res, name, times, filename) {
     } else {
         response.name = req.name;
 
+        s += "\"code_res\":\"" + response.code + "\",";
+        s += "\"cert_res\":\"" + encodeURIComponent(response.certinfo) + "\",";
         s += "\"method\":\"" + req.method + "\",";
-        s += "\"ssl\":\"" + req.ignoreWrongSSL + "\",";
+        s += "\"ssl_ignore\":\"" + req.ignoreWrongSSL + "\",";
 
         var headers = "";
         s += "\"headers\":[";
@@ -177,8 +181,8 @@ async function request2(req, res, name, times, filename) {
             }
         }
         s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"}";
-        dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl,code_res) values(?,?,?,?,?,?,?,?,?,?)`,
-            curDT, name, req.url, headers, req.body, headers_res, response.body, req.method,req.ignoreWrongSSL,response.code,
+        dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res) values(?,?,?,?,?,?,?,?,?,?,?)`,
+            curDT, name, req.url, headers, req.body, headers_res, response.body, req.method,req.ignoreWrongSSL,response.code,response.certinfo,
             err => {
                 console.log("error " + err)
             });
@@ -447,7 +451,8 @@ function loadDB(name) {
         url text not null,
         headers text not null,
 	body text not null,
-        ssl smallint not null,
+        ssl_ignore smallint not null,
+	cert_res text not null,
 	error_res text,
         headers_res text not null,
 	body_res text not null,
@@ -527,7 +532,9 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     let rows = await db_all(params['file'], "SELECT * from requests where name =\"" + step.name + "\" and dt=\"" + decodeURIComponent(params["dt"]) + "\"");
                     console.log(rows);
                     let s = "{\"datetime\":\"" + decodeURIComponent(params["dt"]) + "\",";
-                    s += "\"ssl\":\"" + rows[0].ssl + "\",";
+                    s += "\"cert_res\":\"" + encodeURIComponent(rows[0].cert_res) + "\",";
+                    s += "\"ssl_ignore\":\"" + rows[0].ssl_ignore + "\",";
+                    s += "\"code_res\":\"" + rows[0].code_res + "\",";
                     s += "\"url\":\"" + rows[0].url + "\",";
                     s += "\"method\":\"" + rows[0]["method"] + "\",";
                     s += "\"headers\":[\"" + encodeURIComponent(rows[0]["headers"]);

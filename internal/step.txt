@@ -27,6 +27,8 @@ function setupLast(obj) {
       document.getElementById("lastresponseheaders").value+decodeURIComponent(obj.headers_res[i])+"\n";
     }
     document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body_res);
+    document.getElementById("lastresponsecode").value  = obj.code_res;
+    document.getElementById("lastresponsecert").value  = decodeURIComponent(obj.cert_res);
 }
 
 function selectLastDate() {
@@ -110,12 +112,20 @@ function sendNewStep() {
 <table><tr><td valign=bottom>
   <p><input type="checkbox" id="disabled" />Disabled
   <br>Name <input type="text" id="name" value="<!--NAME-->" size=61>
-</td><td valign=bottom>
+</td>
+<td valign=bottom>
   <p>When 
   <select id="whenlast" onchange="selectLastDate()">
       <!--WHENLAST-->
   </select>
-</td></tr>
+</td>
+<td valign=bottom>
+  <p>When 
+  <select id="whenlast2" onchange="selectLastDate()">
+      <!--WHENLAST-->
+  </select>
+</td>
+</tr>
 <tr><td valign=top>
   <select id="type">
     <option value="get">GET</option>
@@ -142,16 +152,32 @@ function sendNewStep() {
   </select>
   <input type="text" id="url2" value="200" size=40>
   <p><button type="submit">Run</button>
-</td><td valign=top>
+</td>
+<td valign=top>
   <input type=text id="lastrequesttype" size=6>
   <!--URLPREFIX-->
   &nbsp;&nbsp;<input type="text" id="lastrequesturl" value="" size=61>
   <p>Headers<br><textarea cols=80 rows=5 id=lastrequestheaders></textarea>
   <p>Body<br><textarea cols=80 rows=5 id=lastrequestbody></textarea>
   <p><input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
+  <p>HTTP response code <input type=text id=lastresponsecode>
   <p>Headers<br><textarea cols=80 rows=5 id=lastresponseheaders></textarea>
   <p>Body<br><textarea cols=80 rows=5 id=lastresponsebody></textarea>
-</td></tr></table>
+  <p>Certificates<br><textarea cols=80 rows=5 id=lastresponsecert></textarea>
+</td>
+<td valign=top>
+  <input type=text id="lastrequesttype2" size=6>
+  <!--URLPREFIX-->
+  &nbsp;&nbsp;<input type="text" id="lastrequesturl2" value="" size=61>
+  <p>Headers<br><textarea cols=80 rows=5 id=lastrequestheaders2></textarea>
+  <p>Body<br><textarea cols=80 rows=5 id=lastrequestbody2></textarea>
+  <p><input type="checkbox" id="lastignorewrongssl2" />Ignore SSL errors
+  <p>HTTP response code <input type=text id=lastresponsecode2>
+  <p>Headers<br><textarea cols=80 rows=5 id=lastresponseheaders2></textarea>
+  <p>Body<br><textarea cols=80 rows=5 id=lastresponsebody2></textarea>
+  <p>Certificates<br><textarea cols=80 rows=5 id=lastresponsecert2></textarea>
+</td>
+</tr></table>
 </form>
 <script>
 selectLastDate();
