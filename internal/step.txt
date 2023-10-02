@@ -29,6 +29,7 @@ function setupLast(obj) {
     document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body_res);
     document.getElementById("lastresponsecode").value  = obj.code_res;
     document.getElementById("lastresponsecert").value  = decodeURIComponent(obj.cert_res);
+    document.getElementById("lastignorewrongssl").checked  = obj.ssl_ignore=="1";
 }
 
 function selectLastDate() {
