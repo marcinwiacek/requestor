@@ -136,51 +136,33 @@ function digits(a, b) {
 }
 
 async function request2(req, res, name, times, filename) {
-
-    //let s = JSON.stringify(req);
     let dt = new Date();
     let curDT = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
         digits(dt.getDate(), 2) + " " +
         digits(dt.getHours(), 2) + ":" +
         digits(dt.getMinutes(), 2) + ":" +
         digits(dt.getSeconds(), 2) + " " + digits(dt.getMilliseconds(), 3);
-    let s = "{\"oldtimes\":" + JSON.stringify(times) + ",\"datetime\":\"" + curDT + "\",";
-    s += "\"url\":\"" + req.url + "\",";
     console.log("request " + JSON.stringify(req));
     console.log("start");
     var response = await executeRequest(req);
     if (response.error) {
-        s += "\"error\":\"" + response.error + "\"}";
     } else {
         response.name = req.name;
 
-        s += "\"code_res\":\"" + response.code + "\",";
-        s += "\"cert_res\":\"" + encodeURIComponent(response.certinfo) + "\",";
-        s += "\"method\":\"" + req.method + "\",";
-        s += "\"ssl_ignore\":\"" + req.ignoreWrongSSL + "\",";
-
         var headers = "";
-        s += "\"headers\":[";
         for (let headername in req.headers) {
-            s += "\"" + encodeURIComponent(req.headers[headername]) + "\",";
             headers += req.headers[headername] + "\n";
         }
-        s += "\"\"],\"body\":\"" + encodeURIComponent(req.body) + "\",";
-
         var headers_res = "";
-        s += "\"headers_res\":[";
         for (let headername in response.headers) {
             if (Array.isArray(response.headers[headername])) {
                 for (let headerx in response.headers[headername]) {
-                    s += "\"" + encodeURIComponent(headername + ": " + response.headers[headername][headerx]) + "\",";
                     headers_res += headername + ": " + response.headers[headername][headerx] + "\n";
                 }
             } else {
-                s += "\"" + encodeURIComponent(headername + ": " + response.headers[headername]) + "\",";
                 headers_res += headername + ": " + response.headers[headername] + "\n";
             }
         }
-        s += "\"\"],\"body_res\":\"" + encodeURIComponent(response.body) + "\"}";
         dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res) values(?,?,?,?,?,?,?,?,?,?,?)`,
             curDT, name, req.url, headers, req.body, headers_res, response.body, req.method,req.ignoreWrongSSL,response.code,response.certinfo,
             err => {
@@ -188,7 +170,7 @@ async function request2(req, res, name, times, filename) {
             });
     }
     console.log("end");
-    return s;
+    return "{"+(await getJSON(name,curDT,filename))+",\"oldtimes\":" + JSON.stringify(times)+"}";
 }
 
 
@@ -476,6 +458,22 @@ function loadFile(name) {
 
 }
 
+async function getJSON(stepname, dt,file) {
+                    let rows = await db_all(file, "SELECT * from requests where name =\"" + stepname + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
+                    let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
+                    s += "\"cert_res\":\"" + encodeURIComponent(rows[0].cert_res) + "\",";
+                    s += "\"ssl_ignore\":\"" + rows[0].ssl_ignore + "\",";
+                    s += "\"code_res\":\"" + rows[0].code_res + "\",";
+                    s += "\"url\":\"" + rows[0].url + "\",";
+                    s += "\"method\":\"" + rows[0]["method"] + "\",";
+                    s += "\"headers\":[\"" + encodeURIComponent(rows[0]["headers"]);
+                    s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
+                    s += "\"headers_res\":[\"" + encodeURIComponent(rows[0]["headers_res"]);
+                    s += "\"],\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
+return s;
+}
+
+
 async function parsePOSTGetStep(params, res, jsonObj2) {
     //    if (!params["text"] || !params["state"] || !params["type"] || !params["title"]) {
     //        return directToOKFileNotFoundNoRet(res, '', false);
@@ -529,20 +527,7 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                         console.log(match)
                     }
 
-                    let rows = await db_all(params['file'], "SELECT * from requests where name =\"" + step.name + "\" and dt=\"" + decodeURIComponent(params["dt"]) + "\"");
-                    console.log(rows);
-                    let s = "{\"datetime\":\"" + decodeURIComponent(params["dt"]) + "\",";
-                    s += "\"cert_res\":\"" + encodeURIComponent(rows[0].cert_res) + "\",";
-                    s += "\"ssl_ignore\":\"" + rows[0].ssl_ignore + "\",";
-                    s += "\"code_res\":\"" + rows[0].code_res + "\",";
-                    s += "\"url\":\"" + rows[0].url + "\",";
-                    s += "\"method\":\"" + rows[0]["method"] + "\",";
-                    s += "\"headers\":[\"" + encodeURIComponent(rows[0]["headers"]);
-                    s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
-                    s += "\"headers_res\":[\"" + encodeURIComponent(rows[0]["headers_res"]);
-                    s += "\"],\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
-                    s += "}";
-                    if (res != null) res.end(s);
+                    if (res != null) res.end("{"+await getJSON(step.name,params['dt'],params['file'])+"}");
                 }
             }
         }
