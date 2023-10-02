@@ -33,11 +33,10 @@ function readFileContentSync(fileName, callback) {
 }
 
 async function executeRequest(req) {
-    console.log(req);
     console.log("request " + JSON.stringify(req));
     var q = url.parse(req.url, true);
     console.log("url " + JSON.stringify(q));
-var certinfo='';
+    var certinfo='';
     const options = {
         checkServerIdentity: function(host, cert) {
             const err = tls.checkServerIdentity(host, cert);
@@ -120,13 +119,6 @@ function findtc(arr, tc) {
     return stepcopy;
 }
 
-function addToLog(str) {
-    //<?xml version="1.0" encoding="utf-8"?>
-    //    fs.writeFileSync(path.normalize(__dirname + "/bela2log.xml"), str, {
-    //        "flag": "a"
-    //    });
-}
-
 function digits(a, b) {
     let x = a.toString();
     while (x.length < b) {
@@ -138,17 +130,14 @@ function digits(a, b) {
 async function request2(req, res, name, times, filename) {
     let dt = new Date();
     let curDT = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
-        digits(dt.getDate(), 2) + " " +
-        digits(dt.getHours(), 2) + ":" +
-        digits(dt.getMinutes(), 2) + ":" +
-        digits(dt.getSeconds(), 2) + " " + digits(dt.getMilliseconds(), 3);
+        digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
+        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " + 
+        digits(dt.getMilliseconds(), 3);
     console.log("request " + JSON.stringify(req));
     console.log("start");
     var response = await executeRequest(req);
     if (response.error) {
     } else {
-        response.name = req.name;
-
         var headers = "";
         for (let headername in req.headers) {
             headers += req.headers[headername] + "\n";
@@ -189,8 +178,6 @@ ls.on('close', (code) => {
 
 function sendHTMLHead(res) {
     res.statusCode = 200;
-    //    res.setHeader('Cache-Control', 'no-store');
-    //  res.setHeader('Cache-Control', 'must-revalidate');
     res.setHeader('Content-Type', 'text/html; charset=UTF-8');
 }
 
@@ -208,8 +195,6 @@ function sendHTMLBody(req, res, text) {
 
 function sendJSHead(res) {
     res.statusCode = 200;
-    //    res.setHeader('Cache-Control', 'no-store');
-    //  res.setHeader('Cache-Control', 'must-revalidate');
     res.setHeader('Content-Type', 'text/javascript; charset=UTF-8');
 }
 
@@ -344,14 +329,9 @@ async function parsePOSTforms(params, res, jsonObj) {
 }
 
 async function parsePOSTRunStep(params, res, jsonObj2) {
-    //    if (!params["text"] || !params["state"] || !params["type"] || !params["title"]) {
-    //        return directToOKFileNotFoundNoRet(res, '', false);
-    //    }
-
     var sss = "";
 
     console.log(params);
-    console.log(jsonObj);
     let arr = jsonObj[params['file']];
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
@@ -455,30 +435,24 @@ function loadFile(name) {
         }
     }
     return true;
-
 }
 
 async function getJSON(stepname, dt,file) {
-                    let rows = await db_all(file, "SELECT * from requests where name =\"" + stepname + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
-                    let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
-                    s += "\"cert_res\":\"" + encodeURIComponent(rows[0].cert_res) + "\",";
-                    s += "\"ssl_ignore\":\"" + rows[0].ssl_ignore + "\",";
-                    s += "\"code_res\":\"" + rows[0].code_res + "\",";
-                    s += "\"url\":\"" + rows[0].url + "\",";
-                    s += "\"method\":\"" + rows[0]["method"] + "\",";
-                    s += "\"headers\":[\"" + encodeURIComponent(rows[0]["headers"]);
-                    s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
-                    s += "\"headers_res\":[\"" + encodeURIComponent(rows[0]["headers_res"]);
-                    s += "\"],\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
-return s;
+    let rows = await db_all(file, "SELECT * from requests where name =\"" + stepname + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
+    let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
+    s += "\"cert_res\":\"" + encodeURIComponent(rows[0].cert_res) + "\",";
+    s += "\"ssl_ignore\":\"" + rows[0].ssl_ignore + "\",";
+    s += "\"code_res\":\"" + rows[0].code_res + "\",";
+    s += "\"url\":\"" + rows[0].url + "\",";
+    s += "\"method\":\"" + rows[0]["method"] + "\",";
+    s += "\"headers\":[\"" + encodeURIComponent(rows[0]["headers"]);
+    s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
+    s += "\"headers_res\":[\"" + encodeURIComponent(rows[0]["headers_res"]);
+    s += "\"],\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
+    return s;
 }
 
-
 async function parsePOSTGetStep(params, res, jsonObj2) {
-    //    if (!params["text"] || !params["state"] || !params["type"] || !params["title"]) {
-    //        return directToOKFileNotFoundNoRet(res, '', false);
-    //    }
-
     console.log(jsonObj);
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
@@ -504,14 +478,11 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     arra[h] = ll[i];
                     i++;
                 });
-                console.log(arra);
                 for (let stepnumber in tc.steps) {
                     var step = tc.steps[stepnumber];
                     if (step.disabled && step.disabled == true) {
                         continue;
                     }
-                    console.log(step.name + " vs " + params['getstep']);
-
                     if (step.name.localeCompare(params['getstep']) != 0) {
                         continue;
                     }
@@ -526,13 +497,11 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-
                     if (res != null) res.end("{"+await getJSON(step.name,params['dt'],params['file'])+"}");
                 }
             }
         }
     }
-    //            res.end('cos');
 }
 
 function db_all(filename, sql) {
