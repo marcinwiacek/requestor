@@ -96,7 +96,11 @@ var s = e.errors+" ";
                 resp.body = '';
                 resp.headers = [];
                 resp.code = 0;
+		if (s=='undefined ') {
+		resp.error = e.message;
+		} else {
                 resp.error = s;
+		}
 		resp.certinfo = certinfo;
 
             resolve(resp);
