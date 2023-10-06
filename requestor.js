@@ -88,9 +88,17 @@ async function executeRequest(req) {
                 resolve(resp);
             });
         }).on('error', (e) => {
-            console.log(e.message);
+            console.log("error is "+e.message+" "+e);
+            console.log("error is "+e.errors);
+var s = e.errors+" ";
             var resp = {}
-            resp.error = e.message;
+
+                resp.body = '';
+                resp.headers = [];
+                resp.code = 0;
+                resp.error = s;
+		resp.certinfo = certinfo;
+
             resolve(resp);
         });
         if (req.method == "post") {
@@ -128,21 +136,26 @@ function digits(a, b) {
 }
 
 async function request2(req, res, name, times, filename) {
+    console.log("request " + JSON.stringify(req));
+    console.log("start");
     let dt = new Date();
     let curDT = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
         digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
         digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " + 
         digits(dt.getMilliseconds(), 3);
-    console.log("request " + JSON.stringify(req));
-    console.log("start");
     var response = await executeRequest(req);
+    let dt2 = new Date();
+    let curDT2 = dt2.getFullYear() + "-" + digits(dt2.getMonth() + 1, 2) + "-" +
+        digits(dt2.getDate(), 2) + " " + digits(dt2.getHours(), 2) + ":" +
+        digits(dt2.getMinutes(), 2) + ":" + digits(dt2.getSeconds(), 2) + " " + 
+        digits(dt2.getMilliseconds(), 3);
+        var headers = "";
+        var headers_res = "";
     if (response.error) {
     } else {
-        var headers = "";
         for (let headername in req.headers) {
             headers += req.headers[headername] + "\n";
         }
-        var headers_res = "";
         for (let headername in response.headers) {
             if (Array.isArray(response.headers[headername])) {
                 for (let headerx in response.headers[headername]) {
@@ -152,12 +165,12 @@ async function request2(req, res, name, times, filename) {
                 headers_res += headername + ": " + response.headers[headername] + "\n";
             }
         }
-        dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res) values(?,?,?,?,?,?,?,?,?,?,?)`,
-            curDT, name, req.url, headers, req.body, headers_res, response.body, req.method,req.ignoreWrongSSL,response.code,response.certinfo,
+}
+        dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            curDT, name, req.url, headers, req.body, headers_res, response.body, req.method,req.ignoreWrongSSL,response.code,response.certinfo,curDT2,response.error,
             err => {
                 console.log("error " + err)
             });
-    }
     console.log("end");
     return "{"+(await getJSON(name,curDT,filename))+",\"oldtimes\":" + JSON.stringify(times)+"}";
 }
@@ -418,7 +431,8 @@ function loadDB(name) {
 	error_res text,
         headers_res text not null,
 	body_res text not null,
-	code_res SMALLINT not null
+	code_res SMALLINT not null,
+	dt_res text not null
     );`, () => {});
             let v = await db_all(name, "SELECT sqlite_version();");
             console.log(JSON.stringify(v));
@@ -440,6 +454,8 @@ function loadFile(name) {
 async function getJSON(stepname, dt,file) {
     let rows = await db_all(file, "SELECT * from requests where name =\"" + stepname + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
     let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
+    s += "\"datetime_res\":\"" + decodeURIComponent(rows[0].dt_res) + "\",";
+    s += "\"errors\":\"" + encodeURIComponent(rows[0].error_res) + "\",";
     s += "\"cert_res\":\"" + encodeURIComponent(rows[0].cert_res) + "\",";
     s += "\"ssl_ignore\":\"" + rows[0].ssl_ignore + "\",";
     s += "\"code_res\":\"" + rows[0].code_res + "\",";
@@ -608,6 +624,7 @@ const onRequestHandler = async (req, res) => {
     let files = "";
     let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
     for (filenumber in all_files) {
+	if (!all_files[filenumber].includes('.json')) continue;
         files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a><br>";
     }
 

@@ -26,9 +26,11 @@ function setupLast(obj) {
       document.getElementById("lastresponseheaders").value =
       document.getElementById("lastresponseheaders").value+decodeURIComponent(obj.headers_res[i])+"\n";
     }
+    document.getElementById("lastresponsetime").value  = decodeURIComponent(obj.datetime_res);
     document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body_res);
     document.getElementById("lastresponsecode").value  = obj.code_res;
     document.getElementById("lastresponsecert").value  = decodeURIComponent(obj.cert_res);
+    document.getElementById("lastresponseerror").value  = decodeURIComponent(obj.errors);
     document.getElementById("lastignorewrongssl").checked  = obj.ssl_ignore=="1";
 }
 
@@ -157,10 +159,12 @@ function sendNewStep() {
   <p>Headers<br><textarea cols=80 rows=5 id=lastrequestheaders></textarea>
   <p>Body<br><textarea cols=80 rows=5 id=lastrequestbody></textarea>
   <p><input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
-  <p>HTTP response code <input type=text id=lastresponsecode>
+  <p>HTTP response <input type=text id=lastresponsetime>
+  <p>Code <input type=text id=lastresponsecode>
   <p>Headers<br><textarea cols=80 rows=5 id=lastresponseheaders></textarea>
   <p>Body<br><textarea cols=80 rows=5 id=lastresponsebody></textarea>
   <p>Certificates<br><textarea cols=80 rows=5 id=lastresponsecert></textarea>
+  <p>Errors<br><textarea cols=80 rows=5 id=lastresponseerror></textarea>
 </td>
 <td valign=top>
 </td>
