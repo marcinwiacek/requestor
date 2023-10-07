@@ -62,7 +62,6 @@ async function executeRequest(req) {
     return new Promise((resolve, reject) => {
         const r = method2(req.url, options, (response) => {
             const chunk = []
-            response.on('data', (fragments) => {
                 console.log(r.socket.getCipher());
                 var cert = r.socket.getPeerCertificate(true);
                 if (cert != undefined && cert.subject) {
@@ -78,6 +77,7 @@ async function executeRequest(req) {
                         if (cert == undefined || lastprint256 == cert.fingerprint256) break;
                     }
                 }
+            response.on('data', (fragments) => {
 		chunk.push(fragments);
 	    });
             response.on('end', () => {
