@@ -13,6 +13,7 @@ const tls = require('node:tls');
 
 const hostname = '127.0.0.1';
 const port = 3000;
+const maxResultsPerRequest = 5;
 
 function readFileContentSync(fileName, callback) {
     //FIXME: checking if path is going out
@@ -36,23 +37,8 @@ async function executeRequest(req) {
     console.log("request " + JSON.stringify(req));
     var q = url.parse(req.url, true);
     console.log("url " + JSON.stringify(q));
-    var certinfo='';
+    var certinfo = '';
     const options = {
-        checkServerIdentity: function(host, cert) {
-            const err = tls.checkServerIdentity(host, cert);
-            if (err) {
-                return err;
-            }
-            do {
-                certinfo+='subject CN ' + cert.subject.CN + ', O ' + cert.subject.O+"\n";
-                certinfo+='  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O+"\n";
-                //      console.log('  Subject alt name '+ cert.subjectaltname)+"\n";
-                certinfo+='  Valid ' + cert.valid_from + " - " + cert.valid_to+"\n";
-                certinfo+='  SHA256 ' + cert.fingerprint256+"\n\n";
-                lastprint256 = cert.fingerprint256;
-                cert = cert.issuerCertificate;
-            } while (cert.fingerprint256 !== lastprint256);
-        },
         //	hostname:q.hostname,
         //	port:443,
         //	path:q.path,
@@ -73,36 +59,48 @@ async function executeRequest(req) {
     }
     options.method = req.method;
     options.timeout = 3000;
-    options.globalAgent = new https.Agent(options);
     return new Promise((resolve, reject) => {
         const r = method2(req.url, options, (response) => {
             const chunk = []
             response.on('data', (fragments) => chunk.push(fragments));
             response.on('end', () => {
+                console.log(r.socket.getCipher());
+                var cert = r.socket.getPeerCertificate(true);
+                if (cert != undefined && cert.subject) {
+                    while (true) {
+                        console.log(cert);
+                        certinfo += 'subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
+                        certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
+                        //      console.log('  Subject alt name '+ cert.subjectaltname)+"\n";
+                        certinfo += '  Valid ' + cert.valid_from + " - " + cert.valid_to + "\n";
+                        certinfo += '  SHA256 ' + cert.fingerprint256 + "\n\n";
+                        lastprint256 = cert.fingerprint256;
+                        cert = cert.issuerCertificate;
+                        if (cert == undefined || lastprint256 == cert.fingerprint256) break;
+                    }
+                }
                 var resp = {}
                 resp.body = Buffer.concat(chunk).toString();
                 resp.headers = response.headers;
                 resp.code = response.statusCode;
                 resp.error = "";
-		resp.certinfo = certinfo;
+                resp.certinfo = certinfo;
                 resolve(resp);
             });
         }).on('error', (e) => {
-            console.log("error is "+e.message+" "+e);
-            console.log("error is "+e.errors);
-var s = e.errors+" ";
+            console.log("error is " + e.message + " " + e);
+            console.log("error is " + e.errors);
+            var s = e.errors + " ";
             var resp = {}
-
-                resp.body = '';
-                resp.headers = [];
-                resp.code = 0;
-		if (s=='undefined ') {
-		resp.error = e.message;
-		} else {
+            resp.body = '';
+            resp.headers = [];
+            resp.code = 0;
+            if (s == 'undefined ') {
+                resp.error = e.message;
+            } else {
                 resp.error = s;
-		}
-		resp.certinfo = certinfo;
-
+            }
+            resp.certinfo = certinfo;
             resolve(resp);
         });
         if (req.method == "post") {
@@ -145,18 +143,17 @@ async function request2(req, res, name, times, filename) {
     let dt = new Date();
     let curDT = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
         digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
-        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " + 
+        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
         digits(dt.getMilliseconds(), 3);
     var response = await executeRequest(req);
     let dt2 = new Date();
     let curDT2 = dt2.getFullYear() + "-" + digits(dt2.getMonth() + 1, 2) + "-" +
         digits(dt2.getDate(), 2) + " " + digits(dt2.getHours(), 2) + ":" +
-        digits(dt2.getMinutes(), 2) + ":" + digits(dt2.getSeconds(), 2) + " " + 
+        digits(dt2.getMinutes(), 2) + ":" + digits(dt2.getSeconds(), 2) + " " +
         digits(dt2.getMilliseconds(), 3);
-        var headers = "";
-        var headers_res = "";
-    if (response.error) {
-    } else {
+    var headers = "";
+    var headers_res = "";
+    if (response.error) {} else {
         for (let headername in req.headers) {
             headers += req.headers[headername] + "\n";
         }
@@ -169,14 +166,14 @@ async function request2(req, res, name, times, filename) {
                 headers_res += headername + ": " + response.headers[headername] + "\n";
             }
         }
-}
-        dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-            curDT, name, req.url, headers, req.body, headers_res, response.body, req.method,req.ignoreWrongSSL,response.code,response.certinfo,curDT2,response.error,
-            err => {
-                console.log("error " + err)
-            });
+    }
+    dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        curDT, name, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
+        err => {
+            console.log("error " + err)
+        });
     console.log("end");
-    return "{"+(await getJSON(name,curDT,filename))+",\"oldtimes\":" + JSON.stringify(times)+"}";
+    return "{" + (await getJSON(name, curDT, filename)) + ",\"oldtimes\":" + JSON.stringify(times) + "}";
 }
 
 
@@ -455,7 +452,7 @@ function loadFile(name) {
     return true;
 }
 
-async function getJSON(stepname, dt,file) {
+async function getJSON(stepname, dt, file) {
     let rows = await db_all(file, "SELECT * from requests where name =\"" + stepname + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
     let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
     s += "\"datetime_res\":\"" + decodeURIComponent(rows[0].dt_res) + "\",";
@@ -517,7 +514,7 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    if (res != null) res.end("{"+await getJSON(step.name,params['dt'],params['file'])+"}");
+                    if (res != null) res.end("{" + await getJSON(step.name, params['dt'], params['file']) + "}");
                 }
             }
         }
@@ -628,7 +625,7 @@ const onRequestHandler = async (req, res) => {
     let files = "";
     let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
     for (filenumber in all_files) {
-	if (!all_files[filenumber].includes('.json')) continue;
+        if (all_files[filenumber].includes('.json.db')) continue;
         files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a><br>";
     }
 

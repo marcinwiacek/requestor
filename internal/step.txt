@@ -56,8 +56,10 @@ function selectLastDate() {
 }
 
 function sendNewStep() {
+    document.getElementById("run").disabled=true;
   http = createPOST();
   http.onload = function() {
+      document.getElementById("run").disabled=false;
     if (http.status != 200) {
       alert(http.response);
     } else {
@@ -150,7 +152,7 @@ function sendNewStep() {
     <option value="POST">Body</option>
   </select>
   <input type="text" id="url2" value="200" size=40>
-  <p><button type="submit">Run</button>
+  <p><button id=run type="submit">Run</button>
 </td>
 <td valign=top>
   <input type=text id="lastrequesttype" size=6>
