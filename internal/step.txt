@@ -165,7 +165,7 @@ function sendNewStep() {
   <p>Code <input type=text id=lastresponsecode>
   <p>Headers<br><textarea cols=80 rows=5 id=lastresponseheaders></textarea>
   <p>Body<br><textarea cols=80 rows=5 id=lastresponsebody></textarea>
-  <p>Certificates<br><textarea cols=80 rows=5 id=lastresponsecert></textarea>
+  <p>Security<br><textarea cols=80 rows=5 id=lastresponsecert></textarea>
   <p>Errors<br><textarea cols=80 rows=5 id=lastresponseerror></textarea>
 </td>
 <td valign=top>

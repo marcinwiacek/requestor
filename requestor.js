@@ -63,12 +63,15 @@ async function executeRequest(req) {
     return new Promise((resolve, reject) => {
         const r = method2(req.url, options, (response) => {
             const chunk = []
-                console.log(r.socket.getCipher());
+		var cipher = r.socket.getCipher();
+		certinfo += "Cipher\n  "+cipher.standardName+", "+cipher.version+"\n\n";
+//                console.log(r.socket.getCipher());
                 var cert = r.socket.getPeerCertificate(true);
                 if (cert != undefined && cert.subject) {
                     while (true) {
 //                        console.log(cert);
-                        certinfo += 'subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
+			certinfo += "Certificate\n";
+                        certinfo += '  subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
                         certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
                         //      console.log('  Subject alt name '+ cert.subjectaltname)+"\n";
                         certinfo += '  Valid ' + cert.valid_from + " - " + cert.valid_to + "\n";
@@ -249,6 +252,8 @@ function directToOKFileNotFoundNoRet(res, txt, ok) {
 // return values from sub functions are ignored.
 async function parsePOSTforms(params, res, jsonObj) {
     console.log(params);
+    loadFile(params['file']);
+    loadDB(params['file']);
     if (params["runstep"]) {
         return parsePOSTRunStep(params, res, jsonObj);
     } else if (params["getstep"] && params["dt"]) {
@@ -257,8 +262,6 @@ async function parsePOSTforms(params, res, jsonObj) {
             path.normalize(__dirname + "/projects/" + params['file'])))) {
         return;
     }
-    loadFile(params['file']);
-    loadDB(params['file']);
 
     var obiekt = "";
     res.statusCode = 200;
