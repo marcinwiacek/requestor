@@ -46,6 +46,7 @@ async function executeRequest(req) {
         //        req.headers
         //key:
         //cert:
+        agent:false
     };
 
     var method2 = null;
@@ -66,7 +67,7 @@ async function executeRequest(req) {
                 var cert = r.socket.getPeerCertificate(true);
                 if (cert != undefined && cert.subject) {
                     while (true) {
-                        console.log(cert);
+//                        console.log(cert);
                         certinfo += 'subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
                         certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
                         //      console.log('  Subject alt name '+ cert.subjectaltname)+"\n";
