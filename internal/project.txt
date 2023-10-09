@@ -129,6 +129,12 @@ function loadRightPart(url) {
   return false;
 }
 
+function stepRename(oldName,newName) {
+}
+
+function stepDelete(name) {
+}
+
 </script>
 </head>
 <body>
