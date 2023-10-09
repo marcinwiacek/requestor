@@ -51,11 +51,9 @@ async function executeRequest(req) {
 
     var method2 = null;
     if (q.protocol == "http:") {
-        if (req.method == "get") method2 = http.get;
-        if (req.method == "post") method2 = http.request;
+	method2 = req.method == "get" ? http.get:http.request;
     } else if (q.protocol == "https:") {
-        if (req.method == "get") method2 = https.get;
-        if (req.method == "post") method2 = https.request;
+	method2 = req.method == "get" ? https.get:https.request;
         if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
     }
     options.method = req.method;

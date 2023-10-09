@@ -115,7 +115,6 @@ function sendNewStep() {
 </script>
 <form onsubmit="return sendNewStep()">
 <table><tr><td valign=bottom>
-  <p><input type="checkbox" id="disabled" />Disabled
   <br>Name <input type="text" id="name" value="<!--NAME-->" size=61>
 </td>
 <td valign=bottom>
