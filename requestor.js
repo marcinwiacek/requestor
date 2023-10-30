@@ -46,14 +46,14 @@ async function executeRequest(req) {
         //        req.headers
         //key:
         //cert:
-        agent:false
+        agent: false
     };
 
     var method2 = null;
     if (q.protocol == "http:") {
-	method2 = req.method == "get" ? http.get:http.request;
+        method2 = req.method == "get" ? http.get : http.request;
     } else if (q.protocol == "https:") {
-	method2 = req.method == "get" ? https.get:https.request;
+        method2 = req.method == "get" ? https.get : https.request;
         if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
     }
     options.method = req.method;
@@ -61,25 +61,25 @@ async function executeRequest(req) {
     return new Promise((resolve, reject) => {
         const r = method2(req.url, options, (response) => {
             const chunk = []
-		var cipher = r.socket.getCipher();
-		certinfo += "Cipher\n  "+cipher.standardName+", "+cipher.version+"\n\n";
-                var cert = r.socket.getPeerCertificate(true);
-                if (cert != undefined && cert.subject) {
-                    while (true) {
-			certinfo += "Certificate\n";
-                        certinfo += '  subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
-                        certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
-                        //      console.log('  Subject alt name '+ cert.subjectaltname)+"\n";
-                        certinfo += '  Valid ' + cert.valid_from + " - " + cert.valid_to + "\n";
-                        certinfo += '  SHA256 ' + cert.fingerprint256 + "\n\n";
-                        lastprint256 = cert.fingerprint256;
-                        cert = cert.issuerCertificate;
-                        if (cert == undefined || lastprint256 == cert.fingerprint256) break;
-                    }
+            var cipher = r.socket.getCipher();
+            certinfo += "Cipher\n  " + cipher.standardName + ", " + cipher.version + "\n\n";
+            var cert = r.socket.getPeerCertificate(true);
+            if (cert != undefined && cert.subject) {
+                while (true) {
+                    certinfo += "Certificate\n";
+                    certinfo += '  subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
+                    certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
+                    //      console.log('  Subject alt name '+ cert.subjectaltname)+"\n";
+                    certinfo += '  Valid ' + cert.valid_from + " - " + cert.valid_to + "\n";
+                    certinfo += '  SHA256 ' + cert.fingerprint256 + "\n\n";
+                    lastprint256 = cert.fingerprint256;
+                    cert = cert.issuerCertificate;
+                    if (cert == undefined || lastprint256 == cert.fingerprint256) break;
                 }
+            }
             response.on('data', (fragments) => {
-		chunk.push(fragments);
-	    });
+                chunk.push(fragments);
+            });
             response.on('end', () => {
                 var resp = {}
                 resp.body = Buffer.concat(chunk).toString();
@@ -155,18 +155,18 @@ async function request2(req, res, name, times, filename) {
         digits(dt2.getMilliseconds(), 3);
     var headers = "";
     var headers_res = "";
-        for (let headername in req.headers) {
-            headers += req.headers[headername] + "\n";
-        }
-        for (let headername in response.headers) {
-            if (Array.isArray(response.headers[headername])) {
-                for (let headerx in response.headers[headername]) {
-                    headers_res += headername + ": " + response.headers[headername][headerx] + "\n";
-                }
-            } else {
-                headers_res += headername + ": " + response.headers[headername] + "\n";
+    for (let headername in req.headers) {
+        headers += req.headers[headername] + "\n";
+    }
+    for (let headername in response.headers) {
+        if (Array.isArray(response.headers[headername])) {
+            for (let headerx in response.headers[headername]) {
+                headers_res += headername + ": " + response.headers[headername][headerx] + "\n";
             }
+        } else {
+            headers_res += headername + ": " + response.headers[headername] + "\n";
         }
+    }
     dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         curDT, name, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
         err => {
