@@ -129,7 +129,8 @@ function loadRightPart(url) {
   return false;
 }
 
-function stepRename(oldName,newName) {
+function stepRename(stepName) {
+    alert(stepName);
 }
 
 function stepDelete(name) {
@@ -159,7 +160,7 @@ Environment:
 
 <div class="hide" id="cnt" style="border:5px outset black; background-color: white;">
    New<br>
-   Rename<br>
+   <a onclick=stepRename('ala')>Rename</a><br>
    Disable/enable<br>
    Clone<br>
    Delete<br>
@@ -189,6 +190,7 @@ for (var i = 0; i < toggler.length; i++) {
       e.preventDefault();
     });
     toggler[i].addEventListener('mousemove', (e) => {
+      if (document.getElementById("cnt").classList.contains("show")) return;
       if (!e) e = window.event;
       document.getElementById("cnt").style.top = e.pageY + 'px';
       document.getElementById("cnt").style.left = e.pageX + 'px';

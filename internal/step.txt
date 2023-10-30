@@ -1,5 +1,22 @@
 <br>
 <script async=async>
+function getHTTPCode(code) {
+   switch (code) {
+	case "200": return "200 OK";
+	case "201": return "201 Created";
+        case "204": return "204 No Content";
+	case "400": return "400 Bad Request";
+	case "401": return "401 Unauthorized";
+	case "403": return "403 Forbidden";
+	case "404": return "404 Not Found";
+	case "405": return "405 Method Not Allowed";
+	case "500": return "500 Internal Server Error";
+	case "501": return "501 Not Implemented";
+        default: return code;
+   }
+}
+
+
 function selectMethod(name,name2) {
     var selObj = document.getElementById(name);
     for (var i = 0; i < selObj.options.length; i++) {
@@ -28,7 +45,7 @@ function setupLast(obj) {
     }
     document.getElementById("lastresponsetime").value  = decodeURIComponent(obj.datetime_res);
     document.getElementById("lastresponsebody").value  = decodeURIComponent(obj.body_res);
-    document.getElementById("lastresponsecode").value  = obj.code_res;
+    document.getElementById("lastresponsecode").value  = getHTTPCode(obj.code_res);
     document.getElementById("lastresponsecert").value  = decodeURIComponent(obj.cert_res);
     document.getElementById("lastresponseerror").value  = decodeURIComponent(obj.errors);
     document.getElementById("lastignorewrongssl").checked  = obj.ssl_ignore=="1";
@@ -160,8 +177,7 @@ function sendNewStep() {
   <p>Headers<br><textarea cols=80 rows=5 id=lastrequestheaders></textarea>
   <p>Body<br><textarea cols=80 rows=5 id=lastrequestbody></textarea>
   <p><input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
-  <p>HTTP response <input type=text id=lastresponsetime>
-  <p>Code <input type=text id=lastresponsecode>
+  <p>Response time <input type=text id=lastresponsetime> Code <input type=text id=lastresponsecode>
   <p>Headers<br><textarea cols=80 rows=5 id=lastresponseheaders></textarea>
   <p>Body<br><textarea cols=80 rows=5 id=lastresponsebody></textarea>
   <p>Security<br><textarea cols=80 rows=5 id=lastresponsecert></textarea>

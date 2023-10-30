@@ -63,11 +63,9 @@ async function executeRequest(req) {
             const chunk = []
 		var cipher = r.socket.getCipher();
 		certinfo += "Cipher\n  "+cipher.standardName+", "+cipher.version+"\n\n";
-//                console.log(r.socket.getCipher());
                 var cert = r.socket.getPeerCertificate(true);
                 if (cert != undefined && cert.subject) {
                     while (true) {
-//                        console.log(cert);
 			certinfo += "Certificate\n";
                         certinfo += '  subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
                         certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
@@ -157,7 +155,6 @@ async function request2(req, res, name, times, filename) {
         digits(dt2.getMilliseconds(), 3);
     var headers = "";
     var headers_res = "";
-    if (response.error) {} else {
         for (let headername in req.headers) {
             headers += req.headers[headername] + "\n";
         }
@@ -170,7 +167,6 @@ async function request2(req, res, name, times, filename) {
                 headers_res += headername + ": " + response.headers[headername] + "\n";
             }
         }
-    }
     dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         curDT, name, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
         err => {

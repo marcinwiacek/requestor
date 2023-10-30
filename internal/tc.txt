@@ -83,7 +83,7 @@ alert(http.response);
   };
 
   const params = new URLSearchParams(window.location.search);
-console.log(params);
+  console.log(params);
   http.send("file="+params.get('file')+"&tc="+document.getElementById('name').value
 //+"&dt="+encodeURIComponent(document.getElementById("whenlast").value)
 +"&d="+encodeURIComponent(csvData.replaceAll(",\n","\n")));
