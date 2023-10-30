@@ -125,6 +125,7 @@ function sendNewStep() {
     "&body="+encodeURIComponent(document.getElementById("body").value)+
     "&url="+encodeURIComponent(document.getElementById("url").value)+
     "&ssl="+document.getElementById("ignorewrongssl").checked+
+    "&conlen="+document.getElementById("addcontentlength").checked+
     "&method="+method);
 
   return false;
@@ -161,6 +162,7 @@ function sendNewStep() {
   <p>Headers<br><textarea cols=80 rows=5 id="header"><!--HEADER--></textarea>
   <p>Body<br><textarea cols=80 rows=5  id="body"><!--BODY--></textarea>
   <p><input type="checkbox" id="ignorewrongssl" <!--SSLIGNORE--> />Ignore SSL errors
+  <br><input type="checkbox" id="addcontentlength" <!--CONLENGTH--> />Add content-length
   <p>Asserts
   <p><select id="x">
     <option value="GET">HTTP code</option>

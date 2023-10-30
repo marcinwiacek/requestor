@@ -49,6 +49,10 @@ async function executeRequest(req) {
         agent: false
     };
 
+    if (req.conLen) {
+    req.headers["Content-Length"] = "Content-Length: "+req.body.length;
+    }
+
     var method2 = null;
     if (q.protocol == "http:") {
         method2 = req.method == "get" ? http.get : http.request;
@@ -328,6 +332,7 @@ async function parsePOSTforms(params, res, jsonObj) {
                 }
                 obiekt = obiekt.replace("<!--BODY-->", xxxx);
                 obiekt = obiekt.replace("<!--SSLIGNORE-->", stepcopy.ignoreWrongSSL ? "checked" : "");
+                obiekt = obiekt.replace("<!--CONLENGTH-->", stepcopy.conLen ? "checked" : "");
                 obiekt = obiekt.replace("<!--METHOD-->", stepcopy.method);
                 var xxxx = "";
                 let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + step.name + "\" order by dt desc");
@@ -373,6 +378,7 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                 step.headers = decodeURIComponent(params['headers']).split("\n");
                 step.body = decodeURIComponent(params['body']);
                 step.ignoreWrongSSL = params['ssl'] == "true";
+                step.conLen = params['conlen'] == "true";
                 step.url = decodeURIComponent(params['url']);
                 let lines = tc.input;
                 let headers = []
