@@ -50,7 +50,7 @@ async function executeRequest(req) {
     };
 
     if (req.conLen) {
-    req.headers["Content-Length"] = "Content-Length: "+req.body.length;
+      req.headers["Content-Length"] = "Content-Length: "+req.body.length;
     }
 
     var method2 = null;
@@ -336,9 +336,20 @@ async function parsePOSTforms(params, res, jsonObj) {
                 obiekt = obiekt.replace("<!--METHOD-->", stepcopy.method);
                 var xxxx = "";
                 let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + step.name + "\" order by dt desc");
+		var num = 0;
+		var del = "";
                 for (let row in rows) {
                     xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
+		    if (num == maxResultsPerRequest) {
+			if (del != "") del+=",";
+			del+="'"+rows[row].dt+"'";
+		    } else {
+			num++;
+		    }
                 }
+		if (del!="") {
+            	    await db_all(params['file'], "DELETE from requests where name =\"" + step.name + "\" and dt in ("+del+")");
+		}
                 if (res != null) res.end(obiekt.replace("<!--WHENLAST-->", xxxx));
                 return;
             }
@@ -428,7 +439,7 @@ function loadDB(name) {
             dbObj[name].exec(`
     create table requests (
 	dt text not null,
-        name text not null,
+	name text not null,
 	method text not null,
         url text not null,
         headers text not null,
