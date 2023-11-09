@@ -254,6 +254,8 @@ async function parsePOSTforms(params, res, jsonObj) {
     loadDB(params['file']);
     if (params["runstep"]) {
         return parsePOSTRunStep(params, res, jsonObj);
+    } else if (params["renamestep"]) {
+        return parsePOSTRenameStep(params, res, jsonObj);
     } else if (params["getstep"] && params["dt"]) {
         return parsePOSTGetStep(params, res, jsonObj);
     } else if (!(params['file'] && fs.existsSync(
@@ -356,6 +358,39 @@ async function parsePOSTforms(params, res, jsonObj) {
         }
     }
     if (res != null) res.end("");
+}
+
+async function parsePOSTRenameStep(params, res, jsonObj2) {
+    var sss = "";
+
+    console.log(params);
+    let arr = jsonObj[params['file']];
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+
+    let times = [];
+
+    for (let tsnumber in arr.testsuites) {
+        var ts = arr.testsuites[tsnumber];
+        console.log("testsuite name " + ts.name);
+        for (let tcnumber in ts.testcases) {
+            var tc = ts.testcases[tcnumber];
+            console.log("testcase name " + tc.name);
+
+            for (let stepnumber in tc.steps) {
+                var step = tc.steps[stepnumber];
+                if (tc.disabled && tc.disabled == true) {
+                    continue;
+                }
+                console.log(step.name + " vs " + params['old']);
+                if (step.name.localeCompare(params['old']) != 0) {
+                    continue;
+                }
+		step.name=params['new'];
+            }
+        }
+    }
+    if (res != null) res.end(sss);
 }
 
 async function parsePOSTRunStep(params, res, jsonObj2) {
@@ -610,7 +645,7 @@ const onRequestHandler = async (req, res) => {
                     for (let stepnumber in tc.steps) {
                         var step = tc.steps[stepnumber];
                         list += "<li class=\"file\">" +
-                            "<a class=\"step " + (step.disabled ? "disabled" : "") +
+                            "<a id=\""+step.name+"\" class=\"step " + (step.disabled ? "disabled" : "") +
                             "\" onclick=loadRightPart(\"file=" + params['file'] + "&step=" +
                             step.name + "\")>" + step.name + "</a></li>";
                     }

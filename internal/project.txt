@@ -130,6 +130,29 @@ function loadRightPart(url) {
 }
 
 function stepRename(stepName) {
+    var x = prompt("Please enter step name",stepName);
+    if (x!= stepName && x!=null) {
+        http = createPOST();
+        http.onload = function() {
+          if (http.status != 200) {
+            alert(http.response);
+          } else {
+    	    el = document.getElementById(stepName);
+	    el.innerHTML = "<a id=\""+x+"\" class=\""+el.class+"\" onclick=loadRightPart(\"file=bela3.json&step="+x+"\")>"+x+"</a>";
+          }
+        }
+
+        http.onerror = function() {
+          alert('login error');
+         };
+
+        const params = new URLSearchParams(window.location.search);
+        http.send("file="+params.get('file')+"&op=renamestep&old="+stepName+"&new="+x);
+	document.getElementById("cnt").classList.toggle("show");
+    }
+}
+
+function stepEnableDisable(stepName) {
     alert(stepName);
 }
 
@@ -158,12 +181,14 @@ Environment:
   </div>
 </div>
 
+var popupMenuID = "";
+
 <div class="hide" id="cnt" style="border:5px outset black; background-color: white;">
    New<br>
-   <a onclick=stepRename('ala')>Rename</a><br>
-   Disable/enable<br>
+   <a onclick=stepRename(popupMenuID)>Rename</a><br>
+   <a onclick=stepEnableDisable(popupMenuID)>Disable/enable</a><br>
    Clone<br>
-   Delete<br>
+   <a onclick=stepDelete(popupMenuID)>Delete</a><br>
 </div>
 
 <script>
@@ -186,6 +211,7 @@ for (var i = 0; i < toggler.length; i++) {
 var toggler = document.getElementsByClassName("step");
 for (var i = 0; i < toggler.length; i++) {
     toggler[i].addEventListener("contextmenu", (e) => {
+      popupMenuID = e.target.id;
       document.getElementById("cnt").classList.toggle("show");
       e.preventDefault();
     });
