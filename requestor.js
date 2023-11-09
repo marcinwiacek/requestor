@@ -714,7 +714,7 @@ const onRequestHandler = async (req, res) => {
             loadDB(params['file']);
 
             var list = "<ul>";
-            for (let servicenumber in jsonObj[params['file']].services) {
+/*            for (let servicenumber in jsonObj[params['file']].services) {
                 var service = jsonObj[params['file']].services[servicenumber];
                 list += "<li class=\"folder folder-open\">" +
                     "<a onclick=loadRightPart(\"file=" + params['file'] + "&service=" +
@@ -726,7 +726,7 @@ const onRequestHandler = async (req, res) => {
                         func.name + "\")>" + func.name + "</a></li>";
                 }
                 list += "</ul></li>";
-            }
+            }*/
             for (let tsnumber in jsonObj[params['file']].testsuites) {
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
                 list += "<li class=\"folder folder-open\">" +

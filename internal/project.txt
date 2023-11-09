@@ -215,12 +215,12 @@ function savefile() {
 File: <!--NAME-->
 <button onclick=savefile();>Save</button>
 <p>
-<form>
+<!--<form>
 Environment:
 <select name="environment" id="environment">
-<!--ENV-->
+ENV
 </select>
-</form>
+</form>-->
 <div class="flex">
   <div id="one" class="split">
      <!--TC-->
