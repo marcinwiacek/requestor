@@ -254,8 +254,14 @@ async function parsePOSTforms(params, res, jsonObj) {
     loadDB(params['file']);
     if (params["runstep"]) {
         return parsePOSTRunStep(params, res, jsonObj);
-    } else if (params["renamestep"]) {
+    } else if (params["op"]=="savefile") {
+        return parsePOSTSaveFile(params, res, jsonObj);
+    } else if (params["op"]=="renamestep") {
         return parsePOSTRenameStep(params, res, jsonObj);
+    } else if (params["op"]=="enabledisablestep") {
+        return parsePOSTEnableDisableStep(params, res, jsonObj);
+    } else if (params["op"]=="deletestep") {
+        return parsePOSTDeleteStep(params, res, jsonObj);
     } else if (params["getstep"] && params["dt"]) {
         return parsePOSTGetStep(params, res, jsonObj);
     } else if (!(params['file'] && fs.existsSync(
@@ -387,6 +393,97 @@ async function parsePOSTRenameStep(params, res, jsonObj2) {
                     continue;
                 }
 		step.name=params['new'];
+		break;
+            }
+        }
+    }
+    if (res != null) res.end(sss);
+}
+
+async function parsePOSTEnableDisableStep(params, res, jsonObj2) {
+    var sss = "";
+
+    console.log(params);
+    let arr = jsonObj[params['file']];
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+
+    let times = [];
+
+    for (let tsnumber in arr.testsuites) {
+        var ts = arr.testsuites[tsnumber];
+        console.log("testsuite name " + ts.name);
+        for (let tcnumber in ts.testcases) {
+            var tc = ts.testcases[tcnumber];
+            console.log("testcase name " + tc.name);
+
+            for (let stepnumber in tc.steps) {
+                var step = tc.steps[stepnumber];
+                if (tc.disabled && tc.disabled == true) {
+                    continue;
+                }
+                console.log(step.name + " vs " + params['old']);
+                if (step.name.localeCompare(params['old']) != 0) {
+                    continue;
+                }
+		if (step.disabled==true) {
+		    delete step.disabled;
+		} else {
+		    step.disabled=true;
+		}
+		break;
+            }
+        }
+    }
+    if (res != null) res.end(sss);
+}
+
+async function parsePOSTSaveFile(params, res, jsonObj2) {
+    var sss = "";
+
+    console.log(params);
+    let arr = jsonObj[params['file']];
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+
+ fs.writeFile(path.normalize(__dirname+'/projects/ala'), JSON.stringify(arr), function (err) {
+
+ if(err) {
+        return console.log(err);
+    }
+    });
+
+    if (res != null) res.end(sss);
+}
+
+async function parsePOSTDeleteStep(params, res, jsonObj2) {
+    var sss = "";
+
+    console.log(params);
+    let arr = jsonObj[params['file']];
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+
+    let times = [];
+
+    for (let tsnumber in arr.testsuites) {
+        var ts = arr.testsuites[tsnumber];
+        console.log("testsuite name " + ts.name);
+        for (let tcnumber in ts.testcases) {
+            var tc = ts.testcases[tcnumber];
+            console.log("testcase name " + tc.name);
+
+            for (let stepnumber in tc.steps) {
+                var step = tc.steps[stepnumber];
+                if (tc.disabled && tc.disabled == true) {
+                    continue;
+                }
+                console.log(step.name + " vs " + params['old']);
+                if (step.name.localeCompare(params['old']) != 0) {
+                    continue;
+                }
+		tc.steps.splice(stepnumber);
+		break;
             }
         }
     }
