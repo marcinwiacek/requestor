@@ -138,7 +138,16 @@ function stepRename(stepName) {
             alert(http.response);
           } else {
     	    el = document.getElementById(stepName);
-	    el.innerHTML = "<a id=\""+x+"\" class=\""+el.class+"\" onclick=loadRightPart(\"file=bela3.json&step="+x+"\")>"+x+"</a>";
+	    el.id = x;
+el.removeAttribute('onclick');
+el.addEventListener(
+  "click",
+  (e) => {
+loadRightPart("file=bela3.json&step="+x);
+  },
+  false,
+);
+el.text = x;
           }
         }
 
