@@ -333,7 +333,9 @@ updateStep(liel);
               alert(http.response);
             } else {
               liel = document.createElement("li");
-              liel.class = "file";
+              liel.class = "folder folder-open";
+
+              ulel = document.createElement("ul");
 
               alel = document.createElement("a");
               alel.text = x;
@@ -341,13 +343,15 @@ updateStep(liel);
               alel.addEventListener(
                 "click",
                 (e) => {
-                  loadRightPart("file=bela3.json&step=" + x);
+                  loadRightPart("file=bela3.json&tc=" + x);
                 },
                 false,
               );
-              alel.class = "step";
+              alel.class = "tc";
 
-              liel.appendChild(alel);
+		ulel.appendChild(alel);
+
+              liel.appendChild(ulel);
 
               el = document.getElementById(tcName);
               liparent = el.parentNode;
@@ -459,7 +463,11 @@ ENV
 
     <div class="flex">
       <div id="one" class="split">
+
+
         <!--TC-->
+<div id=menu></div>
+
       </div>
       <div id="two" class="split">
         <!--OBIEKT-->
@@ -506,11 +514,66 @@ TS
       <a onclick="suiteDelete(popupMenuID)">Delete</a><br />
       <a onclick="suiteClone(popupMenuID)">Clone</a><br />
     </div>
-
     <script>
       Split(["#one", "#two"], {
         sizes: [20, 80],
       });
+
+
+function addFilesFolders(treeObj,parentDomObj, id) {
+	let liel1 = document.createElement("li");
+	liel1.setAttribute("class","folder folder-open");
+
+	let alel1 = document.createElement("a");
+	alel1.text = treeObj.name;
+	console.log(id+treeObj.name);
+        alel1.setAttribute("id",id+treeObj.name);
+//        alel1.setAttribute("class","");
+        alel1.addEventListener(
+            "click",
+                (e) => {
+                  loadRightPart("file=bela3.json&path=" + id+treeObj.name);
+                },
+                false,
+              );
+
+        let ulel1 = document.createElement("ul");
+
+        liel1.appendChild(alel1);
+        liel1.appendChild(ulel1);
+        parentDomObj.appendChild(liel1);
+
+    treeObj.folders.forEach(function (folder,index) {
+	addFilesFolders(folder,ulel1,id+treeObj.name+"/");
+    });
+    treeObj.files.forEach(function (file,index) {
+	let liel2 = document.createElement("li");
+	liel2.setAttribute("class","file");
+
+        console.log(id+treeObj.name+"/"+file);
+	let alel2 = document.createElement("a");
+	alel2.text = file;
+        alel2.setAttribute("id", id+treeObj.name+"/"+file);
+//        alel2.setAttribute("class", "");
+        alel2.addEventListener(
+            "click",
+                (e) => {
+                  loadRightPart("file=bela3.json&path=" + id+treeObj.name+"/"+file);
+                },
+                false,
+              );
+
+        liel2.appendChild(alel2);
+        ulel1.appendChild(liel2);
+    });
+}
+
+    menuel = document.getElementById("menu");
+    ulel = document.createElement("ul");
+    menuel.appendChild(ulel);
+    tree.forEach(function (folder,index) {
+        addFilesFolders(folder,ulel,"");
+    });
 
       var toggler = document.getElementsByClassName("folder");
       for (var i = 0; i < toggler.length; i++) {
@@ -524,7 +587,6 @@ TS
         });
         toggler[i].prepend(node);
       }
-
 
       var toggler = document.getElementsByClassName("tc");
       for (var i = 0; i < toggler.length; i++) {

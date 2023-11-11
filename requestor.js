@@ -275,10 +275,12 @@ async function parsePOSTforms(params, res, jsonObj) {
         return;
     }
 
+let elpath = params['path'].split("/");
+
     var obiekt = "";
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
-    for (let servicenumber in jsonObj[params['file']].services) {
+/*    for (let servicenumber in jsonObj[params['file']].services) {
         var service = jsonObj[params['file']].services[servicenumber];
         if (service.name == params['service']) {
             if (res != null) res.end("<br>service");
@@ -302,10 +304,11 @@ async function parsePOSTforms(params, res, jsonObj) {
             }
         }
     }
+*/
 
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
-        if (suite.name == params['ts']) {
+        if (elpath.length==1 && suite.name==elpath[0]) {
             obiekt = readFileContentSync("/internal/ts.txt").replace("<!--NAME-->", suite.name);
             if (res != null) res.end(obiekt);
             return;
@@ -313,7 +316,7 @@ async function parsePOSTforms(params, res, jsonObj) {
 
         for (let tcnumber in suite.testcases) {
             var tc = suite.testcases[tcnumber];
-            if (tc.name == params['tc']) {
+    	    if (elpath.length==2 && suite.name==elpath[0] && tc.name==elpath[1]) {
                 obiekt = readFileContentSync("/internal/tc.txt").replace("<!--NAME-->", tc.name);
                 var xxxx = "<script>var csvData =`";
                 for (var inputnumber in tc.input) {
@@ -325,11 +328,11 @@ async function parsePOSTforms(params, res, jsonObj) {
             }
             for (let stepnumber in tc.steps) {
                 var step = tc.steps[stepnumber];
-                if (!(step.name == params['step'])) {
-                    continue;
-                }
-
-                var stepcopy = findtc(jsonObj[params['file']], step);
+    	    if (elpath.length==3 && suite.name==elpath[0] && tc.name==elpath[1] && step.name==elpath[2]) {
+	    } else {
+		continue;
+	    }
+	        var stepcopy = findtc(jsonObj[params['file']], step);
 
                 obiekt = readFileContentSync("/internal/step.txt").replace("<!--NAME-->",
                     stepcopy.name);
@@ -852,7 +855,45 @@ const onRequestHandler = async (req, res) => {
             }
             loadDB(params['file']);
 
+	    let tree=[];
+
+            for (let tsnumber in jsonObj[params['file']].testsuites) {
+                var ts = jsonObj[params['file']].testsuites[tsnumber];
+		var tsobj = {}
+		tsobj.name=ts.name;
+		tsobj.folders=[]
+		tsobj.files=[]
+
+                for (let tcnumber in ts.testcases) {
+                    var tc = ts.testcases[tcnumber];
+
+		    var tcobj = {}
+		    tcobj.name=tc.name;
+		    tcobj.folders=[]
+		    tcobj.files=[]
+
+                    for (let stepnumber in tc.steps) {
+                        var step = tc.steps[stepnumber];
+			tcobj.files.push(step.name);
+                    }
+		    tsobj.folders.push(tcobj);
+                }
+		tree.push(tsobj);
+            }
+/*
+        const params = url.parse(req.url, true).query;
+        if (params['file'] && fs.existsSync(
+                path.normalize(__dirname + "/projects/" + params['file']))) {
+            if (!loadFile(params['file'])) {
+                sendHTML(req, res, readFileContentSync("/internal/project.txt")
+                    .replace("<!--TC-->", "")
+                    .replace("<!--NAME-->", "Error reading file"));
+                return;
+            }
+            loadDB(params['file']);
+
             var list = "<ul>";
+*/
             /*            for (let servicenumber in jsonObj[params['file']].services) {
                             var service = jsonObj[params['file']].services[servicenumber];
                             list += "<li class=\"folder folder-open\">" +
@@ -866,7 +907,7 @@ const onRequestHandler = async (req, res) => {
                             }
                             list += "</ul></li>";
                         }*/
-            for (let tsnumber in jsonObj[params['file']].testsuites) {
+/*            for (let tsnumber in jsonObj[params['file']].testsuites) {
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
 
                         list += "<li class=\"folder folder-open\">" +
@@ -893,9 +934,10 @@ const onRequestHandler = async (req, res) => {
                 list += "</li></ul>";
             }
             list += "</ul>";
+*/
 
             sendHTML(req, res, readFileContentSync("/internal/project.txt")
-                .replace("<!--TC-->", list)
+                .replace("<!--TC-->", "<script>tree = "+JSON.stringify(tree)+";</script>")
                 .replace("<!--NAME-->", params['file'])
                 .replace("<!--RUN-->", "<p><a href=?file=" + params['file'] + "&run=1>run all</a>"));
             return;
