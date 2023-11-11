@@ -589,7 +589,7 @@ async function parsePOSTDeleteStep(params, res, jsonObj2) {
                 if (step.name.localeCompare(params['old']) != 0) {
                     continue;
                 }
-                tc.steps.splice(stepnumber);
+                tc.steps.splice(stepnumber,1);
                 break;
             }
         }
