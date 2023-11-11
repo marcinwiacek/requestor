@@ -197,7 +197,7 @@
             "&op=enabledisablestep&old=" +
             stepName,
         );
-        document.getElementById("foldermenu").classList.toggle("show");
+        document.getElementById("stepmenu").classList.toggle("show");
       }
 
       function stepNew(stepName) {
@@ -247,7 +247,7 @@ updateStep(liel);
               "&new=" +
               x,
           );
-          document.getElementById("foldermenu").classList.toggle("show");
+          document.getElementById("stepmenu").classList.toggle("show");
         }
       }
 
@@ -298,7 +298,7 @@ updateStep(liel);
               "&new=" +
               x,
           );
-          document.getElementById("foldermenu").classList.toggle("show");
+          document.getElementById("stepmenu").classList.toggle("show");
         }
       }
 
@@ -321,7 +321,7 @@ updateStep(liel);
         http.send(
           "file=" + params.get("file") + "&op=deletestep&old=" + stepName,
         );
-        document.getElementById("foldermenu").classList.toggle("show");
+        document.getElementById("stepmenu").classList.toggle("show");
       }
 
       function tcNew(tcName) {
@@ -396,51 +396,21 @@ updateStep(liel);
         http.send("file=" + params.get("file") + "&op=savefile");
       }
 
-function updateStep(toggler) {
+function updatePopupMenu(toggler,name) {
         toggler.addEventListener("contextmenu", (e) => {
           popupMenuID = e.target.id;
-          document.getElementById("foldermenu").classList.toggle("show");
+          document.getElementById(name+"menu").classList.toggle("show");
           e.preventDefault();
         });
         toggler.addEventListener("mousemove", (e) => {
-          if (document.getElementById("foldermenu").classList.contains("show")) return;
+          if (document.getElementById(name+"menu").classList.contains("show")) return;
           if (!e) e = window.event;
-          document.getElementById("foldermenu").style.top = e.pageY + "px";
-          document.getElementById("foldermenu").style.left = e.pageX + "px";
+          document.getElementById(name+"menu").style.top = e.pageY + "px";
+          document.getElementById(name+"menu").style.left = e.pageX + "px";
         });
 
 }
 
-function updateTC(toggler) {
-        toggler.addEventListener("contextmenu", (e) => {
-          popupMenuID = e.target.id;
-          document.getElementById("foldertc").classList.toggle("show");
-          e.preventDefault();
-        });
-        toggler.addEventListener("mousemove", (e) => {
-          if (document.getElementById("foldertc").classList.contains("show")) return;
-          if (!e) e = window.event;
-          document.getElementById("foldertc").style.top = e.pageY + "px";
-          document.getElementById("foldertc").style.left = e.pageX + "px";
-        });
-
-}
-
-
-function updateTS(toggler) {
-        toggler.addEventListener("contextmenu", (e) => {
-          popupMenuID = e.target.id;
-          document.getElementById("foldersuite").classList.toggle("show");
-          e.preventDefault();
-        });
-        toggler.addEventListener("mousemove", (e) => {
-          if (document.getElementById("foldersuite").classList.contains("show")) return;
-          if (!e) e = window.event;
-          document.getElementById("foldersuite").style.top = e.pageY + "px";
-          document.getElementById("foldersuite").style.left = e.pageX + "px";
-        });
-
-}
 
     </script>
   </head>
@@ -479,7 +449,7 @@ ENV
 
     <div
       class="hide"
-      id="foldermenu"
+      id="stepmenu"
       style="border: 5px outset black; background-color: white"
     >
       <a onclick="stepNew(popupMenuID)">New</a><br />
@@ -491,7 +461,7 @@ ENV
 
     <div
       class="hide"
-      id="foldertc"
+      id="foldermenu"
       style="border: 5px outset black; background-color: white"
     >
 TC
@@ -502,18 +472,6 @@ TC
       <a onclick="tcClone(popupMenuID)">Clone</a><br />
     </div>
 
-    <div
-      class="hide"
-      id="foldersuite"
-      style="border: 5px outset black; background-color: white"
-    >
-TS
-      <a onclick="suiteNew(popupMenuID)">New</a><br />
-      <a onclick="suiteRename(popupMenuID)">Rename</a><br />
-      <a onclick="suiteEnableDisable(popupMenuID)">Disable/enable</a><br />
-      <a onclick="suiteDelete(popupMenuID)">Delete</a><br />
-      <a onclick="suiteClone(popupMenuID)">Clone</a><br />
-    </div>
     <script>
       Split(["#one", "#two"], {
         sizes: [20, 80],
@@ -528,7 +486,7 @@ function addFilesFolders(treeObj,parentDomObj, id) {
 	alel1.text = treeObj.name;
 	console.log(id+treeObj.name);
         alel1.setAttribute("id",id+treeObj.name);
-//        alel1.setAttribute("class","");
+        alel1.setAttribute("class","tcts");
         alel1.addEventListener(
             "click",
                 (e) => {
@@ -588,29 +546,15 @@ function addFilesFolders(treeObj,parentDomObj, id) {
         toggler[i].prepend(node);
       }
 
-      var toggler = document.getElementsByClassName("tc");
+      var toggler = document.getElementsByClassName("tcts");
       for (var i = 0; i < toggler.length; i++) {
-      updateTC(toggler[i]);
-      }
-
-      var toggler = document.getElementsByClassName("ts");
+          updatePopupMenu(toggler[i],"folder");
+    }
+      var toggler = document.getElementsByClassName("file");
       for (var i = 0; i < toggler.length; i++) {
-      updateTS(toggler[i]);
-      }
+          updatePopupMenu(toggler[i],"step");
+    }
 
-
-      var toggler = document.getElementsByClassName("step");
-      for (var i = 0; i < toggler.length; i++) {
-      updateStep(toggler[i]);
-      }
-
-      var toggler = document.getElementsByClassName("foldermenu");
-      for (var i = 0; i < toggler.length; i++) {
-        toggler[i].addEventListener("contextmenu", (e) => {
-          document.getElementById("foldermenu").classList.toggle("show");
-          e.preventDefault();
-        });
-      }
     </script>
   </body>
 </html>

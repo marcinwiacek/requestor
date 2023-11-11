@@ -6,8 +6,8 @@ onboarding in many companies, support for all important features, etc.).
 Allows for concurrent work.
 
 # Why another app?
-Because many existing were written years ago and are very obsolete and horrible.
-I say it with > 15 years of experience.
+Because many existing apps were written years ago and are obsolete
+and horrible. I say it with > 15 years of testing experience.
 
 # Ha, ha, license allows for using it for free, I don't need to pay
 Indeed. But don't expect all possible support. Time is money.
@@ -15,11 +15,19 @@ Indeed. But don't expect all possible support. Time is money.
 # I want this and this
 Wait or see previous point
 
+# Support
+GitHub or marcin (@) mwiacek (.) com. I will do my best, but I can't give
+any SLA warranty with free version. Time is money.
+
 # There is no big company staying behind this
-Linux kernel also started this way. And today you have it in desktop, Android, etc.
+Linux kernel also started this way. And today you have it in desktop,
+Android, etc.
 
 # Code is horrible, all should go to the trash, bla, bla, bla
-Write or propose better
+Yeah. Month ago it was worse, year ago much worse. Normally you start from
+smth horrible and improve it. This is called progress (BTW, do you think, that
+Android 1.0 or Windows 1.0 was already excellent?). If you're not patient,
+write or propose smth better or shut up.
 
 # Installation
 1. install nodejs - ```sudo snap install node --classic --channel=20```
