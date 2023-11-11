@@ -677,19 +677,19 @@ function loadDB(name) {
             }
             dbObj[name].exec(`
     create table requests (
-	dt text not null,
-	name text not null,
-	method text not null,
-        url text not null,
-        headers text not null,
-	body text not null,
-        ssl_ignore smallint not null,
-	cert_res text not null,
-	error_res text,
-        headers_res text not null,
-	body_res text not null,
-	code_res SMALLINT not null,
-	dt_res text not null
+    dt text not null,
+    name text not null,
+    method text not null,
+    url text not null,
+    headers text not null,
+    body text not null,
+    ssl_ignore smallint not null,
+    cert_res text not null,
+    error_res text,
+    headers_res text not null,
+    body_res text not null,
+    code_res SMALLINT not null,
+    dt_res text not null
     );`, () => {});
             let v = await db_all(name, "SELECT sqlite_version();");
             console.log(JSON.stringify(v));
