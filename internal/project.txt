@@ -550,15 +550,15 @@ function addFilesFolders(treeObj,parentDomObj, id) {
 	let liel2 = document.createElement("li");
 	liel2.setAttribute("class","file");
 
-        console.log(id+treeObj.name+"/"+file);
+        console.log(id+treeObj.name+"/"+file.name);
 	let alel2 = document.createElement("a");
-	alel2.text = file;
-        alel2.setAttribute("id", id+treeObj.name+"/"+file);
-//        alel2.setAttribute("class", "");
+	alel2.text = file.name;
+        alel2.setAttribute("id", id+treeObj.name+"/"+file.name);
+        alel2.setAttribute("class", "step"+(file.disabled?" disabled":""));
         alel2.addEventListener(
             "click",
                 (e) => {
-                  loadRightPart("file=bela3.json&path=" + id+treeObj.name+"/"+file);
+                  loadRightPart("file=bela3.json&path=" + id+treeObj.name+"/"+file.name);
                 },
                 false,
               );

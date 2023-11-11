@@ -861,6 +861,7 @@ const onRequestHandler = async (req, res) => {
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
 		var tsobj = {}
 		tsobj.name=ts.name;
+		tsobj.disabled=ts.disabled;
 		tsobj.folders=[]
 		tsobj.files=[]
 
@@ -869,12 +870,16 @@ const onRequestHandler = async (req, res) => {
 
 		    var tcobj = {}
 		    tcobj.name=tc.name;
+		    tcobj.disabled=tc.disabled;
 		    tcobj.folders=[]
 		    tcobj.files=[]
 
                     for (let stepnumber in tc.steps) {
                         var step = tc.steps[stepnumber];
-			tcobj.files.push(step.name);
+			var stepobj = {}
+    			stepobj.name=step.name;
+			stepobj.disabled=step.disabled && step.disabled == true?true:false;
+			tcobj.files.push(stepobj);
                     }
 		    tsobj.folders.push(tcobj);
                 }
