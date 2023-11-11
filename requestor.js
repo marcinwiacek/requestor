@@ -836,15 +836,18 @@ const onRequestHandler = async (req, res) => {
                         }*/
             for (let tsnumber in jsonObj[params['file']].testsuites) {
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
-                list += "<li class=\"folder folder-open\">" +
-                    "<a onclick=loadRightPart(\"file=" + params['file'] + "&ts=" +
-                    ts.name + "\")>" + ts.name + "</a><ul>";
+
+                        list += "<li class=\"folder folder-open\">" +
+                            "<a id=\"" + ts.name + "\" class=\"ts " + (ts.disabled ? "disabled" : "") +
+                            "\" onclick=loadRightPart(\"file=" + params['file'] + "&ts=" +
+                            ts.name + "\")>" + ts.name + "</a><ul>";
 
                 for (let tcnumber in ts.testcases) {
                     var tc = ts.testcases[tcnumber];
-                    list += "<li class=\"folder folder-open\">" +
-                        "<a onclick=loadRightPart(\"file=" + params['file'] + "&tc=" +
-                        tc.name + "\")>" + tc.name + "</a><ul>";
+                        list += "<li class=\"folder folder-open\">" +
+                            "<a id=\"" + tc.name + "\" class=\"tc " + (tc.disabled ? "disabled" : "") +
+                            "\" onclick=loadRightPart(\"file=" + params['file'] + "&tc=" +
+                            tc.name + "\")>" + tc.name + "</a><ul>";
 
                     for (let stepnumber in tc.steps) {
                         var step = tc.steps[stepnumber];
