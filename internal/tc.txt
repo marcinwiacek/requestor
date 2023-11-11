@@ -1,120 +1,135 @@
-<br>
+<br />
 
 <div>
-    <button onclick='table.clearData();return false;'>Clear data</button>
-    <button onclick='table.addRow({});return false;'>Add row</button>
-    <button onclick='addColumn();return false;'>Add column</button>
-    <button onclick='table.deleteColumn("name");return false;'>Delete column</button>
-    <button onclick='table.import("csv",".csv");return false;'>Load from CSV file</button>
-    <button onclick='table.download("csv", "data.csv", {delimiter:","});return false;'>Save to CSV file</button>
-    <button onclick='table.copyToClipboard("all");return false;'>Copy to clipboard</button>
+  <button onclick="table.clearData();return false;">Clear data</button>
+  <button onclick="table.addRow({});return false;">Add row</button>
+  <button onclick="addColumn();return false;">Add column</button>
+  <button onclick='table.deleteColumn("name");return false;'>
+    Delete column
+  </button>
+  <button onclick='table.import("csv",".csv");return false;'>
+    Load from CSV file
+  </button>
+  <button
+    onclick='table.download("csv", "data.csv", {delimiter:","});return false;'
+  >
+    Save to CSV file
+  </button>
+  <button onclick='table.copyToClipboard("all");return false;'>
+    Copy to clipboard
+  </button>
 </div>
 
 <div id="data-table"></div>
 <!--DATA-->
 <script>
-
-function addColumn() {
-  while (true) {
-    var x = prompt("Please enter unique column name");
-    if (x == null) break;
-    if (x=="") continue;
-      for (columnNum in table.getColumnDefinitions()){
-          if (table.getColumnDefinitions()[columnNum].title == x) {
-             x = "";
-             break;
-          }
+  function addColumn() {
+    while (true) {
+      var x = prompt("Please enter unique column name");
+      if (x == null) break;
+      if (x == "") continue;
+      for (columnNum in table.getColumnDefinitions()) {
+        if (table.getColumnDefinitions()[columnNum].title == x) {
+          x = "";
+          break;
+        }
       }
-    if (x=="") continue;
-    table.addColumn({title:x, field:x}, true, x);
-    break;
+      if (x == "") continue;
+      table.addColumn({ title: x, field: x }, true, x);
+      break;
+    }
   }
-}
 
-var table = new Tabulator("#data-table", {
-    height:205,
-    data:csvData,
-    importFormat:"csv",
-    layout:"fitColumns",
-    autoColumns:true,
-    movableColumns:true,
-//    history:true,
-    addRowPos:"top",
-    paginationSize:7,
-    paginationCounter:"rows",
-    clipboard:true,
-//    movableRows: true,
-//    movableRowsConnectedElements: "#drop-area",
-//    movableColumns: true
-});
+  var table = new Tabulator("#data-table", {
+    height: 205,
+    data: csvData,
+    importFormat: "csv",
+    layout: "fitColumns",
+    autoColumns: true,
+    movableColumns: true,
+    //    history:true,
+    addRowPos: "top",
+    paginationSize: 7,
+    paginationCounter: "rows",
+    clipboard: true,
+    //    movableRows: true,
+    //    movableRowsConnectedElements: "#drop-area",
+    //    movableColumns: true
+  });
 
-table.on("movableRowsElementDrop", function(e, element, row){
-        var div = document.createElement("div");
-        div.textContent = row.getData().name;
-        element.appendChild(div);
-});
+  table.on("movableRowsElementDrop", function (e, element, row) {
+    var div = document.createElement("div");
+    div.textContent = row.getData().name;
+    element.appendChild(div);
+  });
 
-table.on("dataChanged", function(data){
+  table.on("dataChanged", function (data) {
     var csvData = "";
     for (var key in data) {
-	for (var key2 in data[key]) {
-	    csvData+=key2+",";
-	}
-	break;
+      for (var key2 in data[key]) {
+        csvData += key2 + ",";
+      }
+      break;
     }
-    csvData+="\n";
+    csvData += "\n";
     for (var key in data) {
-	for (var key2 in data[key]) {
-	    csvData+=data[key][key2]+",";
-	}
-        csvData+="\n";
+      for (var key2 in data[key]) {
+        csvData += data[key][key2] + ",";
+      }
+      csvData += "\n";
     }
 
-http = createPOST();
-  http.onload = function() {
-    if (http.status != 200) {
+    http = createPOST();
+    http.onload = function () {
+      if (http.status != 200) {
+        alert(http.response);
+      }
       alert(http.response);
-    }
-alert(http.response);
-  }
+    };
 
-  http.onerror = function() {
-    alert('login error');
-  };
+    http.onerror = function () {
+      alert("login error");
+    };
 
-  const params = new URLSearchParams(window.location.search);
-  console.log(params);
-  http.send("file="+params.get('file')+"&tc="+document.getElementById('name').value
-//+"&dt="+encodeURIComponent(document.getElementById("whenlast").value)
-+"&d="+encodeURIComponent(csvData.replaceAll(",\n","\n")));
+    const params = new URLSearchParams(window.location.search);
+    console.log(params);
+    http.send(
+      "file=" +
+        params.get("file") +
+        "&tc=" +
+        document.getElementById("name").value +
+        //+"&dt="+encodeURIComponent(document.getElementById("whenlast").value)
+        "&d=" +
+        encodeURIComponent(csvData.replaceAll(",\n", "\n")),
+    );
+  });
 
-});
-
-
-table.on("dataProcessed", function(){
+  table.on("dataProcessed", function () {
     var newColumns = [];
     var aColumns = table.getColumns();
     for (var i = 0; i < aColumns.length; i++) {
-        aColumns[i]._column.definition.editor = "input";
-        aColumns[i]._column.definition.headerDblClick = function(e, column){
-    	    let name = prompt("Please enter column name", column._column.definition.title);
-	    var newColumns = [];
-	    var aColumns = table.getColumns();
-	    for (var i = 0; i < aColumns.length; i++) {
-		if (aColumns[i]._column.definition == column._column.definition) {
-		    aColumns[i]._column.definition.title = name;
-	        };
-    		newColumns.push(aColumns[i]._column.definition);
-	    }
-	    table.setColumns(newColumns);
-	};
-        newColumns.push(aColumns[i]._column.definition);
+      aColumns[i]._column.definition.editor = "input";
+      aColumns[i]._column.definition.headerDblClick = function (e, column) {
+        let name = prompt(
+          "Please enter column name",
+          column._column.definition.title,
+        );
+        var newColumns = [];
+        var aColumns = table.getColumns();
+        for (var i = 0; i < aColumns.length; i++) {
+          if (aColumns[i]._column.definition == column._column.definition) {
+            aColumns[i]._column.definition.title = name;
+          }
+          newColumns.push(aColumns[i]._column.definition);
+        }
+        table.setColumns(newColumns);
+      };
+      newColumns.push(aColumns[i]._column.definition);
     }
     table.setColumns(newColumns);
-});
-
+  });
 </script>
 
-<form id=d>
-<p>Name: <input type="text" id="name" name="name" value="<!--NAME-->">
+<form id="d">
+  <p>Name: <input type="text" id="name" name="name" value="<!--NAME-->" /></p>
 </form>
