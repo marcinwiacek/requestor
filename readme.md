@@ -25,9 +25,9 @@ Android, etc.
 
 # Code is horrible, all should go to the trash, bla, bla, bla
 Yeah. Month ago it was worse, year ago much worse. Normally you start from
-smth horrible and improve it. This is called progress (BTW, do you think, that
-Android 1.0 or Windows 1.0 was already excellent?). If you're not patient,
-write or propose smth better or shut up.
+smth horrible and improve it. This is called progress (BTW, Android 1.0 or
+Windows 1.0 wasn't excellent). If you're not patient, write & propose smth 
+better or shut up & allow big boys to work.
 
 # Installation
 1. install nodejs - ```sudo snap install node --classic --channel=20```
