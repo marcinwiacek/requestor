@@ -266,6 +266,8 @@ async function parsePOSTforms(params, res, jsonObj) {
         return parsePOSTEnableDisableStep(params, res, jsonObj);
     } else if (params["op"] == "deletestep") {
         return parsePOSTDeleteStep(params, res, jsonObj);
+    } else if (params["op"] == "newtc") {
+        return parsePOSTNewTC(params, res, jsonObj);
     } else if (params["getstep"] && params["dt"]) {
         return parsePOSTGetStep(params, res, jsonObj);
     } else if (!(params['file'] && fs.existsSync(
@@ -540,6 +542,36 @@ async function parsePOSTEnableDisableStep(params, res, jsonObj2) {
                 }
                 break;
             }
+        }
+    }
+    if (res != null) res.end(sss);
+}
+
+async function parsePOSTNewTC(params, res, jsonObj2) {
+    var sss = "";
+
+    console.log(params);
+    let arr = jsonObj[params['file']];
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+
+    let times = [];
+
+    for (let tsnumber in arr.testsuites) {
+        var ts = arr.testsuites[tsnumber];
+        console.log("testsuite name " + ts.name);
+        for (let tcnumber in ts.testcases) {
+            var tc = ts.testcases[tcnumber];
+            console.log("testcase name " + tc.name);
+
+                if (tc.name.localeCompare(params['old']) != 0) {
+                    continue;
+                }
+
+                let newTC = {};
+                newTC.name = params["new"];
+                ts.testcases.splice(tcnumber, 0, newTC);
+                break;
         }
     }
     if (res != null) res.end(sss);

@@ -324,6 +324,57 @@ updateStep(liel);
         document.getElementById("foldermenu").classList.toggle("show");
       }
 
+      function tcNew(tcName) {
+        var x = prompt("Please enter new test case name");
+        if (x != tcName && x != null) {
+          http = createPOST();
+          http.onload = function () {
+            if (http.status != 200) {
+              alert(http.response);
+            } else {
+              liel = document.createElement("li");
+              liel.class = "file";
+
+              alel = document.createElement("a");
+              alel.text = x;
+              alel.id = x;
+              alel.addEventListener(
+                "click",
+                (e) => {
+                  loadRightPart("file=bela3.json&step=" + x);
+                },
+                false,
+              );
+              alel.class = "step";
+
+              liel.appendChild(alel);
+
+              el = document.getElementById(tcName);
+              liparent = el.parentNode;
+              liparent.parentNode.insertBefore(liel, liparent);
+
+updateStep(liel);
+
+            }
+          };
+
+          http.onerror = function () {
+            alert("login error");
+          };
+
+          const params = new URLSearchParams(window.location.search);
+          http.send(
+            "file=" +
+              params.get("file") +
+              "&op=newtc&old=" +
+              tcName +
+              "&new=" +
+              x,
+          );
+          document.getElementById("foldertc").classList.toggle("show");
+        }
+      }
+
       function savefile() {
         http = createPOST();
         http.onload = function () {
