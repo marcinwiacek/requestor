@@ -242,6 +242,7 @@
 
         while (true) {
           var newName = prompt("Please enter unique name",oldName);
+oldName = newName;
 
           if (newName == null) {
             break;
@@ -255,31 +256,25 @@
               if (http.status != 200) {
                 alert(http.response);
               } else {
-
-/*
               liel = document.createElement("li");
-              liel.class = "file";
+              liel.class = elpath.length ==3?"file":"folder";
 
               alel = document.createElement("a");
-              alel.text = x;
-              alel.id = x;
-              alel.addEventListener(
-                "click",
-                (e) => {
-                  loadRightPart("file=bela3.json&step=" + x);
-                },
-                false,
-              );
-              alel.class = "step";
+              alel.text = newName;
+              alel.id = newElementPath;
+              alel.class = elpath.length ==3?"step":"tcts";
+            params = new URLSearchParams(window.location.search);
+          alel.onclick = function () {
+            loadRightPart("file=" + params.get("file") + "&path=" + this.id);
+          };
 
               liel.appendChild(alel);
 
-              el = document.getElementById(stepName);
+              el = document.getElementById(elementPath);
               liparent = el.parentNode;
               liparent.parentNode.insertBefore(liel, liparent);
 
               updateStep(liel);
-*/
               }
             };
 
