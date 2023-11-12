@@ -266,7 +266,7 @@ retVal.index = tsnumber;
                 retVal = [];
                 retVal.obj = tc;
 retVal.index = tcnumber;
-                retVal.parent = suite.tescases;
+                retVal.parent = suite.testcases;
                 return retVal;
             }
             for (let stepnumber in tc.steps) {
