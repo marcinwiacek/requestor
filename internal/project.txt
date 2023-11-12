@@ -137,43 +137,72 @@
         return false;
       }
 
-      function stepRename(stepName) {
-        var x = prompt("Please enter step name", stepName);
-        if (x != stepName && x != null) {
-          http = createPOST();
-          http.onload = function () {
-            if (http.status != 200) {
-              alert(http.response);
-            } else {
-              el = document.getElementById(stepName);
-              el.id = x;
-              el.removeAttribute("onclick");
-              el.addEventListener(
-                "click",
-                (e) => {
-                  loadRightPart("file=bela3.json&step=" + x);
-                },
-                false,
-              );
-              el.text = x;
-            }
-          };
+      function elementRename(elementPath) {
+        let elpath = elementPath.split("/");
 
-          http.onerror = function () {
-            alert("login error");
-          };
+        while (true) {
+          var x = prompt("Please enter unique name", elpath[elpath.length - 1]);
 
-          const params = new URLSearchParams(window.location.search);
-          http.send(
-            "file=" +
-              params.get("file") +
-              "&op=renamestep&old=" +
-              stepName +
-              "&new=" +
-              x,
-          );
-          document.getElementById("stepmenu").classList.toggle("show");
+          if (x == null) {
+            break;
+          }
+
+          if (
+            document.getElementById(
+              elementPath.replace(
+                new RegExp(elpath[elpath.length - 1] + "$"),
+                x,
+              ),
+            ) == null
+          ) {
+            http = createPOST();
+            http.onload = function () {
+              if (http.status != 200) {
+                alert(http.response);
+              } else {
+                const params = new URLSearchParams(window.location.search);
+                el = document.getElementById(elementPath);
+                el.id = x;
+                el.removeAttribute("onclick");
+                el.addEventListener(
+                  "click",
+                  (e) => {
+                    loadRightPart(
+                      "file=" +
+                        params.get("file") +
+                        "&path=" +
+                        elementPath.replace(
+                          new RegExp(elpath[elpath.length - 1] + "$"),
+                          x,
+                        ),
+                    );
+                  },
+                  false,
+                );
+                el.text = x;
+              }
+            };
+
+            http.onerror = function () {
+              alert("login error");
+            };
+
+            const params = new URLSearchParams(window.location.search);
+            http.send(
+              "file=" +
+                params.get("file") +
+                "&" +
+                "op=renameelement&" +
+                "path=" +
+                elementPath +
+                "&" +
+                "new=" +
+                x,
+            );
+            break;
+          }
         }
+        document.getElementById("stepmenu").classList.toggle("show");
       }
 
       function stepEnableDisable(stepName) {
@@ -229,8 +258,7 @@
               liparent = el.parentNode;
               liparent.parentNode.insertBefore(liel, liparent);
 
-updateStep(liel);
-
+              updateStep(liel);
             }
           };
 
@@ -280,8 +308,7 @@ updateStep(liel);
               liparent = el.parentNode;
               liparent.parentNode.insertBefore(liel, liparent);
 
-updateStep(liel);
-
+              updateStep(liel);
             }
           };
 
@@ -349,7 +376,7 @@ updateStep(liel);
               );
               alel.class = "tc";
 
-		ulel.appendChild(alel);
+              ulel.appendChild(alel);
 
               liel.appendChild(ulel);
 
@@ -357,8 +384,7 @@ updateStep(liel);
               liparent = el.parentNode;
               liparent.parentNode.insertBefore(liel, liparent);
 
-updateStep(liel);
-
+              updateStep(liel);
             }
           };
 
@@ -396,22 +422,20 @@ updateStep(liel);
         http.send("file=" + params.get("file") + "&op=savefile");
       }
 
-function updatePopupMenu(toggler,name) {
+      function updatePopupMenu(toggler, name) {
         toggler.addEventListener("contextmenu", (e) => {
           popupMenuID = e.target.id;
-          document.getElementById(name+"menu").classList.toggle("show");
+          document.getElementById(name + "menu").classList.toggle("show");
           e.preventDefault();
         });
         toggler.addEventListener("mousemove", (e) => {
-          if (document.getElementById(name+"menu").classList.contains("show")) return;
+          if (document.getElementById(name + "menu").classList.contains("show"))
+            return;
           if (!e) e = window.event;
-          document.getElementById(name+"menu").style.top = e.pageY + "px";
-          document.getElementById(name+"menu").style.left = e.pageX + "px";
+          document.getElementById(name + "menu").style.top = e.pageY + "px";
+          document.getElementById(name + "menu").style.left = e.pageX + "px";
         });
-
-}
-
-
+      }
     </script>
   </head>
   <body>
@@ -433,11 +457,8 @@ ENV
 
     <div class="flex">
       <div id="one" class="split">
-
-
         <!--TC-->
-<div id=menu></div>
-
+        <div id="menu"></div>
       </div>
       <div id="two" class="split">
         <!--OBIEKT-->
@@ -453,7 +474,7 @@ ENV
       style="border: 5px outset black; background-color: white"
     >
       <a onclick="stepNew(popupMenuID)">New</a><br />
-      <a onclick="stepRename(popupMenuID)">Rename</a><br />
+      <a onclick="elementRename(popupMenuID)">Rename</a><br />
       <a onclick="stepEnableDisable(popupMenuID)">Disable/enable</a><br />
       <a onclick="stepDelete(popupMenuID)">Delete</a><br />
       <a onclick="stepClone(popupMenuID)">Clone</a><br />
@@ -464,9 +485,9 @@ ENV
       id="foldermenu"
       style="border: 5px outset black; background-color: white"
     >
-TC
+      TC
       <a onclick="tcNew(popupMenuID)">New</a><br />
-      <a onclick="tcRename(popupMenuID)">Rename</a><br />
+      <a onclick="elementRename(popupMenuID)">Rename</a><br />
       <a onclick="tcEnableDisable(popupMenuID)">Disable/enable</a><br />
       <a onclick="tcDelete(popupMenuID)">Delete</a><br />
       <a onclick="tcClone(popupMenuID)">Clone</a><br />
@@ -477,23 +498,26 @@ TC
         sizes: [20, 80],
       });
 
+      function addFilesFolders(treeObj, parentDomObj, id) {
+        const params = new URLSearchParams(window.location.search);
 
-function addFilesFolders(treeObj,parentDomObj, id) {
-	let liel1 = document.createElement("li");
-	liel1.setAttribute("class","folder folder-open");
+        let liel1 = document.createElement("li");
+        liel1.setAttribute("class", "folder folder-open");
 
-	let alel1 = document.createElement("a");
-	alel1.text = treeObj.name;
-	console.log(id+treeObj.name);
-        alel1.setAttribute("id",id+treeObj.name);
-        alel1.setAttribute("class","tcts");
+        let alel1 = document.createElement("a");
+        alel1.text = treeObj.name;
+        console.log(id + treeObj.name);
+        alel1.setAttribute("id", id + treeObj.name);
+        alel1.setAttribute("class", "tcts");
         alel1.addEventListener(
-            "click",
-                (e) => {
-                  loadRightPart("file=bela3.json&path=" + id+treeObj.name);
-                },
-                false,
-              );
+          "click",
+          (e) => {
+            loadRightPart(
+              "file=" + params.get("file") + "&path=" + id + treeObj.name,
+            );
+          },
+          false,
+        );
 
         let ulel1 = document.createElement("ul");
 
@@ -501,37 +525,47 @@ function addFilesFolders(treeObj,parentDomObj, id) {
         liel1.appendChild(ulel1);
         parentDomObj.appendChild(liel1);
 
-    treeObj.folders.forEach(function (folder,index) {
-	addFilesFolders(folder,ulel1,id+treeObj.name+"/");
-    });
-    treeObj.files.forEach(function (file,index) {
-	let liel2 = document.createElement("li");
-	liel2.setAttribute("class","file");
+        treeObj.folders.forEach(function (folder, index) {
+          addFilesFolders(folder, ulel1, id + treeObj.name + "/");
+        });
+        treeObj.files.forEach(function (file, index) {
+          let liel2 = document.createElement("li");
+          liel2.setAttribute("class", "file");
 
-        console.log(id+treeObj.name+"/"+file.name);
-	let alel2 = document.createElement("a");
-	alel2.text = file.name;
-        alel2.setAttribute("id", id+treeObj.name+"/"+file.name);
-        alel2.setAttribute("class", "step"+(file.disabled?" disabled":""));
-        alel2.addEventListener(
+          console.log(id + treeObj.name + "/" + file.name);
+          let alel2 = document.createElement("a");
+          alel2.text = file.name;
+          alel2.setAttribute("id", id + treeObj.name + "/" + file.name);
+          alel2.setAttribute(
+            "class",
+            "step" + (file.disabled ? " disabled" : ""),
+          );
+          alel2.addEventListener(
             "click",
-                (e) => {
-                  loadRightPart("file=bela3.json&path=" + id+treeObj.name+"/"+file.name);
-                },
-                false,
+            (e) => {
+              loadRightPart(
+                "file=" +
+                  params.get("file") +
+                  "&path=" +
+                  id +
+                  treeObj.name +
+                  "/" +
+                  file.name,
               );
+            },
+            false,
+          );
 
-        liel2.appendChild(alel2);
-        ulel1.appendChild(liel2);
-    });
-}
+          liel2.appendChild(alel2);
+          ulel1.appendChild(liel2);
+        });
+      }
 
-    menuel = document.getElementById("menu");
-    ulel = document.createElement("ul");
-    menuel.appendChild(ulel);
-    tree.forEach(function (folder,index) {
-        addFilesFolders(folder,ulel,"");
-    });
+      ulel = document.createElement("ul");
+      document.getElementById("menu").appendChild(ulel);
+      tree.forEach(function (folder, index) {
+        addFilesFolders(folder, ulel, "");
+      });
 
       var toggler = document.getElementsByClassName("folder");
       for (var i = 0; i < toggler.length; i++) {
@@ -548,13 +582,12 @@ function addFilesFolders(treeObj,parentDomObj, id) {
 
       var toggler = document.getElementsByClassName("tcts");
       for (var i = 0; i < toggler.length; i++) {
-          updatePopupMenu(toggler[i],"folder");
-    }
+        updatePopupMenu(toggler[i], "folder");
+      }
       var toggler = document.getElementsByClassName("file");
       for (var i = 0; i < toggler.length; i++) {
-          updatePopupMenu(toggler[i],"step");
-    }
-
+        updatePopupMenu(toggler[i], "step");
+      }
     </script>
   </body>
 </html>
