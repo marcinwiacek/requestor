@@ -64,11 +64,6 @@
           ],
           "steps": [
             {
-              "name": "step1",
-              "function": "search",
-              "disabled": true
-            },
-            {
               "name": "step2",
               "method": "get",
               "conLen": true,
