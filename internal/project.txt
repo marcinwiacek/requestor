@@ -137,7 +137,7 @@
         return false;
       }
 
-      function elementRename(elementPath) {
+      function elementRename(elementPath,objobj) {
         let elpath = elementPath.split("/");
 
         while (true) {
@@ -146,48 +146,36 @@
           if (x == null) {
             break;
           }
-
-          if (
-            document.getElementById(
+	    newElementPath = 
               elementPath.replace(
                 new RegExp(elpath[elpath.length - 1] + "$"),
                 x,
-              ),
-            ) == null
+              );
+
+          if (
+            document.getElementById(newElementPath) == null
           ) {
             http = createPOST();
             http.onload = function () {
               if (http.status != 200) {
                 alert(http.response);
               } else {
-                const params = new URLSearchParams(window.location.search);
+                params = new URLSearchParams(window.location.search);
                 el = document.getElementById(elementPath);
-                el.id = x;
-                el.removeAttribute("onclick");
-                el.addEventListener(
-                  "click",
-                  (e) => {
-                    loadRightPart(
-                      "file=" +
-                        params.get("file") +
-                        "&path=" +
-                        elementPath.replace(
-                          new RegExp(elpath[elpath.length - 1] + "$"),
-                          x,
-                        ),
-                    );
-                  },
-                  false,
-                );
-                el.text = x;
-              }
-            };
+                el.id = newElementPath;
+		el.text= x;
+          el.onclick=function(){
+            loadRightPart(
+              "file=" + params.get("file") + 
+                        "&path=" +newElementPath
+            );
+          }}};
 
             http.onerror = function () {
               alert("login error");
             };
 
-            const params = new URLSearchParams(window.location.search);
+            params = new URLSearchParams(window.location.search);
             http.send(
               "file=" +
                 params.get("file") +
@@ -202,7 +190,7 @@
             break;
           }
         }
-        document.getElementById("stepmenu").classList.toggle("show");
+        objobj.classList.toggle("show");
       }
 
       function stepEnableDisable(stepName) {
@@ -219,14 +207,14 @@
           alert("login error");
         };
 
-        const params = new URLSearchParams(window.location.search);
+ params = new URLSearchParams(window.location.search);
         http.send(
           "file=" +
             params.get("file") +
             "&op=enabledisablestep&old=" +
             stepName,
         );
-        document.getElementById("stepmenu").classList.toggle("show");
+        obj.classList.toogle("show");
       }
 
       function stepNew(stepName) {
@@ -474,7 +462,7 @@ ENV
       style="border: 5px outset black; background-color: white"
     >
       <a onclick="stepNew(popupMenuID)">New</a><br />
-      <a onclick="elementRename(popupMenuID)">Rename</a><br />
+      <a onclick=elementRename(popupMenuID,document.getElementById("stepmenu"))>Rename</a><br />
       <a onclick="stepEnableDisable(popupMenuID)">Disable/enable</a><br />
       <a onclick="stepDelete(popupMenuID)">Delete</a><br />
       <a onclick="stepClone(popupMenuID)">Clone</a><br />
@@ -487,7 +475,7 @@ ENV
     >
       TC
       <a onclick="tcNew(popupMenuID)">New</a><br />
-      <a onclick="elementRename(popupMenuID)">Rename</a><br />
+      <a onclick=elementRename(popupMenuID,document.getElementById("foldermenu"))>Rename</a><br />
       <a onclick="tcEnableDisable(popupMenuID)">Disable/enable</a><br />
       <a onclick="tcDelete(popupMenuID)">Delete</a><br />
       <a onclick="tcClone(popupMenuID)">Clone</a><br />
@@ -509,15 +497,11 @@ ENV
         console.log(id + treeObj.name);
         alel1.setAttribute("id", id + treeObj.name);
         alel1.setAttribute("class", "tcts");
-        alel1.addEventListener(
-          "click",
-          (e) => {
+        alel1.onclick=function(){
             loadRightPart(
-              "file=" + params.get("file") + "&path=" + id + treeObj.name,
+              "file=" + params.get("file") + "&path=" + id + treeObj.name
             );
-          },
-          false,
-        );
+          };
 
         let ulel1 = document.createElement("ul");
 
@@ -540,21 +524,12 @@ ENV
             "class",
             "step" + (file.disabled ? " disabled" : ""),
           );
-          alel2.addEventListener(
-            "click",
-            (e) => {
-              loadRightPart(
-                "file=" +
-                  params.get("file") +
-                  "&path=" +
-                  id +
-                  treeObj.name +
-                  "/" +
-                  file.name,
-              );
-            },
-            false,
-          );
+          alel2.onclick=function(){
+            loadRightPart(
+              "file=" + params.get("file") + "&path=" + id + treeObj.name+                  "/" +
+                  file.name
+            );
+          };
 
           liel2.appendChild(alel2);
           ulel1.appendChild(liel2);
