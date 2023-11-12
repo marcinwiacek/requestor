@@ -255,6 +255,7 @@ function findElement(jsonObj, params) {
         if (elpath.length == 1 && suite.name == elpath[0]) {
             retVal = [];
             retVal.obj = suite;
+retVal.index = tsnumber;
             retVal.parent = jsonObj[params['file']].testsuites[tsnumber];
             return retVal;
         }
@@ -264,6 +265,7 @@ function findElement(jsonObj, params) {
             if (elpath.length == 2 && suite.name == elpath[0] && tc.name == elpath[1]) {
                 retVal = [];
                 retVal.obj = tc;
+retVal.index = tcnumber;
                 retVal.parent = suite.tescases;
                 return retVal;
             }
@@ -272,6 +274,7 @@ function findElement(jsonObj, params) {
                 if (elpath.length == 3 && suite.name == elpath[0] && tc.name == elpath[1] && step.name == elpath[2]) {
                     retVal = [];
                     retVal.obj = step;
+retVal.index = stepnumber;
                     retVal.parent = tc.steps;
                     return retVal;
                 }
@@ -291,8 +294,8 @@ async function parsePOSTforms(params, res, jsonObj) {
         return parsePOSTRunStep(params, res, jsonObj);
     } else if (params["op"] == "savefile") {
         return parsePOSTSaveFile(params, res, jsonObj);
-    } else if (params["op"] == "newstep") {
-        return parsePOSTNewStep(params, res, jsonObj);
+    } else if (params["op"] == "newelement") {
+        return parsePOSTNewElement(params, res, jsonObj);
     } else if (params["op"] == "clonestep") {
         return parsePOSTCloneStep(params, res, jsonObj);
     } else if (params["op"] == "renameelement") {
@@ -301,8 +304,6 @@ async function parsePOSTforms(params, res, jsonObj) {
         return parsePOSTEnableDisableElement(params, res, jsonObj);
     } else if (params["op"] == "deletestep") {
         return parsePOSTDeleteStep(params, res, jsonObj);
-    } else if (params["op"] == "newtc") {
-        return parsePOSTNewTC(params, res, jsonObj);
     } else if (params["getstep"] && params["dt"]) {
         return parsePOSTGetStep(params, res, jsonObj);
     } else if (!(params['file'] && fs.existsSync(
@@ -420,32 +421,13 @@ async function parsePOSTRenameElement(params, res, jsonObj2) {
     res.end("");
 }
 
-async function parsePOSTNewStep(params, res, jsonObj2) {
-    var sss = "";
-
-    console.log(params);
-    let arr = jsonObj[params['file']];
+async function parsePOSTNewElement(params, res, jsonObj2) {
+    el = findElement(jsonObj2, params);
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
-
-    let times = [];
-
-    for (let tsnumber in arr.testsuites) {
-        var ts = arr.testsuites[tsnumber];
-        console.log("testsuite name " + ts.name);
-        for (let tcnumber in ts.testcases) {
-            var tc = ts.testcases[tcnumber];
-            console.log("testcase name " + tc.name);
-
-            for (let stepnumber in tc.steps) {
-                var step = tc.steps[stepnumber];
-                if (tc.disabled && tc.disabled == true) {
-                    continue;
-                }
-                console.log(step.name + " vs " + params['old']);
-                if (step.name.localeCompare(params['old']) != 0) {
-                    continue;
-                }
+    if (el != null) {
+    let elpath = params['path'].split("/");
+    if (elpath.length==3) {
                 let newStep = {};
                 newStep.name = params["new"];
                 newStep.method = "POST";
@@ -455,12 +437,10 @@ async function parsePOSTNewStep(params, res, jsonObj2) {
                 newStep.conLen = true;
                 newStep.url = "";
                 newStep.headers = "";
-                tc.steps.splice(stepnumber, 0, newStep);
-                break;
-            }
-        }
+                el.parent.splice(el.index, 0, newStep);
     }
-    if (res != null) res.end(sss);
+    }
+    res.end("");
 }
 
 async function parsePOSTCloneStep(params, res, jsonObj2) {

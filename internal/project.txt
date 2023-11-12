@@ -236,14 +236,27 @@
         objobj.classList.toogle("show");
       }
 
-      function stepNew(stepName) {
-        var x = prompt("Please enter new step name");
-        if (x != stepName && x != null) {
-          http = createPOST();
-          http.onload = function () {
-            if (http.status != 200) {
-              alert(http.response);
-            } else {
+      function elementNew(elementPath,objobj) {
+        let oldName = "";
+        let elpath = elementPath.split("/");
+
+        while (true) {
+          var newName = prompt("Please enter unique name",oldName);
+
+          if (newName == null) {
+            break;
+          }
+          elpath[elpath.length - 1] = newName;
+          newElementPath = getPath(elpath);
+
+          if (document.getElementById(newElementPath) == null) {
+            http = createPOST();
+            http.onload = function () {
+              if (http.status != 200) {
+                alert(http.response);
+              } else {
+
+/*
               liel = document.createElement("li");
               liel.class = "file";
 
@@ -266,24 +279,30 @@
               liparent.parentNode.insertBefore(liel, liparent);
 
               updateStep(liel);
-            }
-          };
+*/
+              }
+            };
 
-          http.onerror = function () {
-            alert("login error");
-          };
+            http.onerror = function () {
+              alert("login error");
+            };
 
-          const params = new URLSearchParams(window.location.search);
-          http.send(
-            "file=" +
-              params.get("file") +
-              "&op=newstep&old=" +
-              stepName +
-              "&new=" +
-              x,
-          );
-          document.getElementById("stepmenu").classList.toggle("show");
+            params = new URLSearchParams(window.location.search);
+            http.send(
+              "file=" +
+                params.get("file") +
+                "&" +
+                "op=newelement&" +
+                "path=" +
+                elementPath +
+                "&" +
+                "new=" +
+                newName,
+            );
+            break;
+          }
         }
+        objobj.classList.toggle("show");
       }
 
       function stepClone(stepName) {
@@ -358,60 +377,6 @@
         document.getElementById("stepmenu").classList.toggle("show");
       }
 
-      function tcNew(tcName) {
-        var x = prompt("Please enter new test case name");
-        if (x != tcName && x != null) {
-          http = createPOST();
-          http.onload = function () {
-            if (http.status != 200) {
-              alert(http.response);
-            } else {
-              liel = document.createElement("li");
-              liel.class = "folder folder-open";
-
-              ulel = document.createElement("ul");
-
-              alel = document.createElement("a");
-              alel.text = x;
-              alel.id = x;
-              alel.addEventListener(
-                "click",
-                (e) => {
-                  loadRightPart("file=bela3.json&tc=" + x);
-                },
-                false,
-              );
-              alel.class = "tc";
-
-              ulel.appendChild(alel);
-
-              liel.appendChild(ulel);
-
-              el = document.getElementById(tcName);
-              liparent = el.parentNode;
-              liparent.parentNode.insertBefore(liel, liparent);
-
-              updateStep(liel);
-            }
-          };
-
-          http.onerror = function () {
-            alert("login error");
-          };
-
-          const params = new URLSearchParams(window.location.search);
-          http.send(
-            "file=" +
-              params.get("file") +
-              "&op=newtc&old=" +
-              tcName +
-              "&new=" +
-              x,
-          );
-          document.getElementById("foldertc").classList.toggle("show");
-        }
-      }
-
       function savefile() {
         http = createPOST();
         http.onload = function () {
@@ -480,7 +445,10 @@ ENV
       id="stepmenu"
       style="border: 5px outset black; background-color: white"
     >
-      <a onclick="stepNew(popupMenuID)">New</a><br />
+      <a
+        onclick=elementNew(popupMenuID,document.getElementById("stepmenu"))
+        >New</a
+      ><br />
       <a
         onclick=elementRename(popupMenuID,document.getElementById("stepmenu"))
         >Rename</a
@@ -499,7 +467,10 @@ ENV
       style="border: 5px outset black; background-color: white"
     >
       TC
-      <a onclick="tcNew(popupMenuID)">New</a><br />
+      <a
+        onclick=elementNew(popupMenuID,document.getElementById("foldermenu"))
+        >New</a
+      ><br />
       <a
         onclick=elementRename(popupMenuID,document.getElementById("foldermenu"))
         >Rename</a
