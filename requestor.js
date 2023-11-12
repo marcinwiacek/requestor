@@ -297,8 +297,8 @@ async function parsePOSTforms(params, res, jsonObj) {
         return parsePOSTCloneStep(params, res, jsonObj);
     } else if (params["op"] == "renameelement") {
         return parsePOSTRenameElement(params, res, jsonObj);
-    } else if (params["op"] == "enabledisablestep") {
-        return parsePOSTEnableDisableStep(params, res, jsonObj);
+    } else if (params["op"] == "enabledisableelement") {
+        return parsePOSTEnableDisableElement(params, res, jsonObj);
     } else if (params["op"] == "deletestep") {
         return parsePOSTDeleteStep(params, res, jsonObj);
     } else if (params["op"] == "newtc") {
@@ -523,42 +523,18 @@ async function parsePOSTCloneStep(params, res, jsonObj2) {
     if (res != null) res.end(sss);
 }
 
-async function parsePOSTEnableDisableStep(params, res, jsonObj2) {
-    var sss = "";
-
-    console.log(params);
-    let arr = jsonObj[params['file']];
+async function parsePOSTEnableDisableElement(params, res, jsonObj2) {
+    el = findElement(jsonObj2, params);
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
-
-    let times = [];
-
-    for (let tsnumber in arr.testsuites) {
-        var ts = arr.testsuites[tsnumber];
-        console.log("testsuite name " + ts.name);
-        for (let tcnumber in ts.testcases) {
-            var tc = ts.testcases[tcnumber];
-            console.log("testcase name " + tc.name);
-
-            for (let stepnumber in tc.steps) {
-                var step = tc.steps[stepnumber];
-                if (tc.disabled && tc.disabled == true) {
-                    continue;
-                }
-                console.log(step.name + " vs " + params['old']);
-                if (step.name.localeCompare(params['old']) != 0) {
-                    continue;
-                }
-                if (step.disabled == true) {
-                    delete step.disabled;
+    if (el != null) {
+                if (el.obj.disabled == true) {
+                    delete el.obj.disabled;
                 } else {
-                    step.disabled = true;
+                    el.obj.disabled = true;
                 }
-                break;
-            }
-        }
     }
-    if (res != null) res.end(sss);
+    res.end("");
 }
 
 async function parsePOSTNewTC(params, res, jsonObj2) {
