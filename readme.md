@@ -1,8 +1,10 @@
 Requestor
 
-Application for sending requests. Designed as replacement for SoapUI, Ready API,
-Postman and many other tools. Written using nodeJS (=speed, no problems with
-onboarding in many companies, support for all important features, etc.).
+Application for sending, analizing and testing requests. Designed
+as replacement for SoapUI, Ready API, Postman and many other tools.
+Written using nodeJS (=speed, code available, no problems with
+onboarding in some companies, support for all important features, etc.).
+
 Allows for concurrent work.
 
 # Why another app?
@@ -26,8 +28,8 @@ Android, etc.
 # Code is horrible, all should go to the trash, bla, bla, bla
 Yeah. Month ago it was worse, year ago much worse. Normally you start from
 smth horrible and improve it. This is called progress (BTW, Android 1.0 or
-Windows 1.0 wasn't excellent). If you're not patient, write & propose smth 
-better or shut up & allow big boys to work.
+Windows 1.0 were not excellent too). If you're not patient, write & propose
+smth better or shut up & allow big boys to work.
 
 # Installation
 1. install nodejs - ```sudo snap install node --classic --channel=20```
