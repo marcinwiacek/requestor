@@ -352,14 +352,15 @@
         }
       }
 
-      function stepDelete(stepName) {
+      function elementDelete(stepName,objobj) {
         http = createPOST();
         http.onload = function () {
           if (http.status != 200) {
             alert(http.response);
           } else {
             el = document.getElementById(stepName);
-            el.remove();
+//fixme for folder also parent parent
+            el.parentNode.remove();
           }
         };
 
@@ -369,7 +370,7 @@
 
         const params = new URLSearchParams(window.location.search);
         http.send(
-          "file=" + params.get("file") + "&op=deletestep&old=" + stepName,
+          "file=" + params.get("file") + "&op=deleteelement&path=" + stepName,
         );
         document.getElementById("stepmenu").classList.toggle("show");
       }
@@ -453,7 +454,10 @@ ENV
         onclick="elementEnableDisable(popupMenuID,document.getElementById('stepmenu'))"
         >Disable/enable</a
       ><br />
-      <a onclick="stepDelete(popupMenuID)">Delete</a><br />
+      <a
+        onclick="elementDelete(popupMenuID,document.getElementById('stepmenu'))"
+        >Delete</a
+      ><br />
       <a onclick="stepClone(popupMenuID)">Clone</a><br />
     </div>
 
@@ -474,7 +478,10 @@ ENV
         onclick="elementEnableDisable(popupMenuID,document.getElementById('foldermenu'))"
         >Disable/enable</a
       ><br />
-      <a onclick="tcDelete(popupMenuID)">Delete</a><br />
+      <a
+        onclick="elementDelete(popupMenuID,document.getElementById('foldermenu'))"
+        >Delete</a
+      ><br />
       <a onclick="tcClone(popupMenuID)">Clone</a><br />
     </div>
 
