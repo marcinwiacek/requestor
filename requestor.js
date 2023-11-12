@@ -315,31 +315,6 @@ async function parsePOSTforms(params, res, jsonObj) {
     var obiekt = "";
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
-    /*    for (let servicenumber in jsonObj[params['file']].services) {
-            var service = jsonObj[params['file']].services[servicenumber];
-            if (service.name == params['service']) {
-                if (res != null) res.end("<br>service");
-                return;
-            }
-            for (let functionnumber in service.functions) {
-                var func = service.functions[functionnumber];
-                if (func.name == params['function']) {
-                    obiekt = readFileContentSync("/internal/function.txt").replace("<!--NAME-->", func.name).replace("<!--URL-->", func.url);
-                    var xxxx = "";
-                    for (var headernumber in func.headers) {
-                        xxxx += func.headers[headernumber];
-                    }
-                    obiekt = obiekt.replace("<!--HEADER-->", xxxx);
-                    var xxxx = "";
-                    for (var bodynumber in func.body) {
-                        xxxx += func.content[bodynumber];
-                    }
-                    if (res != null) res.end(obiekt.replace("<!--BODY-->", xxxx));
-                    return;
-                }
-            }
-        }
-    */
 
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
