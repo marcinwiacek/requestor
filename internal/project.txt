@@ -106,6 +106,21 @@
         return http;
       }
 
+      function executePOST(URL, OKhandler, ...args) {
+        http = createPOST();
+        http.onload = function () {
+          if (http.status != 200) {
+            alert(http.response);
+          } else {
+            OKhandler(args);
+          }
+        };
+        http.onerror = function () {
+          alert("login error");
+        };
+        http.send(URL);
+      }
+
       function loadRightPart(url) {
         http = createPOST();
         http.onload = function () {
@@ -161,41 +176,8 @@
           newElementPath = getPath(elpath);
 
           if (document.getElementById(newElementPath) == null) {
-            http = createPOST();
-            http.onload = function () {
-              if (http.status != 200) {
-                alert(http.response);
-              } else {
-                params = new URLSearchParams(window.location.search);
-                el = document.getElementById(elementPath);
-                el.text = newName;
-                var toggler = document.getElementsByClassName("tcts");
-                for (var i = 0; i < toggler.length; i++) {
-                  if (toggler[i].id && toggler[i].id.startsWith(elementPath)) {
-                    toggler[i].id = toggler[i].id.replace(
-                      elementPath,
-                      newElementPath,
-                    );
-                  }
-                }
-                var toggler = document.getElementsByClassName("step");
-                for (var i = 0; i < toggler.length; i++) {
-                  if (toggler[i].id && toggler[i].id.startsWith(elementPath)) {
-                    toggler[i].id = toggler[i].id.replace(
-                      elementPath,
-                      newElementPath,
-                    );
-                  }
-                }
-              }
-            };
-
-            http.onerror = function () {
-              alert("login error");
-            };
-
             params = new URLSearchParams(window.location.search);
-            http.send(
+            executePOST(
               "file=" +
                 params.get("file") +
                 "&" +
@@ -205,6 +187,25 @@
                 "&" +
                 "new=" +
                 newName,
+              function (args) {
+                el = document.getElementById(args[0]);
+                el.text = args[1];
+                var toggler = document.getElementsByClassName("tcts");
+                for (var i = 0; i < toggler.length; i++) {
+                  if (toggler[i].id && toggler[i].id.startsWith(elementPath)) {
+                    toggler[i].id = toggler[i].id.replace(args[0], args[2]);
+                  }
+                }
+                var toggler = document.getElementsByClassName("step");
+                for (var i = 0; i < toggler.length; i++) {
+                  if (toggler[i].id && toggler[i].id.startsWith(elementPath)) {
+                    toggler[i].id = toggler[i].id.replace(args[0], args[2]);
+                  }
+                }
+              },
+              elementPath,
+              newName,
+              newElementPath,
             );
             break;
           }
@@ -213,26 +214,17 @@
       }
 
       function elementEnableDisable(stepName, objobj) {
-        http = createPOST();
-        http.onload = function () {
-          if (http.status != 200) {
-            alert(http.response);
-          } else {
-            document.getElementById(stepName).classList.toggle("disabled");
-          }
-        };
-
-        http.onerror = function () {
-          alert("login error");
-        };
-
-        params = new URLSearchParams(window.location.search);
-        http.send(
+            params = new URLSearchParams(window.location.search);
+            executePOST(
           "file=" +
             params.get("file") +
             "&op=enabledisableelement&path=" +
             stepName,
-        );
+              function (args) {
+            document.getElementById(args[0]).classList.toggle("disabled");
+              },
+		stepName
+            );
         objobj.classList.toogle("show");
       }
 
@@ -352,14 +344,14 @@
         }
       }
 
-      function elementDelete(stepName,objobj) {
+      function elementDelete(stepName, objobj) {
         http = createPOST();
         http.onload = function () {
           if (http.status != 200) {
             alert(http.response);
           } else {
             el = document.getElementById(stepName);
-//fixme for folder also parent parent
+            //fixme for folder also parent parent
             el.parentNode.remove();
           }
         };
