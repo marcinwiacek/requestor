@@ -1,388 +1,350 @@
+<!doctype html>
 <html>
-  <head>
+
+<head>
     <script src="../external/split.min.js"></script>
     <link href="../external/tabulator_midnight.min.css" rel="stylesheet" />
     <script type="text/javascript" src="../external/tabulator.min.js"></script>
 
     <style>
-      .flex {
-        display: flex;
-        flex-direction: row;
-      }
-
-      .flex > .split {
-        height: 100vh;
-        overflow-y: scroll;
-      }
-
-      .gutter.gutter-horizontal {
-        cursor: ew-resize;
-      }
-
-      .gutter {
-        background-color: #eee;
-        background-repeat: no-repeat;
-        background-position: 50%;
-      }
-
-      .gutter.gutter-horizontal {
-        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==");
-      }
-
-      .heading {
-        padding: 15px;
-        background: #eeeeee;
-        text-align: center;
-        font-weight: 800;
-        color: #0062cc;
-        letter-spacing: 2px;
-      }
-
-      ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-      }
-
-      li {
-        margin-left: 7px;
-      }
-
-      .file {
-        display: block;
-        list-style: none;
-      }
-
-      .folder {
-        list-style: none;
-        cursor: pointer;
-
-        > ul {
-          display: none;
+        .flex {
+            display: flex;
+            flex-direction: row;
         }
-      }
 
-      .folder-open {
-        > ul {
-          display: block;
-          padding-left: 15px;
-          margin-left: 9px;
-          border-left: 2px solid $color-grey;
+        .flex>.split {
+            height: 100vh;
+            overflow-y: scroll;
         }
-      }
 
-      .hide {
-        display: none;
-        position: absolute;
-        z-index: 10;
-      }
+        .gutter.gutter-horizontal {
+            cursor: ew-resize;
+        }
 
-      .show {
-        display: block;
-        position: absolute;
-        z-index: 10;
-      }
+        .gutter {
+            background-color: #eee;
+            background-repeat: no-repeat;
+            background-position: 50%;
+        }
 
-      .disabled {
-        color: grey;
-      }
+        .gutter.gutter-horizontal {
+            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==");
+        }
+
+        .heading {
+            padding: 15px;
+            background: #eeeeee;
+            text-align: center;
+            font-weight: 800;
+            color: #0062cc;
+            letter-spacing: 2px;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            margin-left: 7px;
+        }
+
+        .file {
+            display: block;
+            list-style: none;
+        }
+
+        .folder {
+            list-style: none;
+            cursor: pointer;
+
+            >ul {
+                display: none;
+            }
+        }
+
+        .folder-open {
+            >ul {
+                display: block;
+                padding-left: 15px;
+                margin-left: 9px;
+                border-left: 2px solid $color-grey;
+            }
+        }
+
+        .hide {
+            display: none;
+            position: absolute;
+            z-index: 10;
+        }
+
+        .show {
+            display: block;
+            position: absolute;
+            z-index: 10;
+        }
+
+        .disabled {
+            color: grey;
+        }
     </style>
     <script>
-      function createPOST() {
-        var http = new XMLHttpRequest();
-        var url =
-          window.location.protocol +
-          "/" +
-          "/" +
-          window.location.hostname +
-          ":" +
-          window.location.port +
-          window.location.pathname;
-        http.open("POST", url, true);
-        http.setRequestHeader(
-          "Content-type",
-          "application/x-www-form-urlencoded",
-        );
-        return http;
-      }
+        function createPOST() {
+            var http = new XMLHttpRequest();
+            var url =
+                window.location.protocol + "//" + window.location.hostname + ":" +
+                window.location.port + window.location.pathname;
+            http.open("POST", url, true);
+            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            return http;
+        }
 
-      function executePOST(URL, OKhandler, ...args) {
-        http = createPOST();
-        http.onload = function () {
-          if (http.status != 200) {
-            alert(http.response);
-          } else {
-            OKhandler(args, http.response);
-          }
-        };
-        http.onerror = function () {
-          alert("login error");
-        };
-        http.send(URL);
-      }
+        function executePOST(URL, OKhandler, ...args) {
+            http = createPOST();
+            http.onload = function() {
+                if (http.status != 200) {
+                    alert(http.response);
+                } else {
+                    OKhandler(args, http.response);
+                }
+            };
+            http.onerror = function() {
+                alert("login error");
+            };
+            http.send(URL);
+        }
 
-      function loadRightPart(url) {
-        executePOST(url, function (args, response) {
-          var tmp = document.createElement("div");
-          tmp.innerHTML = response;
-          const scriptElements = tmp.querySelectorAll("script");
-          Array.from(scriptElements).forEach((scriptElement) => {
-            const clonedElement = document.createElement("script");
-            Array.from(scriptElement.attributes).forEach((attribute) => {
-              clonedElement.setAttribute(attribute.name, attribute.value);
+        function loadRightPart(url) {
+            executePOST(url, function(args, response) {
+                var tmp = document.createElement("div");
+                tmp.innerHTML = response;
+                const scriptElements = tmp.querySelectorAll("script");
+                Array.from(scriptElements).forEach((scriptElement) => {
+                    const clonedElement = document.createElement("script");
+                    Array.from(scriptElement.attributes).forEach((attribute) => {
+                        clonedElement.setAttribute(attribute.name, attribute.value);
+                    });
+                    clonedElement.text = scriptElement.text;
+                    scriptElement.parentNode.replaceChild(clonedElement, scriptElement);
+                });
+                document.getElementById("two").innerHTML = "";
+                document.getElementById("two").appendChild(tmp);
             });
-            clonedElement.text = scriptElement.text;
-            scriptElement.parentNode.replaceChild(clonedElement, scriptElement);
-          });
-          document.getElementById("two").innerHTML = "";
-          document.getElementById("two").appendChild(tmp);
-        });
-        return false;
-      }
-
-      function getPath(path) {
-        var retVal = "";
-        for (i = 0; i < path.length; i++) {
-          if (retVal != "") retVal += "/";
-          retVal += path[i];
+            return false;
         }
-        console.log(retVal);
-        return retVal;
-      }
 
-      function elementRename(elementPath, objobj) {
-        let elpath = elementPath.split("/");
-        let oldName = elpath[elpath.length - 1];
+        function getPath(path) {
+            var retVal = "";
+            for (i = 0; i < path.length; i++) {
+                if (retVal != "") retVal += "/";
+                retVal += path[i];
+            }
+            console.log(retVal);
+            return retVal;
+        }
 
-        while (true) {
-          var newName = prompt("Please enter unique name", oldName);
+        function elementRename(elementPath, objobj) {
+            let elpath = elementPath.split("/");
+            let oldName = elpath[elpath.length - 1];
 
-          if (newName == null) {
-            break;
-          }
-          elpath[elpath.length - 1] = newName;
-          newElementPath = getPath(elpath);
+            while (true) {
+                var newName = prompt("Please enter unique name", oldName);
 
-          if (document.getElementById(newElementPath) == null) {
+                if (newName == null) {
+                    break;
+                }
+                elpath[elpath.length - 1] = newName;
+                newElementPath = getPath(elpath);
+
+                if (document.getElementById(newElementPath) == null) {
+                    params = new URLSearchParams(window.location.search);
+                    executePOST("file=" + params.get("file") + "&" + "op=renameelement&" + "path=" + elementPath + "&" + "new=" + newName,
+                        function(args) {
+                            el = document.getElementById(args[0]);
+                            el.text = args[1];
+                            var toggler = document.getElementsByClassName("tcts");
+                            for (var i = 0; i < toggler.length; i++) {
+                                if (toggler[i].id && toggler[i].id.startsWith(elementPath)) {
+                                    toggler[i].id = toggler[i].id.replace(args[0], args[2]);
+                                }
+                            }
+                            var toggler = document.getElementsByClassName("step");
+                            for (var i = 0; i < toggler.length; i++) {
+                                if (toggler[i].id && toggler[i].id.startsWith(elementPath)) {
+                                    toggler[i].id = toggler[i].id.replace(args[0], args[2]);
+                                }
+                            }
+                        },
+                        elementPath, newName, newElementPath,
+                    );
+                    break;
+                }
+            }
+            objobj.classList.toggle("show");
+        }
+
+        function elementEnableDisable(stepName, objobj) {
             params = new URLSearchParams(window.location.search);
-            executePOST(
-              "file=" +
-                params.get("file") +
-                "&" +
-                "op=renameelement&" +
-                "path=" +
-                elementPath +
-                "&" +
-                "new=" +
-                newName,
-              function (args) {
-                el = document.getElementById(args[0]);
-                el.text = args[1];
-                var toggler = document.getElementsByClassName("tcts");
-                for (var i = 0; i < toggler.length; i++) {
-                  if (toggler[i].id && toggler[i].id.startsWith(elementPath)) {
-                    toggler[i].id = toggler[i].id.replace(args[0], args[2]);
-                  }
-                }
-                var toggler = document.getElementsByClassName("step");
-                for (var i = 0; i < toggler.length; i++) {
-                  if (toggler[i].id && toggler[i].id.startsWith(elementPath)) {
-                    toggler[i].id = toggler[i].id.replace(args[0], args[2]);
-                  }
-                }
-              },
-              elementPath,
-              newName,
-              newElementPath,
+            executePOST("file=" + params.get("file") + "&op=enabledisableelement&path=" + stepName,
+                function(args) {
+                    document.getElementById(args[0]).classList.toggle("disabled");
+                }, stepName,
             );
-            break;
-          }
+            objobj.classList.toogle("show");
         }
-        objobj.classList.toggle("show");
-      }
 
-      function elementEnableDisable(stepName, objobj) {
-        params = new URLSearchParams(window.location.search);
-        executePOST(
-          "file=" +
-            params.get("file") +
-            "&op=enabledisableelement&path=" +
-            stepName,
-          function (args) {
-            document.getElementById(args[0]).classList.toggle("disabled");
-          },
-          stepName,
-        );
-        objobj.classList.toogle("show");
-      }
+        function elementNew(elementPath, objobj) {
+            let oldName = "";
+            let elpath = elementPath.split("/");
 
-      function elementNew(elementPath, objobj) {
-        let oldName = "";
-        let elpath = elementPath.split("/");
+            while (true) {
+                var newName = prompt("Please enter unique name", oldName);
+                oldName = newName;
 
-        while (true) {
-          var newName = prompt("Please enter unique name", oldName);
-          oldName = newName;
+                if (newName == null) {
+                    break;
+                }
+                elpath[elpath.length - 1] = newName;
+                newElementPath = getPath(elpath);
 
-          if (newName == null) {
-            break;
-          }
-          elpath[elpath.length - 1] = newName;
-          newElementPath = getPath(elpath);
+                if (document.getElementById(newElementPath) == null) {
+                    params = new URLSearchParams(window.location.search);
+                    executePOST("file=" + params.get("file") + "&" + "op=newelement&" + "path=" + elementPath + "&" + "new=" + newName,
+                        function(args) {
+                            liel = document.createElement("li");
+                            liel.class = args[3] == 3 ? "file" : "folder";
 
-          if (document.getElementById(newElementPath) == null) {
+                            alel = document.createElement("a");
+                            alel.text = args[1];
+                            alel.id = args[2];
+                            alel.class = args[3] == 3 ? "step" : "tcts";
+                            params = new URLSearchParams(window.location.search);
+                            alel.onclick = function() {
+                                loadRightPart(
+                                    "file=" + params.get("file") + "&path=" + this.id,
+                                );
+                            };
+
+                            liel.appendChild(alel);
+
+                            el = document.getElementById(args[0]);
+                            liparent = el.parentNode;
+                            liparent.parentNode.insertBefore(liel, liparent);
+
+                            updateStep(liel);
+                        },
+                        elementPath,
+                        newName,
+                        newElementPath,
+                        elpath.length,
+                    );
+                    break;
+                }
+            }
+            objobj.classList.toggle("show");
+        }
+
+        function elementDelete(stepName, objobj) {
             params = new URLSearchParams(window.location.search);
             executePOST(
-              "file=" +
-                params.get("file") +
-                "&" +
-                "op=newelement&" +
-                "path=" +
-                elementPath +
-                "&" +
-                "new=" +
-                newName,
-              function (args) {
-                liel = document.createElement("li");
-                liel.class = args[3] == 3 ? "file" : "folder";
+                "file=" + params.get("file") + "&op=deleteelement&path=" + stepName,
+                function(args) {
+                    el = document.getElementById(args[0]);
+                    //fixme for folder also parent parent
+                    el.parentNode.remove();
+                },
+                stepName,
+            );
+            document.getElementById("stepmenu").classList.toggle("show");
+        }
 
-                alel = document.createElement("a");
-                alel.text = args[1];
-                alel.id = args[2];
-                alel.class = args[3] == 3 ? "step" : "tcts";
-                params = new URLSearchParams(window.location.search);
-                alel.onclick = function () {
-                  loadRightPart(
-                    "file=" + params.get("file") + "&path=" + this.id,
-                  );
+        function stepClone(stepName) {
+            var x = prompt("Please enter cloned step name");
+            if (x != stepName && x != null) {
+                http = createPOST();
+                http.onload = function() {
+                    if (http.status != 200) {
+                        alert(http.response);
+                    } else {
+                        liel = document.createElement("li");
+                        liel.class = "file";
+
+                        alel = document.createElement("a");
+                        alel.text = x + "(copy)";
+                        alel.id = x + "(copy)";
+                        alel.addEventListener(
+                            "click",
+                            (e) => {
+                                loadRightPart("file=bela3.json&step=" + x);
+                            },
+                            false,
+                        );
+                        alel.class = "step";
+
+                        liel.appendChild(alel);
+
+                        el = document.getElementById(stepName);
+                        liparent = el.parentNode;
+                        liparent.parentNode.insertBefore(liel, liparent);
+
+                        updateStep(liel);
+                    }
                 };
 
-                liel.appendChild(alel);
+                http.onerror = function() {
+                    alert("login error");
+                };
 
-                el = document.getElementById(args[0]);
-                liparent = el.parentNode;
-                liparent.parentNode.insertBefore(liel, liparent);
-
-                updateStep(liel);
-              },
-              elementPath,
-              newName,
-              newElementPath,
-              elpath.length,
-            );
-            break;
-          }
-        }
-        objobj.classList.toggle("show");
-      }
-
-      function elementDelete(stepName, objobj) {
-        params = new URLSearchParams(window.location.search);
-        executePOST(
-          "file=" + params.get("file") + "&op=deleteelement&path=" + stepName,
-          function (args) {
-            el = document.getElementById(args[0]);
-            //fixme for folder also parent parent
-            el.parentNode.remove();
-          },
-          stepName,
-        );
-        document.getElementById("stepmenu").classList.toggle("show");
-      }
-
-      function stepClone(stepName) {
-        var x = prompt("Please enter cloned step name");
-        if (x != stepName && x != null) {
-          http = createPOST();
-          http.onload = function () {
-            if (http.status != 200) {
-              alert(http.response);
-            } else {
-              liel = document.createElement("li");
-              liel.class = "file";
-
-              alel = document.createElement("a");
-              alel.text = x + "(copy)";
-              alel.id = x + "(copy)";
-              alel.addEventListener(
-                "click",
-                (e) => {
-                  loadRightPart("file=bela3.json&step=" + x);
-                },
-                false,
-              );
-              alel.class = "step";
-
-              liel.appendChild(alel);
-
-              el = document.getElementById(stepName);
-              liparent = el.parentNode;
-              liparent.parentNode.insertBefore(liel, liparent);
-
-              updateStep(liel);
+                const params = new URLSearchParams(window.location.search);
+                http.send("file=" + params.get("file") + "&op=clonestep&old=" + stepName + "&new=" + x);
+                document.getElementById("stepmenu").classList.toggle("show");
             }
-          };
-
-          http.onerror = function () {
-            alert("login error");
-          };
-
-          const params = new URLSearchParams(window.location.search);
-          http.send(
-            "file=" +
-              params.get("file") +
-              "&op=clonestep&old=" +
-              stepName +
-              "&new=" +
-              x,
-          );
-          document.getElementById("stepmenu").classList.toggle("show");
         }
-      }
 
-      function savefile() {
-        http = createPOST();
-        http.onload = function () {
-          if (http.status != 200) {
-            alert(http.response);
-          } else {
-          }
-        };
+        function savefile() {
+            http = createPOST();
+            http.onload = function() {
+                if (http.status != 200) {
+                    alert(http.response);
+                } else {}
+            };
 
-        http.onerror = function () {
-          alert("login error");
-        };
+            http.onerror = function() {
+                alert("login error");
+            };
 
-        const params = new URLSearchParams(window.location.search);
-        http.send("file=" + params.get("file") + "&op=savefile");
-      }
+            const params = new URLSearchParams(window.location.search);
+            http.send("file=" + params.get("file") + "&op=savefile");
+        }
 
-      function updatePopupMenu(toggler, name) {
-        toggler.addEventListener("contextmenu", (e) => {
-          popupMenuID = e.target.id;
-          document.getElementById(name + "menu").classList.toggle("show");
-          e.preventDefault();
-        });
-        toggler.addEventListener("mousemove", (e) => {
-          if (document.getElementById(name + "menu").classList.contains("show"))
-            return;
-          if (!e) e = window.event;
-          document.getElementById(name + "menu").style.top = e.pageY + "px";
-          document.getElementById(name + "menu").style.left = e.pageX + "px";
-        });
-      }
+        function updatePopupMenu(toggler, name) {
+            toggler.addEventListener("contextmenu", (e) => {
+                popupMenuID = e.target.id;
+                document.getElementById(name + "menu").classList.toggle("show");
+                e.preventDefault();
+            });
+            toggler.addEventListener("mousemove", (e) => {
+                if (document.getElementById(name + "menu").classList.contains("show"))
+                    return;
+                if (!e) e = window.event;
+                document.getElementById(name + "menu").style.top = e.pageY + "px";
+                document.getElementById(name + "menu").style.left = e.pageX + "px";
+            });
+        }
     </script>
-  </head>
-  <body>
+</head>
+
+<body>
     <a href=".">back</a>
     <p>
-      File:
-      <!--NAME-->
-      <button onclick="savefile();">Save</button>
+        File:
+        <!--NAME-->
+        <button onclick="savefile();">Save</button>
     </p>
 
     <p>
-      <!--<form>
+        <!--<form>
 Environment:
 <select name="environment" id="environment">
 ENV
@@ -391,143 +353,110 @@ ENV
     </p>
 
     <div class="flex">
-      <div id="one" class="split">
-        <!--TC-->
-        <div id="menu"></div>
-      </div>
-      <div id="two" class="split">
-        <!--OBIEKT-->
-        <!--RUN-->
-      </div>
+        <div id="one" class="split">
+            <!--TC-->
+            <div id="menu"></div>
+        </div>
+        <div id="two" class="split">
+            <!--OBIEKT-->
+            <!--RUN-->
+        </div>
     </div>
 
     var popupMenuID = "";
 
-    <div
-      class="hide"
-      id="stepmenu"
-      style="border: 5px outset black; background-color: white">
-      <a onclick="elementNew(popupMenuID,document.getElementById('stepmenu'))"
-        >New</a
-      ><br />
-      <a
-        onclick="elementRename(popupMenuID,document.getElementById('stepmenu'))"
-        >Rename</a
-      ><br />
-      <a
-        onclick="elementEnableDisable(popupMenuID,document.getElementById('stepmenu'))"
-        >Disable/enable</a
-      ><br />
-      <a
-        onclick="elementDelete(popupMenuID,document.getElementById('stepmenu'))"
-        >Delete</a
-      ><br />
-      <a onclick="stepClone(popupMenuID)">Clone</a><br />
+    <div class="hide" id="stepmenu" style="border: 5px outset black; background-color: white">
+        <a onclick="elementNew(popupMenuID,document.getElementById('stepmenu'))">New</a><br />
+        <a onclick="elementRename(popupMenuID,document.getElementById('stepmenu'))">Rename</a><br />
+        <a onclick="elementEnableDisable(popupMenuID,document.getElementById('stepmenu'))">Disable/enable</a><br />
+        <a onclick="elementDelete(popupMenuID,document.getElementById('stepmenu'))">Delete</a><br />
+        <a onclick="stepClone(popupMenuID)">Clone</a><br />
     </div>
 
-    <div
-      class="hide"
-      id="foldermenu"
-      style="border: 5px outset black; background-color: white">
-      TC
-      <a onclick="elementNew(popupMenuID,document.getElementById('foldermenu'))"
-        >New</a
-      ><br />
-      <a
-        onclick="elementRename(popupMenuID,document.getElementById('foldermenu'))"
-        >Rename</a
-      ><br />
-      <a
-        onclick="elementEnableDisable(popupMenuID,document.getElementById('foldermenu'))"
-        >Disable/enable</a
-      ><br />
-      <a
-        onclick="elementDelete(popupMenuID,document.getElementById('foldermenu'))"
-        >Delete</a
-      ><br />
-      <a onclick="tcClone(popupMenuID)">Clone</a><br />
+    <div class="hide" id="foldermenu" style="border: 5px outset black; background-color: white">
+        TC
+        <a onclick="elementNew(popupMenuID,document.getElementById('foldermenu'))">New</a><br />
+        <a onclick="elementRename(popupMenuID,document.getElementById('foldermenu'))">Rename</a><br />
+        <a onclick="elementEnableDisable(popupMenuID,document.getElementById('foldermenu'))">Disable/enable</a><br />
+        <a onclick="elementDelete(popupMenuID,document.getElementById('foldermenu'))">Delete</a><br />
+        <a onclick="tcClone(popupMenuID)">Clone</a><br />
     </div>
 
     <script>
-      Split(["#one", "#two"], {
-        sizes: [20, 80],
-      });
-
-      function addFilesFolders(treeObj, parentDomObj, id) {
-        const params = new URLSearchParams(window.location.search);
-
-        let liel1 = document.createElement("li");
-        liel1.setAttribute("class", "folder folder-open");
-
-        let alel1 = document.createElement("a");
-        alel1.text = treeObj.name;
-        console.log(id + treeObj.name);
-        alel1.setAttribute("id", id + treeObj.name);
-        alel1.setAttribute(
-          "class",
-          "tcts" + (treeObj.disabled ? " disabled" : ""),
-        );
-        alel1.onclick = function () {
-          loadRightPart("file=" + params.get("file") + "&path=" + this.id);
-        };
-
-        let ulel1 = document.createElement("ul");
-
-        liel1.appendChild(alel1);
-        liel1.appendChild(ulel1);
-        parentDomObj.appendChild(liel1);
-
-        treeObj.folders.forEach(function (folder, index) {
-          addFilesFolders(folder, ulel1, id + treeObj.name + "/");
+        Split(["#one", "#two"], {
+            sizes: [20, 80],
         });
-        treeObj.files.forEach(function (file, index) {
-          let liel2 = document.createElement("li");
-          liel2.setAttribute("class", "file");
 
-          console.log(id + treeObj.name + "/" + file.name);
-          let alel2 = document.createElement("a");
-          alel2.text = file.name;
-          alel2.setAttribute("id", id + treeObj.name + "/" + file.name);
-          alel2.setAttribute(
-            "class",
-            "step" + (file.disabled ? " disabled" : ""),
-          );
-          alel2.onclick = function () {
-            loadRightPart("file=" + params.get("file") + "&path=" + this.id);
-          };
+        function addFilesFolders(treeObj, parentDomObj, id) {
+            const params = new URLSearchParams(window.location.search);
 
-          liel2.appendChild(alel2);
-          ulel1.appendChild(liel2);
+            let liel1 = document.createElement("li");
+            liel1.setAttribute("class", "folder folder-open");
+
+            let alel1 = document.createElement("a");
+            alel1.text = treeObj.name;
+            console.log(id + treeObj.name);
+            alel1.setAttribute("id", id + treeObj.name);
+            alel1.setAttribute("class", "tcts" + (treeObj.disabled ? " disabled" : ""));
+            alel1.onclick = function() {
+                loadRightPart("file=" + params.get("file") + "&path=" + this.id);
+            };
+
+            let ulel1 = document.createElement("ul");
+
+            liel1.appendChild(alel1);
+            liel1.appendChild(ulel1);
+            parentDomObj.appendChild(liel1);
+
+            treeObj.folders.forEach(function(folder, index) {
+                addFilesFolders(folder, ulel1, id + treeObj.name + "/");
+            });
+            treeObj.files.forEach(function(file, index) {
+                let liel2 = document.createElement("li");
+                liel2.setAttribute("class", "file");
+
+                console.log(id + treeObj.name + "/" + file.name);
+                let alel2 = document.createElement("a");
+                alel2.text = file.name;
+                alel2.setAttribute("id", id + treeObj.name + "/" + file.name);
+                alel2.setAttribute("class", "step" + (file.disabled ? " disabled" : ""));
+                alel2.onclick = function() {
+                    loadRightPart("file=" + params.get("file") + "&path=" + this.id);
+                };
+
+                liel2.appendChild(alel2);
+                ulel1.appendChild(liel2);
+            });
+        }
+
+        ulel = document.createElement("ul");
+        document.getElementById("menu").appendChild(ulel);
+        tree.forEach(function(folder, index) {
+            addFilesFolders(folder, ulel, "");
         });
-      }
 
-      ulel = document.createElement("ul");
-      document.getElementById("menu").appendChild(ulel);
-      tree.forEach(function (folder, index) {
-        addFilesFolders(folder, ulel, "");
-      });
+        var toggler = document.getElementsByClassName("folder");
+        for (var i = 0; i < toggler.length; i++) {
+            const node = document.createElement("a");
+            node.innerHTML = toggler[i].classList.contains("folder-open") ?
+                "\u25BC " :
+                "\u25B6 ";
+            node.addEventListener("click", function() {
+                this.innerHTML = this.innerHTML == "\u25B6 " ? "\u25BC " : "\u25B6 ";
+                this.parentElement.classList.toggle("folder-open");
+            });
+            toggler[i].prepend(node);
+        }
 
-      var toggler = document.getElementsByClassName("folder");
-      for (var i = 0; i < toggler.length; i++) {
-        const node = document.createElement("a");
-        node.innerHTML = toggler[i].classList.contains("folder-open")
-          ? "\u25BC "
-          : "\u25B6 ";
-        node.addEventListener("click", function () {
-          this.innerHTML = this.innerHTML == "\u25B6 " ? "\u25BC " : "\u25B6 ";
-          this.parentElement.classList.toggle("folder-open");
-        });
-        toggler[i].prepend(node);
-      }
-
-      var toggler = document.getElementsByClassName("tcts");
-      for (var i = 0; i < toggler.length; i++) {
-        updatePopupMenu(toggler[i], "folder");
-      }
-      var toggler = document.getElementsByClassName("file");
-      for (var i = 0; i < toggler.length; i++) {
-        updatePopupMenu(toggler[i], "step");
-      }
+        var toggler = document.getElementsByClassName("tcts");
+        for (var i = 0; i < toggler.length; i++) {
+            updatePopupMenu(toggler[i], "folder");
+        }
+        var toggler = document.getElementsByClassName("file");
+        for (var i = 0; i < toggler.length; i++) {
+            updatePopupMenu(toggler[i], "step");
+        }
     </script>
-  </body>
+</body>
+
 </html>
