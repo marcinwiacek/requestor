@@ -255,17 +255,16 @@ function findElement(jsonObj, params) {
         if (elpath.length == 1 && suite.name == elpath[0]) {
             retVal = [];
             retVal.obj = suite;
-retVal.index = tsnumber;
+            retVal.index = tsnumber;
             retVal.parent = jsonObj[params['file']].testsuites[tsnumber];
             return retVal;
         }
-
         for (let tcnumber in suite.testcases) {
             var tc = suite.testcases[tcnumber];
             if (elpath.length == 2 && suite.name == elpath[0] && tc.name == elpath[1]) {
                 retVal = [];
                 retVal.obj = tc;
-retVal.index = tcnumber;
+                retVal.index = tcnumber;
                 retVal.parent = suite.testcases;
                 return retVal;
             }
@@ -274,7 +273,7 @@ retVal.index = tcnumber;
                 if (elpath.length == 3 && suite.name == elpath[0] && tc.name == elpath[1] && step.name == elpath[2]) {
                     retVal = [];
                     retVal.obj = step;
-retVal.index = stepnumber;
+                    retVal.index = stepnumber;
                     retVal.parent = tc.steps;
                     return retVal;
                 }
@@ -426,19 +425,19 @@ async function parsePOSTNewElement(params, res, jsonObj2) {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
     if (el != null) {
-    let elpath = params['path'].split("/");
-    if (elpath.length==3) {
-                let newStep = {};
-                newStep.name = params["new"];
-                newStep.method = "POST";
-                newStep.headers = "";
-                newStep.body = "";
-                newStep.ignoreWrongSSL = true;
-                newStep.conLen = true;
-                newStep.url = "";
-                newStep.headers = "";
-                el.parent.splice(el.index, 0, newStep);
-    }
+        let elpath = params['path'].split("/");
+        if (elpath.length == 3) {
+            let newStep = {};
+            newStep.name = params["new"];
+            newStep.method = "POST";
+            newStep.headers = "";
+            newStep.body = "";
+            newStep.ignoreWrongSSL = true;
+            newStep.conLen = true;
+            newStep.url = "";
+            newStep.headers = "";
+            el.parent.splice(el.index, 0, newStep);
+        }
     }
     res.end("");
 }
@@ -508,11 +507,11 @@ async function parsePOSTEnableDisableElement(params, res, jsonObj2) {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
     if (el != null) {
-                if (el.obj.disabled == true) {
-                    delete el.obj.disabled;
-                } else {
-                    el.obj.disabled = true;
-                }
+        if (el.obj.disabled == true) {
+            delete el.obj.disabled;
+        } else {
+            el.obj.disabled = true;
+        }
     }
     res.end("");
 }
@@ -798,62 +797,6 @@ const onRequestHandler = async (req, res) => {
                 }
                 tree.push(tsobj);
             }
-            /*
-                    const params = url.parse(req.url, true).query;
-                    if (params['file'] && fs.existsSync(
-                            path.normalize(__dirname + "/projects/" + params['file']))) {
-                        if (!loadFile(params['file'])) {
-                            sendHTML(req, res, readFileContentSync("/internal/project.txt")
-                                .replace("<!--TC-->", "")
-                                .replace("<!--NAME-->", "Error reading file"));
-                            return;
-                        }
-                        loadDB(params['file']);
-
-                        var list = "<ul>";
-            */
-            /*            for (let servicenumber in jsonObj[params['file']].services) {
-                            var service = jsonObj[params['file']].services[servicenumber];
-                            list += "<li class=\"folder folder-open\">" +
-                                "<a onclick=loadRightPart(\"file=" + params['file'] + "&service=" +
-                                service.name + "\")>" + service.name + "</a><ul>";
-                            for (let functionnumber in service.functions) {
-                                var func = service.functions[functionnumber];
-                                list += "<li class=\"file\">" +
-                                    "<a onclick=loadRightPart(\"file=" + params['file'] + "&function=" +
-                                    func.name + "\")>" + func.name + "</a></li>";
-                            }
-                            list += "</ul></li>";
-                        }*/
-            /*            for (let tsnumber in jsonObj[params['file']].testsuites) {
-                            var ts = jsonObj[params['file']].testsuites[tsnumber];
-
-                                    list += "<li class=\"folder folder-open\">" +
-                                        "<a id=\"" + ts.name + "\" class=\"ts " + (ts.disabled ? "disabled" : "") +
-                                        "\" onclick=loadRightPart(\"file=" + params['file'] + "&ts=" +
-                                        ts.name + "\")>" + ts.name + "</a><ul>";
-
-                            for (let tcnumber in ts.testcases) {
-                                var tc = ts.testcases[tcnumber];
-                                    list += "<li class=\"folder folder-open\">" +
-                                        "<a id=\"" + tc.name + "\" class=\"tc " + (tc.disabled ? "disabled" : "") +
-                                        "\" onclick=loadRightPart(\"file=" + params['file'] + "&tc=" +
-                                        tc.name + "\")>" + tc.name + "</a><ul>";
-
-                                for (let stepnumber in tc.steps) {
-                                    var step = tc.steps[stepnumber];
-                                    list += "<li class=\"file\">" +
-                                        "<a id=\"" + step.name + "\" class=\"step " + (step.disabled ? "disabled" : "") +
-                                        "\" onclick=loadRightPart(\"file=" + params['file'] + "&step=" +
-                                        step.name + "\")>" + step.name + "</a></li>";
-                                }
-                                list += "</li></ul>";
-                            }
-                            list += "</li></ul>";
-                        }
-                        list += "</ul>";
-            */
-
             sendHTML(req, res, readFileContentSync("/internal/project.txt")
                 .replace("<!--TC-->", "<script>tree = " + JSON.stringify(tree) + ";</script>")
                 .replace("<!--NAME-->", params['file'])
