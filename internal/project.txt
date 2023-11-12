@@ -112,7 +112,7 @@
           if (http.status != 200) {
             alert(http.response);
           } else {
-            OKhandler(args);
+            OKhandler(args, http.response);
           }
         };
         http.onerror = function () {
@@ -122,14 +122,9 @@
       }
 
       function loadRightPart(url) {
-        http = createPOST();
-        http.onload = function () {
-          if (http.status != 200) {
-            alert(http.response);
-          }
-
+        executePOST(url, function (args, response) {
           var tmp = document.createElement("div");
-          tmp.innerHTML = http.response;
+          tmp.innerHTML = response;
           const scriptElements = tmp.querySelectorAll("script");
           Array.from(scriptElements).forEach((scriptElement) => {
             const clonedElement = document.createElement("script");
@@ -141,14 +136,7 @@
           });
           document.getElementById("two").innerHTML = "";
           document.getElementById("two").appendChild(tmp);
-        };
-
-        http.onerror = function () {
-          alert("login error");
-        };
-
-        const params = new URLSearchParams(window.location.search);
-        http.send(url);
+        });
         return false;
       }
 
