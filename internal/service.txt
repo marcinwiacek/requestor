@@ -1,4 +1,0 @@
-<form>
-Name: <input type="text" id="url" name="url" value="<!--NAME-->">
-URL prefix: <input type="text" id="url" name="url" value="<!--URL-->">
-</form>
