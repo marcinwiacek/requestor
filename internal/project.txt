@@ -406,8 +406,7 @@ ENV
     <div
       class="hide"
       id="stepmenu"
-      style="border: 5px outset black; background-color: white"
-    >
+      style="border: 5px outset black; background-color: white">
       <a onclick="elementNew(popupMenuID,document.getElementById('stepmenu'))"
         >New</a
       ><br />
@@ -429,8 +428,7 @@ ENV
     <div
       class="hide"
       id="foldermenu"
-      style="border: 5px outset black; background-color: white"
-    >
+      style="border: 5px outset black; background-color: white">
       TC
       <a onclick="elementNew(popupMenuID,document.getElementById('foldermenu'))"
         >New</a
