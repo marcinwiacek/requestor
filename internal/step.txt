@@ -148,14 +148,7 @@
         };
 
         const params = new URLSearchParams(window.location.search);
-        http.send(
-            "file=" +
-            params.get("file") +
-            "&getstep=" +
-            document.getElementById("name").value +
-            "&dt=" +
-            encodeURIComponent(document.getElementById("whenlast").value),
-        );
+        http.send("file=" + params.get("file") +"&op=getstep&path=" +path + "&dt=" +encodeURIComponent(document.getElementById("whenlast").value));
         return false;
     }
 
@@ -208,28 +201,20 @@
         }
 
         const params = new URLSearchParams(window.location.search);
-        http.send(
-            "file=" +
-            params.get("file") +
-            "&runstep=" +
-            document.getElementById("name").value +
-            "&headers=" +
-            encodeURIComponent(document.getElementById("header").value) +
-            "&body=" +
-            encodeURIComponent(document.getElementById("body").value) +
-            "&url=" +
-            encodeURIComponent(document.getElementById("url").value) +
-            "&ssl=" +
-            document.getElementById("ignorewrongssl").checked +
-            "&conlen=" +
-            document.getElementById("addcontentlength").checked +
-            "&method=" +
-            method,
-        );
+        http.send(            "file=" +            params.get("file") +
+            "&runstep=" +            document.getElementById("name").value +
+            "&headers=" +            encodeURIComponent(document.getElementById("header").value) +
+            "&body=" +            encodeURIComponent(document.getElementById("body").value) +
+            "&url=" +            encodeURIComponent(document.getElementById("url").value) +
+            "&ssl=" +            document.getElementById("ignorewrongssl").checked +
+            "&conlen=" +            document.getElementById("addcontentlength").checked +
+            "&method=" +            method        );
 
         return false;
     }
+
 </script>
+<!--PATH-->
 <form onsubmit="return sendNewStep()">
     <table>
         <tr>

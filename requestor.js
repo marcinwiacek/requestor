@@ -297,7 +297,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         return parsePOSTEnableDisableElement(req, params, res, jsonObj);
     } else if (params["op"] == "deleteelement") {
         return parsePOSTDeleteElement(req, params, res, jsonObj);
-    } else if (params["getstep"] && params["dt"]) {
+    } else if (params["op"] == "getstep" && params["dt"]) {
         return parsePOSTGetStep(req, params, res, jsonObj);
     } else if (!(params['file'] && fs.existsSync(
             path.normalize(__dirname + "/projects/" + params['file'])))) {
@@ -353,6 +353,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 obiekt = obiekt.replace("<!--SSLIGNORE-->", stepcopy.ignoreWrongSSL ? "checked" : "");
                 obiekt = obiekt.replace("<!--CONLENGTH-->", stepcopy.conLen ? "checked" : "");
                 obiekt = obiekt.replace("<!--METHOD-->", stepcopy.method);
+                obiekt = obiekt.replace("<!--PATH-->", "<script>path = '"+path+"';</script>");
                 var xxxx = "";
                 let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + path + "\" order by dt desc");
                 var num = 0;
@@ -646,6 +647,7 @@ async function getJSON(stepname, dt, file) {
 
 async function parsePOSTGetStep(req, params, res, jsonObj2) {
     console.log(jsonObj);
+console.log(params);
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var ts = jsonObj[params['file']].testsuites[tsnumber];
         let path = ts.name;
@@ -673,11 +675,10 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
                     if (step.disabled && step.disabled == true) {
                         continue;
                     }
-                    if (step.name.localeCompare(params['getstep']) != 0) {
+                    if ((path +"/" + tc.name + "/" + step.name).localeCompare(params['path']) != 0) {
                         continue;
                     }
                     if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
-                    console.log("starting " + step.name + " vs " + params['getstep']);
                     var stepcopy = findtc(jsonObj[params['file']], step);
                     if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
                     for (let d in arra) {
