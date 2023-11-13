@@ -48,6 +48,28 @@
             color: grey;
         }
     </style>
+
+    <div id="menu"></div>
+
+    <div class="hide" id="stepmenu" style="border: 5px outset black; background-color: white">
+        <a onclick="elementNew(popupMenuID,document.getElementById('stepmenu'))">New</a><br />
+        <a onclick="elementRename(popupMenuID,document.getElementById('stepmenu'))">Rename</a><br />
+        <a onclick="elementEnableDisable(popupMenuID,document.getElementById('stepmenu'))">Disable/enable</a><br />
+        <a onclick="elementDelete(popupMenuID,document.getElementById('stepmenu'))">Delete</a><br />
+        <a onclick="stepClone(popupMenuID)">Clone</a><br />
+    </div>
+
+    <div class="hide" id="foldermenu" style="border: 5px outset black; background-color: white">
+        TC
+        <a onclick="elementNew(popupMenuID,document.getElementById('foldermenu'))">New</a><br />
+        <a onclick="elementRename(popupMenuID,document.getElementById('foldermenu'))">Rename</a><br />
+        <a onclick="elementEnableDisable(popupMenuID,document.getElementById('foldermenu'))">Disable/enable</a><br />
+        <a onclick="elementDelete(popupMenuID,document.getElementById('foldermenu'))">Delete</a><br />
+        <a onclick="tcClone(popupMenuID)">Clone</a><br />
+    </div>
+
+    <!--TC-->
+
     <script>
         function getPath(path) {
             var retVal = "";
@@ -231,29 +253,7 @@
                 document.getElementById(name + "menu").style.left = e.pageX + "px";
             });
         }
-    </script>
-    <div id="menu"></div>
 
-
-    <div class="hide" id="stepmenu" style="border: 5px outset black; background-color: white">
-        <a onclick="elementNew(popupMenuID,document.getElementById('stepmenu'))">New</a><br />
-        <a onclick="elementRename(popupMenuID,document.getElementById('stepmenu'))">Rename</a><br />
-        <a onclick="elementEnableDisable(popupMenuID,document.getElementById('stepmenu'))">Disable/enable</a><br />
-        <a onclick="elementDelete(popupMenuID,document.getElementById('stepmenu'))">Delete</a><br />
-        <a onclick="stepClone(popupMenuID)">Clone</a><br />
-    </div>
-
-    <div class="hide" id="foldermenu" style="border: 5px outset black; background-color: white">
-        TC
-        <a onclick="elementNew(popupMenuID,document.getElementById('foldermenu'))">New</a><br />
-        <a onclick="elementRename(popupMenuID,document.getElementById('foldermenu'))">Rename</a><br />
-        <a onclick="elementEnableDisable(popupMenuID,document.getElementById('foldermenu'))">Disable/enable</a><br />
-        <a onclick="elementDelete(popupMenuID,document.getElementById('foldermenu'))">Delete</a><br />
-        <a onclick="tcClone(popupMenuID)">Clone</a><br />
-    </div>
-
-    <!--TC-->
-    <script>
         var popupMenuID = "";
 
         function addFilesFolders(treeObj, parentDomObj, id) {
