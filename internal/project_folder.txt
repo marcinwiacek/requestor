@@ -74,7 +74,7 @@
 
                 if (document.getElementById(newElementPath) == null) {
                     params = new URLSearchParams(window.location.search);
-                    executePOST("file=" + params.get("file") + "&" + "op=renameelement&" + "path=" + elementPath + "&" + "new=" + newName,
+                    executePOST("file=" + params.get("file") + "&" + "op=renameelement&" + "path=" + elementPath + "&" + "new=" + newName + "&newpath=" + newElementPath,
                         function(args) {
                             el = document.getElementById(args[0]);
                             el.text = args[1];
@@ -232,7 +232,7 @@
             });
         }
     </script>
-            <div id="menu"></div>
+    <div id="menu"></div>
 
 
     <div class="hide" id="stepmenu" style="border: 5px outset black; background-color: white">
@@ -252,9 +252,9 @@
         <a onclick="tcClone(popupMenuID)">Clone</a><br />
     </div>
 
-<!--TC-->
+    <!--TC-->
     <script>
-    var popupMenuID = "";
+        var popupMenuID = "";
 
         function addFilesFolders(treeObj, parentDomObj, id) {
             const params = new URLSearchParams(window.location.search);

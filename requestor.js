@@ -13,7 +13,7 @@ const tls = require('node:tls');
 
 const hostname = '127.0.0.1';
 const port = 3000;
-const maxResultsPerRequest = 5;
+const maxResultsPerRequest = 500;
 
 function readFileContentSync(fileName, callback) {
     //FIXME: checking if path is going out
@@ -318,6 +318,7 @@ async function parsePOSTforms(params, res, jsonObj) {
 
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
+        let path = suite.name;
         if (elpath.length == 1 && suite.name == elpath[0]) {
             obiekt = readFileContentSync("/internal/ts.txt").replace("<!--NAME-->", suite.name);
             if (res != null) res.end(obiekt);
@@ -342,6 +343,7 @@ async function parsePOSTforms(params, res, jsonObj) {
                     continue;
                 }
                 var stepcopy = findtc(jsonObj[params['file']], step);
+                path += "/" + tc.name + "/" + step.name;
 
                 obiekt = readFileContentSync("/internal/step.txt").replace("<!--NAME-->",
                     stepcopy.name);
@@ -361,7 +363,7 @@ async function parsePOSTforms(params, res, jsonObj) {
                 obiekt = obiekt.replace("<!--CONLENGTH-->", stepcopy.conLen ? "checked" : "");
                 obiekt = obiekt.replace("<!--METHOD-->", stepcopy.method);
                 var xxxx = "";
-                let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + step.name + "\" order by dt desc");
+                let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + path + "\" order by dt desc");
                 var num = 0;
                 var del = "";
                 for (let row in rows) {
@@ -374,7 +376,7 @@ async function parsePOSTforms(params, res, jsonObj) {
                     }
                 }
                 if (del != "") {
-                    await db_all(params['file'], "DELETE from requests where name =\"" + step.name + "\" and dt in (" + del + ")");
+                    await db_all(params['file'], "DELETE from requests where name =\"" + path + "\" and dt in (" + del + ")");
                 }
                 if (res != null) res.end(obiekt.replace("<!--WHENLAST-->", xxxx));
                 return;
@@ -391,6 +393,7 @@ async function parsePOSTRenameElement(params, res, jsonObj2) {
     if (el != null) {
         console.log(el);
         el.obj.name = params['new'];
+        await db_all(file, "UPDATE requests set name =\"" + params['newpath'] + "\" where name =\"" + params['path'] + "\" ");
     }
     res.end("");
 }
@@ -532,10 +535,10 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
     for (let tsnumber in arr.testsuites) {
         var ts = arr.testsuites[tsnumber];
         console.log("testsuite name " + ts.name);
+        let path = ts.name;
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
             console.log("testcase name " + tc.name);
-
             for (let stepnumber in tc.steps) {
                 var step = tc.steps[stepnumber];
                 if (tc.disabled && tc.disabled == true) {
@@ -545,6 +548,7 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                 if (step.name.localeCompare(params['runstep']) != 0) {
                     continue;
                 }
+                path += "/" + tc.name + "/" + step.name;
                 console.log("starting " + step.name + " vs " + params['runstep']);
                 step.method = params['method'];
                 step.headers = decodeURIComponent(params['headers']).split("\n");
@@ -578,7 +582,7 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    sss = await request2(stepcopy, res, step.name, times, params['file']);
+                    sss = await request2(stepcopy, res, path, times, params['file']);
                     times.push(JSON.parse(sss).datetime);
 
                     if (stepcopy.url == step.url) break;
@@ -632,6 +636,23 @@ function loadFile(name) {
 
 async function getJSON(stepname, dt, file) {
     let rows = await db_all(file, "SELECT * from requests where name =\"" + stepname + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
+    console.log("getjson " + stepname);
+    if (rows == null) {
+        let s = "\"datetime\":\"" + "\",";
+        s += "\"datetime_res\":\"" + "\",";
+        s += "\"errors\":\"" + "\",";
+        s += "\"cert_res\":\"" + "\",";
+        s += "\"ssl_ignore\":\"" + false + "\",";
+        s += "\"code_res\":\"" + "\",";
+        s += "\"url\":\"" + "\",";
+        s += "\"method\":\"GET" + "\",";
+        s += "\"headers\":[\"";
+        s += "\"],\"body\":\"" + "\",";
+        s += "\"headers_res\":[\""
+        s += "\"],\"body_res\":\"" + "\"";
+        return s;
+    }
+
     let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
     s += "\"datetime_res\":\"" + decodeURIComponent(rows[0].dt_res) + "\",";
     s += "\"errors\":\"" + encodeURIComponent(rows[0].error_res) + "\",";
@@ -654,6 +675,7 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
 
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var ts = jsonObj[params['file']].testsuites[tsnumber];
+        let path = ts.name;
         console.log("testsuite name " + ts.name);
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
@@ -681,6 +703,7 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     if (step.name.localeCompare(params['getstep']) != 0) {
                         continue;
                     }
+                    if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
                     console.log("starting " + step.name + " vs " + params['getstep']);
                     var stepcopy = findtc(jsonObj[params['file']], step);
                     if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
@@ -692,7 +715,8 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    if (res != null) res.end("{" + await getJSON(step.name, params['dt'], params['file']) + "}");
+                    console.log(path);
+                    if (res != null) res.end("{" + await getJSON(path, params['dt'], params['file']) + "}");
                 }
             }
         }
@@ -703,12 +727,14 @@ function db_all(filename, sql) {
     return new Promise((resolve, reject) => {
         const q = [];
         dbObj[filename].each(sql, (err, row) => {
+                console.log('abc');
                 if (err) {
                     reject(err);
                 }
                 q.push(row);
             },
             (err, n) => {
+                console.log('def');
                 if (err) {
                     reject(err);
                 }
@@ -772,8 +798,8 @@ const onRequestHandler = async (req, res) => {
                 tree.push(tsobj);
             }
             sendHTML(req, res, readFileContentSync("/internal/project.txt")
-                    .replace("<!--FOLDERS_MENU-->", 
-                readFileContentSync("/internal/project_folder.txt"))
+                .replace("<!--FOLDERS_MENU-->",
+                    readFileContentSync("/internal/project_folder.txt"))
                 .replace("<!--TC-->", "<script>tree = " + JSON.stringify(tree) + ";</script>")
                 .replace("<!--NAME-->", params['file'])
                 .replace("<!--RUN-->", "<p><a href=?file=" + params['file'] + "&run=1>run all</a>"));

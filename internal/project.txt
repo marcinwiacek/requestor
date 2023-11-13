@@ -100,7 +100,6 @@
             const params = new URLSearchParams(window.location.search);
             http.send("file=" + params.get("file") + "&op=savefile");
         }
-
     </script>
 </head>
 
@@ -112,18 +111,9 @@
         <button onclick="savefile();">Save</button>
     </p>
 
-    <p>
-        <!--<form>
-Environment:
-<select name="environment" id="environment">
-ENV
-</select>
-</form>-->
-    </p>
-
     <div class="flex">
         <div id="one" class="split">
-<!--FOLDERS_MENU-->
+            <!--FOLDERS_MENU-->
         </div>
         <div id="two" class="split">
             <!--OBIEKT-->

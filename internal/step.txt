@@ -1,358 +1,329 @@
 <br />
 <script async="async">
-  function getHTTPCode(code) {
-    switch (code) {
-      //https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-      case "200":
-        return "200 OK";
-      case "201":
-        return "201 Created";
-      case "204":
-        return "204 No Content";
-      case "300":
-        return "300 Multiple Choices";
-      case "301":
-        return "301 Moved Permanently";
-      case "302":
-        return "302 Found";
-      case "303":
-        return "303 See Other";
-      case "304":
-        return "304 Not Modified";
-      case "305":
-        return "305 Use Proxy";
-      case "306":
-        return "306 Switch Proxy";
-      case "307":
-        return "307 Temporary Redirect";
-      case "308":
-        return "307 Permanent Redirect";
-      case "400":
-        return "400 Bad Request";
-      case "401":
-        return "401 Unauthorized";
-      case "402":
-        return "402 Payment Required";
-      case "403":
-        return "403 Forbidden";
-      case "404":
-        return "404 Not Found";
-      case "405":
-        return "405 Method Not Allowed";
-      case "406":
-        return "405 Not Acceptable";
-      case "407":
-        return "407 Proxy Authentication Required";
-      case "408":
-        return "408 Request Timeout";
-      case "409":
-        return "409 Conflict";
-      case "410":
-        return "410 Gone";
-      case "411":
-        return "411 Length Required";
-      case "412":
-        return "412 Precondition Failed";
-      case "413":
-        return "413 Payload Too Large";
-      case "414":
-        return "414 URI Too Long";
-      case "415":
-        return "415 Unsupported Media Type";
-      case "416":
-        return "416 Range Not Satisfiable";
-      case "417":
-        return "417 Expectation Failed";
-      case "500":
-        return "500 Internal Server Error";
-      case "501":
-        return "501 Not Implemented";
-      case "502":
-        return "502 Bad Gateway";
-      case "503":
-        return "503 Service Unavailable";
-      case "504":
-        return "504 Gateway Timeout";
-      case "505":
-        return "505 HTTP Version Not Supported";
-      default:
-        return code;
-    }
-  }
-
-  function selectMethod(name, name2) {
-    var selObj = document.getElementById(name);
-    for (var i = 0; i < selObj.options.length; i++) {
-      if (selObj.options[i].text.toUpperCase() == name2.toUpperCase()) {
-        selObj.options[i].selected = true;
-        break;
-      }
-    }
-  }
-
-  function setupLast(obj) {
-    console.log(http.response);
-
-    document.getElementById("lastrequesttype").value = obj.method.toUpperCase();
-    document.getElementById("lastrequesturl").value = obj.url;
-    document.getElementById("lastrequestheaders").value = "";
-    for (var i = 0; i < obj.headers.length; i++) {
-      document.getElementById("lastrequestheaders").value =
-        document.getElementById("lastrequestheaders").value +
-        decodeURIComponent(obj.headers[i]) +
-        "\n";
-    }
-    document.getElementById("lastrequestbody").value = decodeURIComponent(
-      obj.body,
-    );
-    document.getElementById("lastresponseheaders").value = "";
-    for (var i = 0; i < obj.headers_res.length; i++) {
-      document.getElementById("lastresponseheaders").value =
-        document.getElementById("lastresponseheaders").value +
-        decodeURIComponent(obj.headers_res[i]) +
-        "\n";
-    }
-    document.getElementById("lastresponsetime").value = decodeURIComponent(
-      obj.datetime_res,
-    );
-    document.getElementById("lastresponsebody").value = decodeURIComponent(
-      obj.body_res,
-    );
-    document.getElementById("lastresponsecode").value = getHTTPCode(
-      obj.code_res,
-    );
-    document.getElementById("lastresponsecert").value = decodeURIComponent(
-      obj.cert_res,
-    );
-    document.getElementById("lastresponseerror").value = decodeURIComponent(
-      obj.errors,
-    );
-    document.getElementById("lastignorewrongssl").checked =
-      obj.ssl_ignore == "1";
-  }
-
-  function selectLastDate() {
-    if (document.getElementById("whenlast").value == "") return;
-
-    http = createPOST();
-    http.onload = function () {
-      if (http.status != 200) {
-        alert(http.response);
-      } else {
-        setupLast(JSON.parse(http.response));
-      }
-    };
-
-    http.onerror = function () {
-      alert("login error");
-    };
-
-    const params = new URLSearchParams(window.location.search);
-    http.send(
-      "file=" +
-        params.get("file") +
-        "&getstep=" +
-        document.getElementById("name").value +
-        "&dt=" +
-        encodeURIComponent(document.getElementById("whenlast").value),
-    );
-    return false;
-  }
-
-  function sendNewStep() {
-    document.getElementById("run").disabled = true;
-    http = createPOST();
-    http.onload = function () {
-      document.getElementById("run").disabled = false;
-      if (http.status != 200) {
-        alert(http.response);
-      } else {
-        var obj = JSON.parse(http.response);
-
-        for (var i = 0; i < obj.oldtimes.length; i++) {
-          var option1 = document.createElement("option");
-          option1.value = obj.oldtimes[i];
-          option1.text = obj.oldtimes[i];
-          var selObj1 = document.getElementById("whenlast");
-          selObj1.prepend(option1);
+    function getHTTPCode(code) {
+        switch (code) {
+            //https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+            case "200":
+                return "200 OK";
+            case "201":
+                return "201 Created";
+            case "204":
+                return "204 No Content";
+            case "300":
+                return "300 Multiple Choices";
+            case "301":
+                return "301 Moved Permanently";
+            case "302":
+                return "302 Found";
+            case "303":
+                return "303 See Other";
+            case "304":
+                return "304 Not Modified";
+            case "305":
+                return "305 Use Proxy";
+            case "306":
+                return "306 Switch Proxy";
+            case "307":
+                return "307 Temporary Redirect";
+            case "308":
+                return "307 Permanent Redirect";
+            case "400":
+                return "400 Bad Request";
+            case "401":
+                return "401 Unauthorized";
+            case "402":
+                return "402 Payment Required";
+            case "403":
+                return "403 Forbidden";
+            case "404":
+                return "404 Not Found";
+            case "405":
+                return "405 Method Not Allowed";
+            case "406":
+                return "405 Not Acceptable";
+            case "407":
+                return "407 Proxy Authentication Required";
+            case "408":
+                return "408 Request Timeout";
+            case "409":
+                return "409 Conflict";
+            case "410":
+                return "410 Gone";
+            case "411":
+                return "411 Length Required";
+            case "412":
+                return "412 Precondition Failed";
+            case "413":
+                return "413 Payload Too Large";
+            case "414":
+                return "414 URI Too Long";
+            case "415":
+                return "415 Unsupported Media Type";
+            case "416":
+                return "416 Range Not Satisfiable";
+            case "417":
+                return "417 Expectation Failed";
+            case "500":
+                return "500 Internal Server Error";
+            case "501":
+                return "501 Not Implemented";
+            case "502":
+                return "502 Bad Gateway";
+            case "503":
+                return "503 Service Unavailable";
+            case "504":
+                return "504 Gateway Timeout";
+            case "505":
+                return "505 HTTP Version Not Supported";
+            default:
+                return code;
         }
+    }
 
-        var option = document.createElement("option");
-        option.value = obj.datetime;
-        option.text = obj.datetime;
-        var selObj = document.getElementById("whenlast");
-        selObj.prepend(option);
-
+    function selectMethod(name, name2) {
+        var selObj = document.getElementById(name);
         for (var i = 0; i < selObj.options.length; i++) {
-          if (selObj.options[i].text == obj.datetime) {
-            selObj.options[i].selected = true;
-            break;
-          }
+            if (selObj.options[i].text.toUpperCase() == name2.toUpperCase()) {
+                selObj.options[i].selected = true;
+                break;
+            }
         }
-
-        setupLast(obj);
-      }
-    };
-
-    http.onerror = function () {
-      alert("login error");
-    };
-
-    var method = "";
-    var selObj = document.getElementById("type");
-    for (var i = 0; i < selObj.options.length; i++) {
-      if (selObj.options[i].selected) {
-        method = selObj.options[i].value;
-        break;
-      }
     }
 
-    const params = new URLSearchParams(window.location.search);
-    http.send(
-      "file=" +
-        params.get("file") +
-        "&runstep=" +
-        document.getElementById("name").value +
-        "&headers=" +
-        encodeURIComponent(document.getElementById("header").value) +
-        "&body=" +
-        encodeURIComponent(document.getElementById("body").value) +
-        "&url=" +
-        encodeURIComponent(document.getElementById("url").value) +
-        "&ssl=" +
-        document.getElementById("ignorewrongssl").checked +
-        "&conlen=" +
-        document.getElementById("addcontentlength").checked +
-        "&method=" +
-        method,
-    );
+    function setupLast(obj) {
+        console.log(http.response);
 
-    return false;
-  }
+        document.getElementById("lastrequesttype").value = obj.method.toUpperCase();
+        document.getElementById("lastrequesturl").value = obj.url;
+        document.getElementById("lastrequestheaders").value = "";
+        for (var i = 0; i < obj.headers.length; i++) {
+            document.getElementById("lastrequestheaders").value =
+                document.getElementById("lastrequestheaders").value +
+                decodeURIComponent(obj.headers[i]) +
+                "\n";
+        }
+        document.getElementById("lastrequestbody").value = decodeURIComponent(
+            obj.body,
+        );
+        document.getElementById("lastresponseheaders").value = "";
+        for (var i = 0; i < obj.headers_res.length; i++) {
+            document.getElementById("lastresponseheaders").value =
+                document.getElementById("lastresponseheaders").value +
+                decodeURIComponent(obj.headers_res[i]) +
+                "\n";
+        }
+        document.getElementById("lastresponsetime").value = decodeURIComponent(
+            obj.datetime_res,
+        );
+        document.getElementById("lastresponsebody").value = decodeURIComponent(
+            obj.body_res,
+        );
+        document.getElementById("lastresponsecode").value = getHTTPCode(
+            obj.code_res,
+        );
+        document.getElementById("lastresponsecert").value = decodeURIComponent(
+            obj.cert_res,
+        );
+        document.getElementById("lastresponseerror").value = decodeURIComponent(
+            obj.errors,
+        );
+        document.getElementById("lastignorewrongssl").checked =
+            obj.ssl_ignore == "1";
+    }
+
+    function selectLastDate() {
+        if (document.getElementById("whenlast").value == "") return;
+
+        http = createPOST();
+        http.onload = function() {
+            if (http.status != 200) {
+                alert(http.response);
+            } else {
+                setupLast(JSON.parse(http.response));
+            }
+        };
+
+        http.onerror = function() {
+            alert("login error");
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        http.send(
+            "file=" +
+            params.get("file") +
+            "&getstep=" +
+            document.getElementById("name").value +
+            "&dt=" +
+            encodeURIComponent(document.getElementById("whenlast").value),
+        );
+        return false;
+    }
+
+    function sendNewStep() {
+        document.getElementById("run").disabled = true;
+        http = createPOST();
+        http.onload = function() {
+            document.getElementById("run").disabled = false;
+            if (http.status != 200) {
+                alert(http.response);
+            } else {
+                var obj = JSON.parse(http.response);
+
+                for (var i = 0; i < obj.oldtimes.length; i++) {
+                    var option1 = document.createElement("option");
+                    option1.value = obj.oldtimes[i];
+                    option1.text = obj.oldtimes[i];
+                    var selObj1 = document.getElementById("whenlast");
+                    selObj1.prepend(option1);
+                }
+
+                var option = document.createElement("option");
+                option.value = obj.datetime;
+                option.text = obj.datetime;
+                var selObj = document.getElementById("whenlast");
+                selObj.prepend(option);
+
+                for (var i = 0; i < selObj.options.length; i++) {
+                    if (selObj.options[i].text == obj.datetime) {
+                        selObj.options[i].selected = true;
+                        break;
+                    }
+                }
+
+                setupLast(obj);
+            }
+        };
+
+        http.onerror = function() {
+            alert("login error");
+        };
+
+        var method = "";
+        var selObj = document.getElementById("type");
+        for (var i = 0; i < selObj.options.length; i++) {
+            if (selObj.options[i].selected) {
+                method = selObj.options[i].value;
+                break;
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        http.send(
+            "file=" +
+            params.get("file") +
+            "&runstep=" +
+            document.getElementById("name").value +
+            "&headers=" +
+            encodeURIComponent(document.getElementById("header").value) +
+            "&body=" +
+            encodeURIComponent(document.getElementById("body").value) +
+            "&url=" +
+            encodeURIComponent(document.getElementById("url").value) +
+            "&ssl=" +
+            document.getElementById("ignorewrongssl").checked +
+            "&conlen=" +
+            document.getElementById("addcontentlength").checked +
+            "&method=" +
+            method,
+        );
+
+        return false;
+    }
 </script>
 <form onsubmit="return sendNewStep()">
-  <table>
-    <tr>
-      <td valign="bottom">
-        <br />Name <input type="text" id="name" value="<!--NAME-->" size="61" />
-      </td>
-      <td valign="bottom">
-        <p>
-          When
-          <select id="whenlast" onchange="selectLastDate()">
-            <!--WHENLAST-->
-          </select>
-        </p>
-      </td>
-      <td valign="bottom"></td>
-    </tr>
-    <tr>
-      <td valign="top">
-        <select id="type">
-          <option value="get">GET</option>
-          <option value="head">HEAD</option>
-          <option value="post">POST</option>
-          <option value="put">PUT</option>
-          <option value="delete">DELETE</option>
-          <option value="connect">CONNECT</option>
-          <option value="options">OPTIONS</option>
-          <option value="trace">TRACE</option>
-          <option value="patch">PATCH</option>
-        </select>
-        <script>
-          selectMethod("type", "<!--METHOD-->");
-        </script>
-        <!--URLPREFIX-->&nbsp;&nbsp;
-        <input type="text" id="url" value="<!--URL-->" size="57" />
-        <p>
-          Headers<br /><textarea cols="80" rows="5" id="header">
-<!--HEADER--></textarea
-          >
-        </p>
-        <p>
-          Body<br /><textarea cols="80" rows="5" id="body">
-<!--BODY--></textarea
-          >
-        </p>
-        <p>
-          <input type="checkbox" id="ignorewrongssl" <!--SSLIGNORE--> />Ignore SSL
-          errors <br /><input
-            type="checkbox"
-            id="addcontentlength"
-            <!--CONLENGTH-->
-          />Add content-length
-        </p>
+    <table>
+        <tr>
+            <td valign="bottom">
+                <br />Name <input type="text" id="name" value="<!--NAME-->" size="61" />
+            </td>
+            <td valign="bottom">
+                <p>
+                    When
+                    <select id="whenlast" onchange="selectLastDate()">
+                        <!--WHENLAST-->
+                    </select>
+                </p>
+            </td>
+            <td valign="bottom"></td>
+        </tr>
+        <tr>
+            <td valign="top">
+                <select id="type">
+                    <option value="get">GET</option>
+                    <option value="head">HEAD</option>
+                    <option value="post">POST</option>
+                    <option value="put">PUT</option>
+                    <option value="delete">DELETE</option>
+                    <option value="connect">CONNECT</option>
+                    <option value="options">OPTIONS</option>
+                    <option value="trace">TRACE</option>
+                    <option value="patch">PATCH</option>
+                </select>
+                <script>
+                    selectMethod("type", "<!--METHOD-->");
+                </script>
+                <!--URLPREFIX-->&nbsp;&nbsp;
+                <input type="text" id="url" value="<!--URL-->" size="57" />
+                <p>
+                    Headers<br /><textarea cols="80" rows="5" id="header">
+<!--HEADER--></textarea>
+                </p>
+                <p>
+                    Body<br /><textarea cols="80" rows="5" id="body">
+<!--BODY--></textarea>
+                </p>
+                <p>
+                    <input type="checkbox" id="ignorewrongssl" <!--SSLIGNORE--> />Ignore SSL
+                    errors <br /><input type="checkbox" id="addcontentlength" <!--CONLENGTH-->
+                    />Add content-length
+                </p>
 
-        <p>Asserts</p>
-        <p>
-          <select id="x">
-            <option value="GET">HTTP code</option>
-            <option value="POST">Headers</option>
-            <option value="POST">Body</option>
-          </select>
-          <input type="text" id="url2" value="200" size="40" />
-        </p>
+                <p>Asserts</p>
+                <p>
+                    <select id="x">
+                        <option value="GET">HTTP code</option>
+                        <option value="POST">Headers</option>
+                        <option value="POST">Body</option>
+                    </select>
+                    <input type="text" id="url2" value="200" size="40" />
+                </p>
 
-        <p><button id="run" type="submit">Run</button></p>
-      </td>
-      <td valign="top">
-        <input type="text" id="lastrequesttype" size="6" />
-        <!--URLPREFIX-->
-        &nbsp;&nbsp;<input type="text" id="lastrequesturl" value="" size="61" />
-        <p>
-          Headers<br /><textarea
-            cols="80"
-            rows="5"
-            id="lastrequestheaders"
-          ></textarea>
-        </p>
-        <p>
-          Body<br /><textarea
-            cols="80"
-            rows="5"
-            id="lastrequestbody"
-          ></textarea>
-        </p>
-        <p>
-          <input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
-        </p>
-        <p>
-          Response time <input type="text" id="lastresponsetime" /> Code
-          <input type="text" id="lastresponsecode" />
-        </p>
-        <p>
-          Headers<br /><textarea
-            cols="80"
-            rows="5"
-            id="lastresponseheaders"
-          ></textarea>
-        </p>
-        <p>
-          Body<br /><textarea
-            cols="80"
-            rows="5"
-            id="lastresponsebody"
-          ></textarea>
-        </p>
-        <p>
-          Security<br /><textarea
-            cols="80"
-            rows="5"
-            id="lastresponsecert"
-          ></textarea>
-        </p>
-        <p>
-          Errors<br /><textarea
-            cols="80"
-            rows="5"
-            id="lastresponseerror"
-          ></textarea>
-        </p>
-      </td>
-      <td valign="top"></td>
-    </tr>
-  </table>
+                <p><button id="run" type="submit">Run</button></p>
+            </td>
+            <td valign="top">
+                <input type="text" id="lastrequesttype" size="6" />
+                <!--URLPREFIX-->
+                &nbsp;&nbsp;<input type="text" id="lastrequesturl" value="" size="61" />
+                <p>
+                    Headers<br /><textarea cols="80" rows="5" id="lastrequestheaders"></textarea>
+                </p>
+                <p>
+                    Body<br /><textarea cols="80" rows="5" id="lastrequestbody"></textarea>
+                </p>
+                <p>
+                    <input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
+                </p>
+                <p>
+                    Response time <input type="text" id="lastresponsetime" /> Code
+                    <input type="text" id="lastresponsecode" />
+                </p>
+                <p>
+                    Headers<br /><textarea cols="80" rows="5" id="lastresponseheaders"></textarea>
+                </p>
+                <p>
+                    Body<br /><textarea cols="80" rows="5" id="lastresponsebody"></textarea>
+                </p>
+                <p>
+                    Security<br /><textarea cols="80" rows="5" id="lastresponsecert"></textarea>
+                </p>
+                <p>
+                    Errors<br /><textarea cols="80" rows="5" id="lastresponseerror"></textarea>
+                </p>
+            </td>
+            <td valign="top"></td>
+        </tr>
+    </table>
 </form>
 <script>
-  selectLastDate();
+    selectLastDate();
 </script>
