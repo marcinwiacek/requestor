@@ -15,6 +15,9 @@ const hostname = '127.0.0.1';
 const port = 3000;
 const maxResultsPerRequest = 500;
 
+let jsonObj = [];
+let dbObj = [];
+
 function readFileContentSync(fileName, callback) {
     //FIXME: checking if path is going out
     if (callback) {
@@ -31,6 +34,25 @@ function readFileContentSync(fileName, callback) {
         const x = fs.readFileSync(path.normalize(__dirname + fileName), 'utf8');
         return (x.charCodeAt(0) == 65279) ? x.substring(1) : x;
     }
+}
+
+function loadFile(name) {
+    if (!jsonObj[name]) {
+        try {
+            jsonObj[name] = JSON.parse(readFileContentSync("/projects/" + name));
+        } catch (e) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function digits(a, b) {
+    let x = a.toString();
+    while (x.length < b) {
+        x = "0" + x;
+    }
+    return x;
 }
 
 async function executeRequest(req) {
@@ -135,13 +157,6 @@ function findtc(arr, tc) {
     return stepcopy;
 }
 
-function digits(a, b) {
-    let x = a.toString();
-    while (x.length < b) {
-        x = "0" + x;
-    }
-    return x;
-}
 
 async function request2(req, res, name, times, filename) {
     console.log("request " + JSON.stringify(req));
@@ -194,12 +209,8 @@ ls.on('close', (code) => {
 });
 */
 
-function sendHTMLHead(res) {
+function sendBody(req, res, text) {
     res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html; charset=UTF-8');
-}
-
-function sendHTMLBody(req, res, text) {
     if (req.headers['accept-encoding'] && req.headers['accept-encoding'].includes('gzip')) {
         res.setHeader('Content-Encoding', 'gzip');
         res.end(zlib.gzipSync(text));
@@ -211,40 +222,24 @@ function sendHTMLBody(req, res, text) {
     }
 }
 
-function sendJSHead(res) {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/javascript; charset=UTF-8');
-}
-
-function sendCSSHead(res) {
-    res.statusCode = 200;
-    //    res.setHeader('Cache-Control', 'no-store');
-    //  res.setHeader('Cache-Control', 'must-revalidate');
-    res.setHeader('Content-Type', 'text/css; charset=UTF-8');
-}
-
 function sendHTML(req, res, text) {
-    sendHTMLHead(res);
-    sendHTMLBody(req, res, text);
+    res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+    sendBody(req, res, text);
+}
+
+function sendPlain(req, res, text) {
+    res.setHeader('Content-Type', 'text/plain');
+    sendBody(req, res, text);
 }
 
 function sendJS(req, res, text) {
-    sendJSHead(res);
-    sendHTMLBody(req, res, text);
+    res.setHeader('Content-Type', 'text/javascript; charset=UTF-8');
+    sendBody(req, res, text);
 }
 
 function sendCSS(req, res, text) {
-    sendCSSHead(res);
-    sendHTMLBody(req, res, text);
-}
-
-let jsonObj = [];
-let dbObj = [];
-
-function directToOKFileNotFoundNoRet(res, txt, ok) {
-    res.statusCode = ok ? 200 : 404;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end(txt);
+    res.setHeader('Content-Type', 'text/css; charset=UTF-8');
+    sendBody(req, res, text);
 }
 
 function findElement(jsonObj, params) {
@@ -283,28 +278,27 @@ function findElement(jsonObj, params) {
     return null;
 }
 
-
 // return values from sub functions are ignored.
-async function parsePOSTforms(params, res, jsonObj) {
+async function parsePOSTforms(req, params, res, jsonObj) {
     console.log(params);
     loadFile(params['file']);
     loadDB(params['file']);
     if (params["runstep"]) {
-        return parsePOSTRunStep(params, res, jsonObj);
+        return parsePOSTRunStep(req, params, res, jsonObj);
     } else if (params["op"] == "savefile") {
-        return parsePOSTSaveFile(params, res, jsonObj);
+        return parsePOSTSaveFile(req, params, res, jsonObj);
     } else if (params["op"] == "newelement") {
-        return parsePOSTNewElement(params, res, jsonObj);
+        return parsePOSTNewElement(req, params, res, jsonObj);
     } else if (params["op"] == "clonestep") {
-        return parsePOSTCloneStep(params, res, jsonObj);
+        return parsePOSTCloneStep(req, params, res, jsonObj);
     } else if (params["op"] == "renameelement") {
-        return parsePOSTRenameElement(params, res, jsonObj);
+        return parsePOSTRenameElement(req, params, res, jsonObj);
     } else if (params["op"] == "enabledisableelement") {
-        return parsePOSTEnableDisableElement(params, res, jsonObj);
+        return parsePOSTEnableDisableElement(req, params, res, jsonObj);
     } else if (params["op"] == "deleteelement") {
-        return parsePOSTDeleteElement(params, res, jsonObj);
+        return parsePOSTDeleteElement(req, params, res, jsonObj);
     } else if (params["getstep"] && params["dt"]) {
-        return parsePOSTGetStep(params, res, jsonObj);
+        return parsePOSTGetStep(req, params, res, jsonObj);
     } else if (!(params['file'] && fs.existsSync(
             path.normalize(__dirname + "/projects/" + params['file'])))) {
         return;
@@ -313,15 +307,12 @@ async function parsePOSTforms(params, res, jsonObj) {
     let elpath = params['path'].split("/");
 
     var obiekt = "";
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
 
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
         let path = suite.name;
         if (elpath.length == 1 && suite.name == elpath[0]) {
-            obiekt = readFileContentSync("/internal/ts.txt").replace("<!--NAME-->", suite.name);
-            if (res != null) res.end(obiekt);
+            sendPlain(req, res, readFileContentSync("/internal/ts.txt").replace("<!--NAME-->", suite.name));
             return;
         }
 
@@ -334,7 +325,7 @@ async function parsePOSTforms(params, res, jsonObj) {
                     xxxx += tc.input[inputnumber] + "\n";
                 }
                 xxxx += "`;</script>";
-                if (res != null) res.end(obiekt.replace("<!--DATA-->", xxxx));
+                sendPlain(req, res, obiekt.replace("<!--DATA-->", xxxx));
                 return;
             }
             for (let stepnumber in tc.steps) {
@@ -378,30 +369,26 @@ async function parsePOSTforms(params, res, jsonObj) {
                 if (del != "") {
                     await db_all(params['file'], "DELETE from requests where name =\"" + path + "\" and dt in (" + del + ")");
                 }
-                if (res != null) res.end(obiekt.replace("<!--WHENLAST-->", xxxx));
+                sendPlain(req, res, obiekt.replace("<!--WHENLAST-->", xxxx));
                 return;
             }
         }
     }
-    if (res != null) res.end("");
+    sendPlain(req, res, "");
 }
 
-async function parsePOSTRenameElement(params, res, jsonObj2) {
+async function parsePOSTRenameElement(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
     if (el != null) {
         console.log(el);
         el.obj.name = params['new'];
-        await db_all(file, "UPDATE requests set name =\"" + params['newpath'] + "\" where name =\"" + params['path'] + "\" ");
+        await db_all(params['file'], "UPDATE requests set name =\"" + params['newpath'] + "\" where name =\"" + params['path'] + "\" ");
     }
-    res.end("");
+    sendPlain(req, res, "");
 }
 
-async function parsePOSTNewElement(params, res, jsonObj2) {
+async function parsePOSTNewElement(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
     if (el != null) {
         let elpath = params['path'].split("/");
         if (elpath.length == 3) {
@@ -417,10 +404,30 @@ async function parsePOSTNewElement(params, res, jsonObj2) {
             el.parent.splice(el.index, 0, newStep);
         }
     }
-    res.end("");
+    sendPlain(req, res, "");
 }
 
-async function parsePOSTCloneStep(params, res, jsonObj2) {
+async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
+    el = findElement(jsonObj2, params);
+    if (el != null) {
+        if (el.obj.disabled == true) {
+            delete el.obj.disabled;
+        } else {
+            el.obj.disabled = true;
+        }
+    }
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
+    el = findElement(jsonObj2, params);
+    if (el != null) {
+        el.parent.splice(el.index, 1);
+    }
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTCloneStep(req, params, res, jsonObj2) {
     var sss = "";
 
     console.log(params);
@@ -480,58 +487,20 @@ async function parsePOSTCloneStep(params, res, jsonObj2) {
     if (res != null) res.end(sss);
 }
 
-async function parsePOSTEnableDisableElement(params, res, jsonObj2) {
-    el = findElement(jsonObj2, params);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    if (el != null) {
-        if (el.obj.disabled == true) {
-            delete el.obj.disabled;
-        } else {
-            el.obj.disabled = true;
-        }
-    }
-    res.end("");
-}
-
-async function parsePOSTDeleteElement(params, res, jsonObj2) {
-    el = findElement(jsonObj2, params);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    if (el != null) {
-        el.parent.splice(el.index, 1);
-    }
-    res.end("");
-}
-
-async function parsePOSTSaveFile(params, res, jsonObj2) {
-    var sss = "";
-
-    console.log(params);
-    let arr = jsonObj[params['file']];
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-
-    fs.writeFile(path.normalize(__dirname + '/projects/ala'), JSON.stringify(arr), function(err) {
-
+async function parsePOSTSaveFile(req, params, res, jsonObj2) {
+    fs.writeFile(path.normalize(__dirname + '/projects/ala'), JSON.stringify(jsonObj[params['file']]), function(err) {
         if (err) {
             return console.log(err);
         }
     });
-
-    if (res != null) res.end(sss);
+    sendPlain(req, params, res, "");
 }
 
-async function parsePOSTRunStep(params, res, jsonObj2) {
+async function parsePOSTRunStep(req, params, res, jsonObj2) {
     var sss = "";
-
     console.log(params);
     let arr = jsonObj[params['file']];
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-
     let times = [];
-
     for (let tsnumber in arr.testsuites) {
         var ts = arr.testsuites[tsnumber];
         console.log("testsuite name " + ts.name);
@@ -591,7 +560,7 @@ async function parsePOSTRunStep(params, res, jsonObj2) {
             }
         }
     }
-    if (res != null) res.end(sss);
+    sendPlain(req, res, sss);
 }
 
 function loadDB(name) {
@@ -623,15 +592,22 @@ function loadDB(name) {
     }
 }
 
-function loadFile(name) {
-    if (!jsonObj[name]) {
-        try {
-            jsonObj[name] = JSON.parse(readFileContentSync("/projects/" + name));
-        } catch (e) {
-            return false;
-        }
-    }
-    return true;
+function db_all(filename, sql) {
+    return new Promise((resolve, reject) => {
+        const q = [];
+        dbObj[filename].each(sql, (err, row) => {
+                if (err) {
+                    reject(err);
+                }
+                q.push(row);
+            },
+            (err, n) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(q);
+            });
+    });
 }
 
 async function getJSON(stepname, dt, file) {
@@ -668,11 +644,8 @@ async function getJSON(stepname, dt, file) {
     return s;
 }
 
-async function parsePOSTGetStep(params, res, jsonObj2) {
+async function parsePOSTGetStep(req, params, res, jsonObj2) {
     console.log(jsonObj);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var ts = jsonObj[params['file']].testsuites[tsnumber];
         let path = ts.name;
@@ -715,33 +688,13 @@ async function parsePOSTGetStep(params, res, jsonObj2) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    console.log(path);
-                    if (res != null) res.end("{" + await getJSON(path, params['dt'], params['file']) + "}");
+                    sendPlain(req, res, "{" + await getJSON(path, params['dt'], params['file']) + "}");
                 }
             }
         }
     }
 }
 
-function db_all(filename, sql) {
-    return new Promise((resolve, reject) => {
-        const q = [];
-        dbObj[filename].each(sql, (err, row) => {
-                console.log('abc');
-                if (err) {
-                    reject(err);
-                }
-                q.push(row);
-            },
-            (err, n) => {
-                console.log('def');
-                if (err) {
-                    reject(err);
-                }
-                resolve(q);
-            });
-    });
-}
 
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
@@ -813,7 +766,7 @@ const onRequestHandler = async (req, res) => {
         });
         req.on('end', function() {
             console.log(body);
-            parsePOSTforms(url.parse("/?" + body, true).query, res, jsonObj);
+            parsePOSTforms(req, url.parse("/?" + body, true).query, res, jsonObj);
         });
         return;
     }
