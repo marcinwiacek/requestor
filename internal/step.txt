@@ -1,4 +1,3 @@
-<br />
 <script async="async">
     function getHTTPCode(code) {
         switch (code) {
@@ -222,12 +221,10 @@
                 <br />Name <input type="text" id="name" value="<!--NAME-->" size="61" />
             </td>
             <td valign="bottom">
-                <p>
                     When
                     <select id="whenlast" onchange="selectLastDate()">
                         <!--WHENLAST-->
                     </select>
-                </p>
             </td>
             <td valign="bottom"></td>
         </tr>

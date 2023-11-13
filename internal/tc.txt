@@ -1,4 +1,6 @@
-<br />
+<form id="d">
+    <p>Name: <input type="text" id="name" name="name" value="<!--NAME-->" /></p>
+</form>
 
 <div>
     <button onclick="table.clearData();return false;">Clear data</button>
@@ -131,6 +133,3 @@
     });
 </script>
 
-<form id="d">
-    <p>Name: <input type="text" id="name" name="name" value="<!--NAME-->" /></p>
-</form>
