@@ -349,11 +349,11 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 for (var bodynumber in stepcopy.body) {
                     xxxx += stepcopy.body[bodynumber];
                 }
-                obiekt = obiekt.replace("<!--BODY-->", xxxx);
-                obiekt = obiekt.replace("<!--SSLIGNORE-->", stepcopy.ignoreWrongSSL ? "checked" : "");
-                obiekt = obiekt.replace("<!--CONLENGTH-->", stepcopy.conLen ? "checked" : "");
-                obiekt = obiekt.replace("<!--METHOD-->", stepcopy.method);
-                obiekt = obiekt.replace("<!--PATH-->", "<script>path = '"+path+"';</script>");
+                obiekt = obiekt.replace("<!--BODY-->", xxxx)
+                .replace("<!--SSLIGNORE-->", stepcopy.ignoreWrongSSL ? "checked" : "")
+                .replace("<!--CONLENGTH-->", stepcopy.conLen ? "checked" : "")
+                .replace("<!--METHOD-->", stepcopy.method)
+                .replace("<!--PATH-->", "<script>path = '"+path+"';</script>");
                 var xxxx = "";
                 let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + path + "\" order by dt desc");
                 var num = 0;
