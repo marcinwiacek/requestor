@@ -736,7 +736,6 @@ const onRequestHandler = async (req, res) => {
                 path.normalize(__dirname + "/projects/" + params['file']))) {
             if (!loadFile(params['file'])) {
                 sendHTML(req, res, readFileContentSync("/internal/project.txt")
-                    .replace("<!--TC-->", "")
                     .replace("<!--NAME-->", "Error reading file"));
                 return;
             }
@@ -773,6 +772,8 @@ const onRequestHandler = async (req, res) => {
                 tree.push(tsobj);
             }
             sendHTML(req, res, readFileContentSync("/internal/project.txt")
+                    .replace("<!--FOLDERS_MENU-->", 
+                readFileContentSync("/internal/project_folder.txt"))
                 .replace("<!--TC-->", "<script>tree = " + JSON.stringify(tree) + ";</script>")
                 .replace("<!--NAME-->", params['file'])
                 .replace("<!--RUN-->", "<p><a href=?file=" + params['file'] + "&run=1>run all</a>"));
