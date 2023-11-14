@@ -52,19 +52,19 @@
     <div id="menu"></div>
 
     <div class="hide" id="stepmenu" style="border: 5px outset black; background-color: white">
-        <a onclick="elementNew(popupMenuID,document.getElementById('stepmenu'))">New</a><br />
-        <a onclick="elementRename(popupMenuID,document.getElementById('stepmenu'))">Rename</a><br />
-        <a onclick="elementEnableDisable(popupMenuID,document.getElementById('stepmenu'))">Disable/enable</a><br />
-        <a onclick="elementDelete(popupMenuID,document.getElementById('stepmenu'))">Delete</a><br />
+        <a onclick="elementNew(popupMenuID,"stepmenu")">New</a><br />
+        <a onclick="elementRename(popupMenuID,"stepmenu")">Rename</a><br />
+        <a onclick="elementEnableDisable()">Disable/enable</a><br />
+        <a onclick="elementDelete(popupMenuID,"stepmenu")">Delete</a><br />
         <a onclick="stepClone(popupMenuID)">Clone</a><br />
     </div>
 
     <div class="hide" id="foldermenu" style="border: 5px outset black; background-color: white">
         TC
-        <a onclick="elementNew(popupMenuID,document.getElementById('foldermenu'))">New</a><br />
-        <a onclick="elementRename(popupMenuID,document.getElementById('foldermenu'))">Rename</a><br />
-        <a onclick="elementEnableDisable(popupMenuID,document.getElementById('foldermenu'))">Disable/enable</a><br />
-        <a onclick="elementDelete(popupMenuID,document.getElementById('foldermenu'))">Delete</a><br />
+        <a onclick="elementNew(popupMenuID,"foldermenu")">New</a><br />
+        <a onclick="elementRename(popupMenuID,"foldermenu")">Rename</a><br />
+        <a onclick="elementEnableDisable()">Disable/enable</a><br />
+        <a onclick="elementDelete(popupMenuID,"foldermenu")">Delete</a><br />
         <a onclick="tcClone(popupMenuID)">Clone</a><br />
     </div>
 
@@ -121,14 +121,15 @@
             objobj.classList.toggle("show");
         }
 
-        function elementEnableDisable(stepName, objobj) {
+        function elementEnableDisable() {
             params = new URLSearchParams(window.location.search);
-            executePOST("file=" + params.get("file") + "&op=enabledisableelement&path=" + stepName,
+            executePOST("file=" + params.get("file") + "&op=enabledisableelement&path=" + popupMenuID,
                 function(args) {
-                    document.getElementById(args[0]).classList.toggle("disabled");
-                }, stepName,
+                   document.getElementById(args[0]).classList.toggle("disabled");
+                }, popupMenuID
             );
-            objobj.classList.toogle("show");
+
+            document.getElementById(popupMenuName).classList.toggle("show");
         }
 
         function elementNew(elementPath, objobj) {
@@ -242,6 +243,7 @@
         function updatePopupMenu(toggler, name) {
             toggler.addEventListener("contextmenu", (e) => {
                 popupMenuID = e.target.id;
+                popupMenuName = name+"menu";
                 document.getElementById(name + "menu").classList.toggle("show");
                 e.preventDefault();
             });
@@ -255,6 +257,7 @@
         }
 
         var popupMenuID = "";
+        var popupMenuName = "";
 
         function addFilesFolders(treeObj, parentDomObj, id) {
             const params = new URLSearchParams(window.location.search);
