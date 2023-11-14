@@ -311,6 +311,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
         let pathwithnum = tsnumber;
+        let path = suite.name;
         if (elpath.length == 1 && suite.name == elpath[0]) {
             sendPlain(req, res, readFileContentSync("/internal/ts.txt").replace("<!--NAME-->", suite.name));
             return;
@@ -335,6 +336,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 }
                 var stepcopy = findtc(jsonObj[params['file']], step);
                 pathwithnum += "/" + tcnumber + "/" + stepnumber;
+                path += "/" + tc.name + "/" + step.name;
 
                 obiekt = readFileContentSync("/internal/step.txt").replace("<!--NAME-->",
                     stepcopy.name);
@@ -614,6 +616,7 @@ function db_all(filename, sql) {
 }
 
 async function getJSON(stepname, dt, file) {
+console.log("searching for "+stepname);
     let rows = await db_all(file, "SELECT * from requests where name =\"" + stepname + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
     if (rows == null) {
         let s = "\"datetime\":\"" + "\",";
@@ -648,7 +651,7 @@ async function getJSON(stepname, dt, file) {
 
 async function parsePOSTGetStep(req, params, res, jsonObj2) {
     console.log(jsonObj);
-console.log(params);
+console.log(params['path']);
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var ts = jsonObj[params['file']].testsuites[tsnumber];
         let path = ts.name;
@@ -674,9 +677,9 @@ console.log(params);
                 });
                 for (let stepnumber in tc.steps) {
                     var step = tc.steps[stepnumber];
-                    if (step.disabled && step.disabled == true) {
-                        continue;
-                    }
+//                    if (step.disabled && step.disabled == true) {
+//                        continue;
+//                    }
                     if ((path +"/" + tc.name + "/" + step.name).localeCompare(params['path']) != 0) {
                         continue;
                     }
