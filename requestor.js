@@ -310,7 +310,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
-        let path = suite.name;
+        let pathwithnum = tsnumber;
         if (elpath.length == 1 && suite.name == elpath[0]) {
             sendPlain(req, res, readFileContentSync("/internal/ts.txt").replace("<!--NAME-->", suite.name));
             return;
@@ -334,7 +334,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                     continue;
                 }
                 var stepcopy = findtc(jsonObj[params['file']], step);
-                path += "/" + tc.name + "/" + step.name;
+                pathwithnum += "/" + tcnumber + "/" + stepnumber;
 
                 obiekt = readFileContentSync("/internal/step.txt").replace("<!--NAME-->",
                     stepcopy.name);
@@ -355,7 +355,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 .replace("<!--METHOD-->", stepcopy.method)
                 .replace("<!--PATH-->", "<script>path = '"+path+"';</script>");
                 var xxxx = "";
-                let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + path + "\" order by dt desc");
+                let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + pathwithnum + "\" order by dt desc");
                 var num = 0;
                 var del = "";
                 for (let row in rows) {
@@ -368,7 +368,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                     }
                 }
                 if (del != "") {
-                    await db_all(params['file'], "DELETE from requests where name =\"" + path + "\" and dt in (" + del + ")");
+                    await db_all(params['file'], "DELETE from requests where name =\"" + pathwithnum + "\" and dt in (" + del + ")");
                 }
                 sendPlain(req, res, obiekt.replace("<!--WHENLAST-->", xxxx));
                 return;
@@ -383,7 +383,7 @@ async function parsePOSTRenameElement(req, params, res, jsonObj2) {
     if (el != null) {
         console.log(el);
         el.obj.name = params['new'];
-        await db_all(params['file'], "UPDATE requests set name =\"" + params['newpath'] + "\" where name =\"" + params['path'] + "\" ");
+//        await db_all(params['file'], "UPDATE requests set name =\"" + params['newpath'] + "\" where name =\"" + params['path'] + "\" ");
     }
     sendPlain(req, res, "");
 }
@@ -489,6 +489,8 @@ async function parsePOSTCloneStep(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTSaveFile(req, params, res, jsonObj2) {
+//change all positions in db
+//pathwithnumber
     fs.writeFile(path.normalize(__dirname + '/projects/ala'), JSON.stringify(jsonObj[params['file']]), function(err) {
         if (err) {
             return console.log(err);
@@ -505,7 +507,7 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
     for (let tsnumber in arr.testsuites) {
         var ts = arr.testsuites[tsnumber];
         console.log("testsuite name " + ts.name);
-        let path = ts.name;
+        let pathwithnum = tsnumber;
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
             console.log("testcase name " + tc.name);
@@ -518,7 +520,7 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
                 if (step.name.localeCompare(params['runstep']) != 0) {
                     continue;
                 }
-                path += "/" + tc.name + "/" + step.name;
+                pathwithnum += "/" + tcnumber + "/" + stepnumber;
                 console.log("starting " + step.name + " vs " + params['runstep']);
                 step.method = params['method'];
                 step.headers = decodeURIComponent(params['headers']).split("\n");
@@ -552,7 +554,7 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    sss = await request2(stepcopy, res, path, times, params['file']);
+                    sss = await request2(stepcopy, res, pathwithnum, times, params['file']);
                     times.push(JSON.parse(sss).datetime);
 
                     if (stepcopy.url == step.url) break;
@@ -613,7 +615,6 @@ function db_all(filename, sql) {
 
 async function getJSON(stepname, dt, file) {
     let rows = await db_all(file, "SELECT * from requests where name =\"" + stepname + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
-    console.log("getjson " + stepname);
     if (rows == null) {
         let s = "\"datetime\":\"" + "\",";
         s += "\"datetime_res\":\"" + "\",";
@@ -651,6 +652,7 @@ console.log(params);
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var ts = jsonObj[params['file']].testsuites[tsnumber];
         let path = ts.name;
+        let pathwithnum = tsnumber;
         console.log("testsuite name " + ts.name);
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
@@ -679,6 +681,7 @@ console.log(params);
                         continue;
                     }
                     if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
+                    if (!pathwithnum.includes("/")) pathwithnum += "/" + tcnumber + "/" + stepnumber;
                     var stepcopy = findtc(jsonObj[params['file']], step);
                     if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
                     for (let d in arra) {
@@ -689,7 +692,7 @@ console.log(params);
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    sendPlain(req, res, "{" + await getJSON(path, params['dt'], params['file']) + "}");
+                    sendPlain(req, res, "{" + await getJSON(pathwithnum, params['dt'], params['file']) + "}");
                 }
             }
         }
