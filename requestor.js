@@ -251,7 +251,7 @@ function findElement(jsonObj, params) {
             retVal = [];
             retVal.obj = suite;
             retVal.index = tsnumber;
-            retVal.parent = jsonObj[params['file']].testsuites[tsnumber];
+            retVal.parent = jsonObj[params['file']].testsuites;
             return retVal;
         }
         for (let tcnumber in suite.testcases) {
@@ -405,7 +405,18 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
             newStep.url = "";
             newStep.headers = "";
             el.parent.splice(el.index, 0, newStep);
-        }
+        } else if (elpath.length == 2) {
+            let newTC = {};
+	    newTC.name = params["new"];
+	    newTC.steps = [];
+	    newTC.input = [];
+            el.parent.splice(el.index, 0, newTC);
+        } else if (elpath.length == 1) {
+            let newTS = {};
+	    newTS.name = params["new"];
+	    newTS.testcases = [];
+            el.parent.splice(el.index, 0, newTS);
+	}
     }
     sendPlain(req, res, "");
 }

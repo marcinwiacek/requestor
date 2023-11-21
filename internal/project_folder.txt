@@ -170,7 +170,11 @@
                             liparent = el.parentNode;
                             liparent.parentNode.insertBefore(liel, liparent);
 
-                            updateStep(liel);
+                            if (args[3] == 3) {
+                                updateStep(liel);
+			    } else {
+				updateFolder(liel);
+			    }
                         },
                         popupMenuID,
                         newName,
@@ -301,31 +305,40 @@
             });
         }
 
+
+	function updateFolder(obj) {
+                const node = document.createElement("a");
+                node.innerHTML = obj.classList.contains("folder-open") ?
+                    "\u25BC " :
+                    "\u25B6 ";
+                node.addEventListener("click", function() {
+                    this.innerHTML = this.innerHTML == "\u25B6 " ? "\u25BC " : "\u25B6 ";
+                    this.parentElement.classList.toggle("folder-open");
+                });
+	        obj.prepend(node);
+	}
+
+	function updateAllFolders() {
+            var toggler = document.getElementsByClassName("folder");
+            for (var i = 0; i < toggler.length; i++) {
+		updateFolder(toggler[i]);
+            }
+            var toggler = document.getElementsByClassName("tcts");
+            for (var i = 0; i < toggler.length; i++) {
+                updatePopupMenu(toggler[i], "folder");
+            }
+            var toggler = document.getElementsByClassName("file");
+            for (var i = 0; i < toggler.length; i++) {
+                updatePopupMenu(toggler[i], "step");
+            }
+	}
+
         ulel = document.createElement("ul");
         document.getElementById("menu").appendChild(ulel);
         tree.forEach(function(folder, index) {
             addFilesFolders(folder, ulel, "");
         });
 
-        var toggler = document.getElementsByClassName("folder");
-        for (var i = 0; i < toggler.length; i++) {
-            const node = document.createElement("a");
-            node.innerHTML = toggler[i].classList.contains("folder-open") ?
-                "\u25BC " :
-                "\u25B6 ";
-            node.addEventListener("click", function() {
-                this.innerHTML = this.innerHTML == "\u25B6 " ? "\u25BC " : "\u25B6 ";
-                this.parentElement.classList.toggle("folder-open");
-            });
-            toggler[i].prepend(node);
-        }
 
-        var toggler = document.getElementsByClassName("tcts");
-        for (var i = 0; i < toggler.length; i++) {
-            updatePopupMenu(toggler[i], "folder");
-        }
-        var toggler = document.getElementsByClassName("file");
-        for (var i = 0; i < toggler.length; i++) {
-            updatePopupMenu(toggler[i], "step");
-        }
+	updateAllFolders();
     </script>
