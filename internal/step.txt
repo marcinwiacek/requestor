@@ -251,7 +251,7 @@
 <!--HEADER--></textarea>
                 </p>
                 <p>
-                    Body<br /><textarea cols="80" rows="5" id="body">
+                    Body<br /><textarea cols="80" rows="7" id="body">
 <!--BODY--></textarea>
                 </p>
                 <p>
@@ -280,7 +280,7 @@
                     Headers<br /><textarea cols="80" rows="5" id="lastrequestheaders"></textarea>
                 </p>
                 <p>
-                    Body<br /><textarea cols="80" rows="5" id="lastrequestbody"></textarea>
+                    Body<br /><textarea cols="80" rows="7" id="lastrequestbody"></textarea>
                 </p>
                 <p>
                     <input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
@@ -293,13 +293,13 @@
                     Headers<br /><textarea cols="80" rows="5" id="lastresponseheaders"></textarea>
                 </p>
                 <p>
-                    Body<br /><textarea cols="80" rows="5" id="lastresponsebody"></textarea>
+                    Body<br /><textarea cols="80" rows="7" id="lastresponsebody"></textarea>
                 </p>
                 <p>
-                    Security<br /><textarea cols="80" rows="5" id="lastresponsecert"></textarea>
+                    Security<br /><textarea cols="80" rows="3" id="lastresponsecert"></textarea>
                 </p>
                 <p>
-                    Errors<br /><textarea cols="80" rows="5" id="lastresponseerror"></textarea>
+                    Errors<br /><textarea cols="80" rows="3" id="lastresponseerror"></textarea>
                 </p>
             </td>
             <td valign="top"></td>

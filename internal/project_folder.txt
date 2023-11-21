@@ -66,6 +66,8 @@
         <a onclick="elementEnableDisable()">Disable/enable</a><br />
         <a onclick="elementDelete()">Delete</a><br />
         <a onclick="tcClone()">Clone</a><br />
+	<hr>
+        <a onclick="elementNewInside()">New inside</a><br />
     </div>
 
     <!--TC-->
