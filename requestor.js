@@ -289,6 +289,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         return parsePOSTSaveFile(req, params, res, jsonObj);
     } else if (params["op"] == "newelement") {
         return parsePOSTNewElement(req, params, res, jsonObj);
+    } else if (params["op"] == "newelementinside") {
+        return parsePOSTNewElementInside(req, params, res, jsonObj);
     } else if (params["op"] == "clonestep") {
         return parsePOSTCloneStep(req, params, res, jsonObj);
     } else if (params["op"] == "renameelement") {
@@ -402,7 +404,7 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
             newStep.body = "";
             newStep.ignoreWrongSSL = true;
             newStep.conLen = true;
-            newStep.url = "";
+            newStep.url = "https://";
             newStep.headers = "";
             el.parent.splice(el.index, 0, newStep);
         } else if (elpath.length == 2) {
@@ -416,6 +418,34 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
 	    newTS.name = params["new"];
 	    newTS.testcases = [];
             el.parent.splice(el.index, 0, newTS);
+	}
+    }
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
+    el = findElement(jsonObj2, params);
+    if (el != null) {
+console.log("found");
+        let elpath = params['path'].split("/");
+console.log("found "+elpath.length);
+        if (elpath.length == 2) {
+            let newStep = {};
+            newStep.name = params["new"];
+            newStep.method = "POST";
+            newStep.headers = "";
+            newStep.body = "";
+            newStep.ignoreWrongSSL = true;
+            newStep.conLen = true;
+            newStep.url = "https://";
+            newStep.headers = "";
+            el.obj.steps.unshift(newStep);
+        } else if (elpath.length == 1) {
+            let newTC = {};
+	    newTC.name = params["new"];
+	    newTC.steps = [];
+	    newTC.input = [];
+            el.obj.testcases.unshift(newTC);
 	}
     }
     sendPlain(req, res, "");
@@ -509,7 +539,7 @@ async function parsePOSTSaveFile(req, params, res, jsonObj2) {
             return console.log(err);
         }
     });
-    sendPlain(req, params, res, "");
+    sendPlain(req, res, "");
 }
 
 async function parsePOSTRunStep(req, params, res, jsonObj2) {

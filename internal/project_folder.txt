@@ -177,7 +177,7 @@ console.log(toggler[i].id+" vs "+popupMenuID);
                             liparent.parentNode.insertBefore(liel, liparent);
 
 			    if (args[3] == 3) {
-                                updateStep(liel);
+//                                updateStep(liel);
             			updatePopupMenu(alel, "step");
 			    } else {
 				updateFolder(liel);
@@ -195,16 +195,73 @@ console.log(toggler[i].id+" vs "+popupMenuID);
             document.getElementById(popupMenuName).classList.toggle("show");
         }
 
-        function elementDelete(stepName, objobj) {
+        function elementNewInside() {
+            let oldName = "";
+            let elpath = popupMenuID.split("/");
+
+            while (true) {
+                var newName = prompt("Please enter unique name", oldName);
+                oldName = newName;
+
+                if (newName == null) {
+                    break;
+                }
+                newElementPath = getPath(elpath)+"/"+newName;
+
+                if (document.getElementById(newElementPath) == null) {
+                    params = new URLSearchParams(window.location.search);
+                    executePOST("file=" + params.get("file") + "&" + "op=newelementinside&" + "path=" + popupMenuID + "&" + "new=" + newName,
+                        function(args) {
+                            liel = document.createElement("li");
+			    if (args[3] == 2) {
+                                liel.classList.add ("file");
+			    } else {
+                                liel.classList.add ("folder", "folder-open");
+			    }
+                            alel = document.createElement("a");
+                            alel.text = args[1];
+                            alel.id = args[2];
+            		    alel.setAttribute("class", args[3] == 2 ? "step" : "tcts");
+                            params = new URLSearchParams(window.location.search);
+                            alel.onclick = function() {
+                                loadRightPart(
+                                    "file=" + params.get("file") + "&path=" + this.id,
+                                );
+                            };
+
+                            liel.appendChild(alel);
+
+                            el = document.getElementById(args[0]);
+			    el.append(liel);
+
+			    if (args[3] == 2) {
+            			updatePopupMenu(alel, "step");
+			    } else {
+				updateFolder(liel);
+		                updatePopupMenu(alel, "folder");
+			    }
+                        },
+                        popupMenuID,
+                        newName,
+                        newElementPath,
+                        elpath.length,
+                    );
+                    break;
+                }
+            }
+            document.getElementById(popupMenuName).classList.toggle("show");
+        }
+
+        function elementDelete() {
             params = new URLSearchParams(window.location.search);
             executePOST(
-                "file=" + params.get("file") + "&op=deleteelement&path=" + stepName,
+                "file=" + params.get("file") + "&op=deleteelement&path=" + popupMenuID,
                 function(args) {
-                    el = document.getElementById(args[0]);
+                    el = document.getElementById(popupMenuID);
                     //fixme for folder also parent parent
                     el.parentNode.remove();
                 },
-                stepName,
+                null,
             );
             document.getElementById(popupMenuName).classList.toggle("show");
         }
@@ -238,7 +295,7 @@ console.log(toggler[i].id+" vs "+popupMenuID);
                         liparent = el.parentNode;
                         liparent.parentNode.insertBefore(liel, liparent);
 
-                        updateStep(liel);
+//                        updateStep(liel);
                     }
                 };
 
