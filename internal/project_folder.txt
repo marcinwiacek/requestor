@@ -104,6 +104,7 @@
                             el.text = args[1];
                             var toggler = document.getElementsByClassName("tcts");
                             for (var i = 0; i < toggler.length; i++) {
+console.log(toggler[i].id+" vs "+popupMenuID);
                                 if (toggler[i].id && toggler[i].id.startsWith(popupMenuID)) {
                                     toggler[i].id = toggler[i].id.replace(args[0], args[2]);
                                 }
@@ -161,7 +162,7 @@
                             alel = document.createElement("a");
                             alel.text = args[1];
                             alel.id = args[2];
-                            alel.class = args[3] == 3 ? "step" : "tcts";
+            		    alel.setAttribute("class", args[3] == 3 ? "step" : "tcts");
                             params = new URLSearchParams(window.location.search);
                             alel.onclick = function() {
                                 loadRightPart(

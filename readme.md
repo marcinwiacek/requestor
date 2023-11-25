@@ -1,7 +1,7 @@
 Requestor
 
 Application for sending, analizing and testing requests. Could be used
-as replacement for SoapUI, Ready API, Postman and many other tools.
+as simpler replacement for SoapUI, Ready API, Postman and many other tools.
 Written using nodeJS (=speed, available code, no problems with
 onboarding in some companies, support for all important features, etc.).
 
