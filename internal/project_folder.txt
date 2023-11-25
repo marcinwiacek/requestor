@@ -153,8 +153,11 @@
                     executePOST("file=" + params.get("file") + "&" + "op=newelement&" + "path=" + popupMenuID + "&" + "new=" + newName,
                         function(args) {
                             liel = document.createElement("li");
-                            liel.class = args[3] == 3 ? "file" : "folder";
-
+			    if (args[3] == 3) {
+                                liel.classList.add ("file");
+			    } else {
+                                liel.classList.add ("folder", "folder-open");
+			    }
                             alel = document.createElement("a");
                             alel.text = args[1];
                             alel.id = args[2];
@@ -172,10 +175,12 @@
                             liparent = el.parentNode;
                             liparent.parentNode.insertBefore(liel, liparent);
 
-                            if (args[3] == 3) {
+			    if (args[3] == 3) {
                                 updateStep(liel);
+            			updatePopupMenu(alel, "step");
 			    } else {
 				updateFolder(liel);
+		                updatePopupMenu(alel, "folder");
 			    }
                         },
                         popupMenuID,
