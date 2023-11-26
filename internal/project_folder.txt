@@ -156,16 +156,13 @@
                     executePOST("file=" + params.get("file") + "&" + "op=newelement&" + "path=" + popupMenuID + "&" + "new=" + newName,
                         function(args) {
                             newEl = args[3] == 3 ? getFileElement(args[1], false, args[2]) :
-                                getFolderElement(args[1], false, args[2]);
+                                getFolderElement(args[1], false, args[2], args[3]==1?"ts":"tc");
 
                             el = document.getElementById(args[0]);
                             liparent = el.parentNode;
                             liparent.parentNode.insertBefore(newEl, liparent);
 
-                            if (args[3] == 3) {
-                                updatePopupMenu(newEl.children[0], "step");
-                            } else {
-                                updatePopupMenu(newEl.children[0], "folder");
+                            if (args[3] != 3) {
                                 updateFolder(newEl);
                             }
                         },
@@ -198,15 +195,12 @@
                     executePOST("file=" + params.get("file") + "&" + "op=newelementinside&" + "path=" + popupMenuID + "&" + "new=" + newName,
                         function(args) {
                             newEl = args[3] == 2 ? getFileElement(args[1], false, args[2]) :
-                                getFolderElement(args[1], false, args[2]);
+                                getFolderElement(args[1], false, args[2], args[3]==1?"ts":"tc");
 
                             el = document.getElementById(args[0]);
                             el.parentNode.children[2].prepend(newEl);
 
-                            if (args[3] == 2) {
-                                updatePopupMenu(newEl.children[0], "step");
-                            } else {
-                                updatePopupMenu(newEl.children[0], "folder");
+                            if (args[3] != 2) {
                                 updateFolder(newEl);
                             }
                         },
@@ -242,35 +236,43 @@
         }
 
         function elementPaste() {
-            let isFolder1 = document.getElementById(copyID).classList.contains("tcts");
-            let isFolder2 = document.getElementById(popupMenuID).classList.contains("tcts");
-            if (isFolder1 != isFolder2) return;
+            let elpath1 = copyID.split("/");
+            let elpath2 = popupMenuID.split("/");
+	    if (elpath1.length == elpath2.length || elpath2.length == elpath1.length-1) {
+	    } else {
+		return;
+	    }
+
+                    let newName = elpath1[elpath1.length - 1] + "(copy)";
+		    if (elpath2.length==elpath1.length-1) {
+			newElementPath = popupMenuID+"/"+newName;
+		    } else {
+			elpath1 [elpath1.length-1] = newName;
+                	newElementPath = getPath(elpath1);
+		    }
 
             params = new URLSearchParams(window.location.search);
             executePOST(
-                "file=" + params.get("file") + "&op=pasteelement&path=" + copyID + "&new=" + popupMenuID,
+                "file=" + params.get("file") + "&op=pasteelement&path=" + copyID + "&newpath=" + popupMenuID+"&name="+newName,
                 function(args) {
-                    let oldName = "";
-                    let elpath = args[0].split("/");
-                    elpath[elpath.length - 1] = elpath[elpath.length - 1] + "(copy)";
-                    newElementPath = getPath(elpath);
 
-                    newEl = args[1] ?
-                        getFolderElement(elpath[elpath.length - 1], false, newElementPath) :
-                        getFileElement(elpath[elpath.length - 1], false, newElementPath);
+                    newEl = args[0]<3 ?
+                        getFolderElement(args[2], false, args[1], args[0]==1?"ts":"tc") :
+                        getFileElement(args[2], false, args[1]);
 
+		    if (args[3]==args[0]-1) {
+                            el = document.getElementById(popupMenuID);
+                            el.parentNode.children[2].prepend(newEl);
+} else {
                     el = document.getElementById(popupMenuID);
                     liparent = el.parentNode;
                     liparent.parentNode.insertBefore(newEl, liparent);
-
-                    if (args[1]) {
-                        updatePopupMenu(newEl.children[0], "folder");
+}
+                    if (args[0]<3) {
                         updateFolder(newEl);
-                    } else {
-                        updatePopupMenu(newEl.children[0], "step");
                     }
                 },
-                copyID,isFolder1
+                elpath1.length, newElementPath, newName, elpath2.length
             );
             copyID = "";
             document.getElementById(popupMenuName).classList.toggle("show");
@@ -320,7 +322,7 @@
 
         }
 
-        function getFolderElement(name, disabled, id) {
+        function getFolderElement(name, disabled, id, type) {
             const params = new URLSearchParams(window.location.search);
 
             let liel1 = document.createElement("li");
@@ -329,7 +331,7 @@
             let alel1 = document.createElement("a");
             alel1.text = name;
             alel1.setAttribute("id", id);
-            alel1.setAttribute("class", "tcts" + (disabled ? " disabled" : ""));
+            alel1.setAttribute("class", "tcts" + (disabled ? " disabled" : "")+" "+type);
             alel1.onclick = function() {
                 loadRightPart("file=" + params.get("file") + "&path=" + this.id);
             };
@@ -379,7 +381,7 @@
         function addFilesFolders(treeObj, parentDomObj, id) {
             const params = new URLSearchParams(window.location.search);
 
-            const folderel = getFolderElement(treeObj.name, treeObj.disabled, id + treeObj.name);
+            const folderel = getFolderElement(treeObj.name, treeObj.disabled, id + treeObj.name, treeObj.type);
             parentDomObj.appendChild(folderel);
 
             treeObj.folders.forEach(function(folder, index) {
