@@ -82,25 +82,38 @@ async function executeRequest(req) {
         method2 = req.method == "get" ? https.get : https.request;
         if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
     }
+    if (method2 == null) {
+        var resp = {}
+        resp.body = '';
+        resp.headers = [];
+        resp.code = 0;
+        resp.error = "Error parsing url, supported http: and https: in this moment";
+        resp.certinfo = "";
+        return (resp);
+    }
     options.method = req.method;
     options.timeout = 3000;
     return new Promise((resolve, reject) => {
         const r = method2(req.url, options, (response) => {
             const chunk = []
-            var cipher = r.socket.getCipher();
-            certinfo += "Cipher\n  " + cipher.standardName + ", " + cipher.version + "\n\n";
-            var cert = r.socket.getPeerCertificate(true);
-            if (cert != undefined && cert.subject) {
-                while (true) {
-                    certinfo += "Certificate\n";
-                    certinfo += '  subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
-                    certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
-                    certinfo += '  Valid ' + cert.valid_from + " - " + cert.valid_to + "\n";
-                    certinfo += '  SHA256 ' + cert.fingerprint256 + "\n\n";
-                    lastprint256 = cert.fingerprint256;
-                    cert = cert.issuerCertificate;
-                    if (cert == undefined || lastprint256 == cert.fingerprint256) break;
+            try {
+                var cipher = r.socket.getCipher();
+                certinfo += "Cipher\n  " + cipher.standardName + ", " + cipher.version + "\n\n";
+                var cert = r.socket.getPeerCertificate(true);
+                if (cert != undefined && cert.subject) {
+                    while (true) {
+                        certinfo += "Certificate\n";
+                        certinfo += '  subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
+                        certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
+                        certinfo += '  Valid ' + cert.valid_from + " - " + cert.valid_to + "\n";
+                        certinfo += '  SHA256 ' + cert.fingerprint256 + "\n\n";
+                        lastprint256 = cert.fingerprint256;
+                        cert = cert.issuerCertificate;
+                        if (cert == undefined || lastprint256 == cert.fingerprint256) break;
+                    }
                 }
+            } catch (e) {
+                certinfo = "Not possible to get certificate"
             }
             response.on('data', (fragments) => {
                 chunk.push(fragments);
@@ -353,10 +366,10 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                     xxxx += stepcopy.body[bodynumber];
                 }
                 obiekt = obiekt.replace("<!--BODY-->", xxxx)
-                .replace("<!--SSLIGNORE-->", stepcopy.ignoreWrongSSL ? "checked" : "")
-                .replace("<!--CONLENGTH-->", stepcopy.conLen ? "checked" : "")
-                .replace("<!--METHOD-->", stepcopy.method)
-                .replace("<!--PATH-->", "<script>path = '"+path+"';</script>");
+                    .replace("<!--SSLIGNORE-->", stepcopy.ignoreWrongSSL ? "checked" : "")
+                    .replace("<!--CONLENGTH-->", stepcopy.conLen ? "checked" : "")
+                    .replace("<!--METHOD-->", stepcopy.method)
+                    .replace("<!--PATH-->", "<script>path = '" + path + "';</script>");
                 var xxxx = "";
                 let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + pathwithnum + "\" order by dt desc");
                 var num = 0;
@@ -386,7 +399,7 @@ async function parsePOSTRenameElement(req, params, res, jsonObj2) {
     if (el != null) {
         console.log(el);
         el.obj.name = params['new'];
-//        await db_all(params['file'], "UPDATE requests set name =\"" + params['newpath'] + "\" where name =\"" + params['path'] + "\" ");
+        //        await db_all(params['file'], "UPDATE requests set name =\"" + params['newpath'] + "\" where name =\"" + params['path'] + "\" ");
     }
     sendPlain(req, res, "");
 }
@@ -408,16 +421,16 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
             el.parent.splice(el.index, 0, newStep);
         } else if (elpath.length == 2) {
             let newTC = {};
-	    newTC.name = params["new"];
-	    newTC.steps = [];
-	    newTC.input = [];
+            newTC.name = params["new"];
+            newTC.steps = [];
+            newTC.input = [];
             el.parent.splice(el.index, 0, newTC);
         } else if (elpath.length == 1) {
             let newTS = {};
-	    newTS.name = params["new"];
-	    newTS.testcases = [];
+            newTS.name = params["new"];
+            newTS.testcases = [];
             el.parent.splice(el.index, 0, newTS);
-	}
+        }
     }
     sendPlain(req, res, "");
 }
@@ -425,9 +438,9 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
 async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params);
     if (el != null) {
-console.log("found");
+        console.log("found");
         let elpath = params['path'].split("/");
-console.log("found "+elpath.length);
+        console.log("found " + elpath.length);
         if (elpath.length == 2) {
             let newStep = {};
             newStep.name = params["new"];
@@ -441,11 +454,11 @@ console.log("found "+elpath.length);
             el.obj.steps.unshift(newStep);
         } else if (elpath.length == 1) {
             let newTC = {};
-	    newTC.name = params["new"];
-	    newTC.steps = [];
-	    newTC.input = [];
+            newTC.name = params["new"];
+            newTC.steps = [];
+            newTC.input = [];
             el.obj.testcases.unshift(newTC);
-	}
+        }
     }
     sendPlain(req, res, "");
 }
@@ -531,8 +544,8 @@ async function parsePOSTCloneStep(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTSaveFile(req, params, res, jsonObj2) {
-//change all positions in db
-//pathwithnumber
+    //change all positions in db
+    //pathwithnumber
     fs.writeFile(path.normalize(__dirname + '/projects/ala'), JSON.stringify(jsonObj[params['file']]), function(err) {
         if (err) {
             return console.log(err);
@@ -656,7 +669,7 @@ function db_all(filename, sql) {
 }
 
 async function getJSON(stepname, dt, file) {
-console.log("searching for "+stepname);
+    console.log("searching for " + stepname);
     let rows = await db_all(file, "SELECT * from requests where name =\"" + stepname + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
     if (rows == null) {
         let s = "\"datetime\":\"" + "\",";
@@ -691,7 +704,7 @@ console.log("searching for "+stepname);
 
 async function parsePOSTGetStep(req, params, res, jsonObj2) {
     console.log(jsonObj);
-console.log(params['path']);
+    console.log(params['path']);
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var ts = jsonObj[params['file']].testsuites[tsnumber];
         let path = ts.name;
@@ -717,10 +730,10 @@ console.log(params['path']);
                 });
                 for (let stepnumber in tc.steps) {
                     var step = tc.steps[stepnumber];
-//                    if (step.disabled && step.disabled == true) {
-//                        continue;
-//                    }
-                    if ((path +"/" + tc.name + "/" + step.name).localeCompare(params['path']) != 0) {
+                    //                    if (step.disabled && step.disabled == true) {
+                    //                        continue;
+                    //                    }
+                    if ((path + "/" + tc.name + "/" + step.name).localeCompare(params['path']) != 0) {
                         continue;
                     }
                     if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
