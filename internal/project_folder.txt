@@ -73,6 +73,11 @@
             <a onclick="elementNewInside()">New inside</a><br />
     </div>
 
+    <div class="hide" id="mainfilemenu" style="border: 5px outset black; background-color: white">
+        Main<p>
+            <a onclick="elementNew()">New</a><br />
+    </div>
+
     <!--TC-->
 
     <script>
@@ -415,4 +420,7 @@
         for (var i = 0; i < toggler.length; i++) {
             updateFolder(toggler[i]);
         }
+
+            updatePopupMenu(document.getElementById("mainfile"), "mainfile");
+
     </script>

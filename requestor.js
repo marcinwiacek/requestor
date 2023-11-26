@@ -94,59 +94,75 @@ async function executeRequest(req) {
     options.method = req.method;
     options.timeout = 3000;
     return new Promise((resolve, reject) => {
-        const r = method2(req.url, options, (response) => {
-            const chunk = []
-            try {
-                var cipher = r.socket.getCipher();
-                certinfo += "Cipher\n  " + cipher.standardName + ", " + cipher.version + "\n\n";
-                var cert = r.socket.getPeerCertificate(true);
-                if (cert != undefined && cert.subject) {
-                    while (true) {
-                        certinfo += "Certificate\n";
-                        certinfo += '  subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
-                        certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
-                        certinfo += '  Valid ' + cert.valid_from + " - " + cert.valid_to + "\n";
-                        certinfo += '  SHA256 ' + cert.fingerprint256 + "\n\n";
-                        lastprint256 = cert.fingerprint256;
-                        cert = cert.issuerCertificate;
-                        if (cert == undefined || lastprint256 == cert.fingerprint256) break;
+        try {
+            const r = method2(req.url, options, (response) => {
+                const chunk = []
+                try {
+                    var cipher = r.socket.getCipher();
+                    certinfo += "Cipher\n  " + cipher.standardName + ", " + cipher.version + "\n\n";
+                    var cert = r.socket.getPeerCertificate(true);
+                    if (cert != undefined && cert.subject) {
+                        while (true) {
+                            certinfo += "Certificate\n";
+                            certinfo += '  subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
+                            certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
+                            certinfo += '  Valid ' + cert.valid_from + " - " + cert.valid_to + "\n";
+                            certinfo += '  SHA256 ' + cert.fingerprint256 + "\n\n";
+                            lastprint256 = cert.fingerprint256;
+                            cert = cert.issuerCertificate;
+                            if (cert == undefined || lastprint256 == cert.fingerprint256) break;
+                        }
                     }
+                } catch (e) {
+                    certinfo = "Not possible to get certificate"
                 }
-            } catch (e) {
-                certinfo = "Not possible to get certificate"
-            }
-            response.on('data', (fragments) => {
-                chunk.push(fragments);
-            });
-            response.on('end', () => {
+                response.on('data', (fragments) => {
+                    chunk.push(fragments);
+                });
+                response.on('end', () => {
+                    var resp = {}
+                    resp.body = Buffer.concat(chunk).toString();
+                    resp.headers = response.headers;
+                    resp.code = response.statusCode;
+                    resp.error = "";
+                    resp.certinfo = certinfo;
+                    resolve(resp);
+                });
+            }).on('error', (e) => {
+                console.log("error is " + e.message + " " + e);
+                console.log("error is " + e.errors);
+                var s = e.errors + " ";
                 var resp = {}
-                resp.body = Buffer.concat(chunk).toString();
-                resp.headers = response.headers;
-                resp.code = response.statusCode;
-                resp.error = "";
+                resp.body = '';
+                resp.headers = [];
+                resp.code = 0;
+                if (s == 'undefined ') {
+                    resp.error = e.message;
+                } else {
+                    resp.error = s;
+                }
                 resp.certinfo = certinfo;
                 resolve(resp);
             });
-        }).on('error', (e) => {
-            console.log("error is " + e.message + " " + e);
-            console.log("error is " + e.errors);
-            var s = e.errors + " ";
+            if (req.method == "post") {
+                r.write(req.body);
+                r.end();
+            }
+        } catch (e) {
             var resp = {}
             resp.body = '';
             resp.headers = [];
             resp.code = 0;
+            var s = e.errors + " ";
             if (s == 'undefined ') {
                 resp.error = e.message;
             } else {
                 resp.error = s;
             }
-            resp.certinfo = certinfo;
+            resp.certinfo = "";
             resolve(resp);
-        });
-        if (req.method == "post") {
-            r.write(req.body);
-            r.end();
         }
+
     });
 }
 
