@@ -20,14 +20,13 @@ GitHub or marcin (@) mwiacek (.) com. I will do my best, but I can't give
 any SLA with free version. Time is money.
 
 # There is no big company staying behind this
-Linux kernel also started this way. And today you have it in desktop,
-Android, etc.
+Linux kernel started this way. And today you have it in desktop, Android, etc.
 
 # Code is horrible, all should go to the trash, bla, bla, bla
-Yeah. Month ago it was worse, year ago much worse. Normally you start from
+Yes. Month ago it was worse, year ago much worse. Normally you start from
 something horrible or small and improve it. This is called progress
 (Android 1.0 or Windows 1.0 were not excellent too). If you're not patient,
-write & propose something better or allow big boys to work.
+write & propose something better or allow other to work.
 
 # Installation
 1. install nodejs - ```sudo snap install node --classic --channel=20```
