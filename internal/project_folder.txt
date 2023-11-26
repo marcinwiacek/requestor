@@ -212,33 +212,17 @@ console.log(toggler[i].id+" vs "+popupMenuID);
                     params = new URLSearchParams(window.location.search);
                     executePOST("file=" + params.get("file") + "&" + "op=newelementinside&" + "path=" + popupMenuID + "&" + "new=" + newName,
                         function(args) {
-                            liel = document.createElement("li");
-			    if (args[3] == 2) {
-                                liel.classList.add ("file");
-			    } else {
-                                liel.classList.add ("folder", "folder-open");
-			    }
-                            alel = document.createElement("a");
-                            alel.text = args[1];
-                            alel.id = args[2];
-            		    alel.setAttribute("class", args[3] == 2 ? "step" : "tcts");
-                            params = new URLSearchParams(window.location.search);
-                            alel.onclick = function() {
-                                loadRightPart(
-                                    "file=" + params.get("file") + "&path=" + this.id,
-                                );
-                            };
+newEl = args[3] == 2? getFileElement(args[1],false,popupMenuID+"/"):
+getFolderElement(args[1], false,popupMenuID+"/");
 
-                            liel.appendChild(alel);
-
-                            el = document.getElementById(args[0]);
-			    el.append(liel);
+ el = document.getElementById(args[0]);
+			    el.parentNode.children[2].prepend(newEl);
 
 			    if (args[3] == 2) {
-            			updatePopupMenu(alel, "step");
+            			updatePopupMenu(newEl, "step");
 			    } else {
-				updateFolder(liel);
-		                updatePopupMenu(alel, "folder");
+				updateFolder(newEl);
+		                updatePopupMenu(newEl, "folder");
 			    }
                         },
                         popupMenuID,
@@ -350,16 +334,15 @@ function getFolderElement(name, disabled,id) {
 	    return liel1;
 }
 
-function getFileElement(name, name2, disabled,id) {
+function getFileElement(name, disabled,id) {
             const params = new URLSearchParams(window.location.search);
 
                 let liel2 = document.createElement("li");
                 liel2.setAttribute("class", "file");
 
-                console.log(id + name + "/" + name2);
                 let alel2 = document.createElement("a");
-                alel2.text = name2;
-                alel2.setAttribute("id", id + name + "/" + name2);
+                alel2.text = name;
+                alel2.setAttribute("id", id + name);
                 alel2.setAttribute("class", "step" + (disabled ? " disabled" : ""));
                 alel2.onclick = function() {
                     loadRightPart("file=" + params.get("file") + "&path=" + this.id);
@@ -379,7 +362,8 @@ function getFileElement(name, name2, disabled,id) {
                 addFilesFolders(folder, folderel.children[1], id + treeObj.name + "/");
             });
             treeObj.files.forEach(function(file, index) {
-                folderel.children[1].appendChild(getFileElement(treeObj.name, file.name, treeObj.disabled, id));
+                folderel.children[1].appendChild(getFileElement(file.name, treeObj.disabled, 
+                id + treeObj.name+"/"));
             });
         }
 
