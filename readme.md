@@ -1,10 +1,10 @@
 Requestor
 
 Application for sending, analizing and testing requests. Initially created as
-proof of concept, currently could be used in various situations as simpler
-replacement for SoapUI, Ready API, Postman, curl and similar tools.
-Written in Java Script, using nodeJS (=speed, available code, no problems with
-onboarding in some companies, support for all important features, etc.).
+proof of concept, currently could be used as simpler replacement for SoapUI,
+Ready API, Postman, curl and similar tools. Written in Java Script, using
+nodeJS (=speed, available code, no problems with onboarding in some companies,
+support for all important features, etc.).
 
 # Why another app?
 Because many existing apps were written years ago and are obsolete
@@ -14,7 +14,8 @@ and sometimes have horrible GUI.
 Indeed. But don't expect all possible support in such situation. Time is money.
 
 # I want this and this function
-Wait or see previous point.
+Wait or see previous point. Theoretically, if we don't have limit in nodeJS,
+it could be added.
 
 # Support
 GitHub or marcin (@) mwiacek (.) com. I will do my best, but I can't give
