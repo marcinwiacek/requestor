@@ -307,12 +307,42 @@
                 loadRightPart("file=" + params.get("file") + "&path=" + this.id);
             };
 
+alel1.setAttribute("draggable", true);
+  alel1.addEventListener("dragstart", dragStart);
+  alel1.addEventListener("drop", dropEnd);
+  alel1.addEventListener("dragenter", cancelDefault);
+  alel1.addEventListener("dragover", cancelDefault);
+
             let ulel1 = document.createElement("ul");
 
             liel1.appendChild(alel1);
             liel1.appendChild(ulel1);
             return liel1;
         }
+
+
+function cancelDefault(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  return false;
+}
+
+function dragStart(e) {
+  e.dataTransfer.setData("text/plain", e.target.id);
+}
+
+function dropEnd(e) {
+  cancelDefault(e);
+
+  let oldId = e.dataTransfer.getData("text/plain");
+  let newId = e.target.id;
+
+let isFolder1 = document.getElementById(oldId).classList.contains("tcts");
+let isFolder2 = document.getElementById(newId).classList.contains("tcts");
+
+console.log("file/folder drop "+oldId+" "+newId+" "+isFolder1+" " +isFolder2);
+
+}
 
         function getFileElement(name, disabled, id) {
             const params = new URLSearchParams(window.location.search);
@@ -329,6 +359,13 @@
             };
 
             liel2.appendChild(alel2);
+
+alel2.setAttribute("draggable", true);
+  alel2.addEventListener("dragstart", dragStart);
+  alel2.addEventListener("drop", dropEnd);
+  alel2.addEventListener("dragenter", cancelDefault);
+  alel2.addEventListener("dragover", cancelDefault);
+
             return liel2;
         }
 
