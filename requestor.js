@@ -169,7 +169,6 @@ function findtc(arr, tc) {
     return stepcopy;
 }
 
-
 async function request2(req, res, name, times, filename) {
     console.log("request " + JSON.stringify(req));
     console.log("start");
@@ -206,7 +205,6 @@ async function request2(req, res, name, times, filename) {
     console.log("end");
     return "{" + (await getJSON(name, curDT, filename)) + ",\"oldtimes\":" + JSON.stringify(times) + "}";
 }
-
 
 /*
 const ls = child_process('ls', ['/usr']);
@@ -255,7 +253,11 @@ function sendCSS(req, res, text) {
 }
 
 function findElement(jsonObj, params) {
-    let elpath = params['path'].split("/");
+    return findElement2(jsonObj, params, params['path']);
+}
+
+function findElement2(jsonObj, params, pathString) {
+    let elpath = pathString.split("/");
 
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
@@ -303,8 +305,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         return parsePOSTNewElement(req, params, res, jsonObj);
     } else if (params["op"] == "newelementinside") {
         return parsePOSTNewElementInside(req, params, res, jsonObj);
-    } else if (params["op"] == "clonestep") {
-        return parsePOSTCloneStep(req, params, res, jsonObj);
+    } else if (params["op"] == "pasteelement") {
+        return parsePOSTPasteElement(req, params, res, jsonObj);
     } else if (params["op"] == "renameelement") {
         return parsePOSTRenameElement(req, params, res, jsonObj);
     } else if (params["op"] == "enabledisableelement") {
@@ -483,64 +485,15 @@ async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
     sendPlain(req, res, "");
 }
 
-async function parsePOSTCloneStep(req, params, res, jsonObj2) {
-    var sss = "";
-
-    console.log(params);
-    let arr = jsonObj[params['file']];
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-
-    let times = [];
-
-    let oldStep = null;
-
-    for (let tsnumber in arr.testsuites) {
-        var ts = arr.testsuites[tsnumber];
-        console.log("testsuite name " + ts.name);
-        for (let tcnumber in ts.testcases) {
-            var tc = ts.testcases[tcnumber];
-            console.log("testcase name " + tc.name);
-
-            for (let stepnumber in tc.steps) {
-                var step = tc.steps[stepnumber];
-                if (tc.disabled && tc.disabled == true) {
-                    continue;
-                }
-                console.log(step.name + " vs " + params['new']);
-                if (step.name.localeCompare(params['new']) != 0) {
-                    continue;
-                }
-                oldStep = JSON.parse(JSON.stringify(step));
-                break;
-            }
-        }
+async function parsePOSTPasteElement(req, params, res, jsonObj2) {
+    el = findElement(jsonObj2, params);
+    el2 = findElement2(jsonObj2, params, params['new']);
+    if (el != null && el2 != null) {
+	    let newObj = JSON.parse(JSON.stringify(el.obj));
+	    newObj.name = newObj.name+"(copy)";
+            el2.parent.splice(el2.index, 0, newObj);
     }
-
-    for (let tsnumber in arr.testsuites) {
-        var ts = arr.testsuites[tsnumber];
-        console.log("testsuite name " + ts.name);
-        for (let tcnumber in ts.testcases) {
-            var tc = ts.testcases[tcnumber];
-            console.log("testcase name " + tc.name);
-
-            for (let stepnumber in tc.steps) {
-                var step = tc.steps[stepnumber];
-                if (tc.disabled && tc.disabled == true) {
-                    continue;
-                }
-                console.log(step.name + " vs " + params['old']);
-                if (step.name.localeCompare(params['old']) != 0) {
-                    continue;
-                }
-                oldStep.name = oldStep.name + "(copy)";
-                tc.steps.splice(stepnumber, 0, oldStep);
-                break;
-            }
-        }
-    }
-
-    if (res != null) res.end(sss);
+    sendPlain(req, res, "");
 }
 
 async function parsePOSTSaveFile(req, params, res, jsonObj2) {

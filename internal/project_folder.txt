@@ -249,7 +249,7 @@ if (isFolder1 != isFolder2) return;
 
             params = new URLSearchParams(window.location.search);
             executePOST(
-                "file=" + params.get("file") + "&op=copyelement&path=" + copyID+"&new="+popupMenuID,
+                "file=" + params.get("file") + "&op=pasteelement&path=" + copyID+"&new="+popupMenuID,
                 function(args) {
                 },
                 null,
@@ -354,7 +354,7 @@ alel2.setAttribute("draggable", true);
   alel2.addEventListener("dragenter", cancelDefault);
   alel2.addEventListener("dragover", cancelDefault);
 
-                updatePopupMenu(alel2, "file");
+                updatePopupMenu(alel2, "step");
 
             return liel2;
         }
