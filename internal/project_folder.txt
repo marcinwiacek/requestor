@@ -328,17 +328,17 @@ console.log(toggler[i].id+" vs "+popupMenuID);
         var popupMenuID = "";
         var popupMenuName = "";
 
-        function addFilesFolders(treeObj, parentDomObj, id) {
+function getFolderElement(name, disabled,id) {
             const params = new URLSearchParams(window.location.search);
 
             let liel1 = document.createElement("li");
             liel1.setAttribute("class", "folder folder-open");
 
             let alel1 = document.createElement("a");
-            alel1.text = treeObj.name;
-            console.log(id + treeObj.name);
-            alel1.setAttribute("id", id + treeObj.name);
-            alel1.setAttribute("class", "tcts" + (treeObj.disabled ? " disabled" : ""));
+            alel1.text = name;
+            console.log(id + name);
+            alel1.setAttribute("id", id + name);
+            alel1.setAttribute("class", "tcts" + (disabled ? " disabled" : ""));
             alel1.onclick = function() {
                 loadRightPart("file=" + params.get("file") + "&path=" + this.id);
             };
@@ -347,10 +347,18 @@ console.log(toggler[i].id+" vs "+popupMenuID);
 
             liel1.appendChild(alel1);
             liel1.appendChild(ulel1);
-            parentDomObj.appendChild(liel1);
+	    return liel1;
+}
+
+        function addFilesFolders(treeObj, parentDomObj, id) {
+            const params = new URLSearchParams(window.location.search);
+
+const folderel = getFolderElement(treeObj.name, treeObj.disabled, id);
+
+            parentDomObj.appendChild(folderel);
 
             treeObj.folders.forEach(function(folder, index) {
-                addFilesFolders(folder, ulel1, id + treeObj.name + "/");
+                addFilesFolders(folder, folderel.children[1], id + treeObj.name + "/");
             });
             treeObj.files.forEach(function(file, index) {
                 let liel2 = document.createElement("li");
@@ -366,7 +374,7 @@ console.log(toggler[i].id+" vs "+popupMenuID);
                 };
 
                 liel2.appendChild(alel2);
-                ulel1.appendChild(liel2);
+                folderel.children[1].appendChild(liel2);
             });
         }
 
