@@ -263,7 +263,7 @@
                     liparent = el.parentNode;
                     liparent.parentNode.insertBefore(newEl, liparent);
 
-                    if (isFolder1) {
+                    if (args[1]) {
                         updatePopupMenu(newEl.children[0], "folder");
                         updateFolder(newEl);
                     } else {
@@ -296,35 +296,6 @@
         var popupMenuName = "";
         var copyID = "";
 
-        function getFolderElement(name, disabled, id) {
-            const params = new URLSearchParams(window.location.search);
-
-            let liel1 = document.createElement("li");
-            liel1.setAttribute("class", "folder folder-open");
-
-            let alel1 = document.createElement("a");
-            alel1.text = name;
-            console.log(id);
-            alel1.setAttribute("id", id);
-            alel1.setAttribute("class", "tcts" + (disabled ? " disabled" : ""));
-            alel1.onclick = function() {
-                loadRightPart("file=" + params.get("file") + "&path=" + this.id);
-            };
-
-            alel1.setAttribute("draggable", true);
-            alel1.addEventListener("dragstart", dragStart);
-            alel1.addEventListener("drop", dropEnd);
-            alel1.addEventListener("dragenter", cancelDefault);
-            alel1.addEventListener("dragover", cancelDefault);
-
-            updatePopupMenu(alel1, "folder");
-
-            let ulel1 = document.createElement("ul");
-
-            liel1.appendChild(alel1);
-            liel1.appendChild(ulel1);
-            return liel1;
-        }
 
         function cancelDefault(e) {
             e.preventDefault();
@@ -347,6 +318,35 @@
 
             console.log("file/folder drop " + oldId + " " + newId + " " + isFolder1 + " " + isFolder2);
 
+        }
+
+        function getFolderElement(name, disabled, id) {
+            const params = new URLSearchParams(window.location.search);
+
+            let liel1 = document.createElement("li");
+            liel1.setAttribute("class", "folder folder-open");
+
+            let alel1 = document.createElement("a");
+            alel1.text = name;
+            alel1.setAttribute("id", id);
+            alel1.setAttribute("class", "tcts" + (disabled ? " disabled" : ""));
+            alel1.onclick = function() {
+                loadRightPart("file=" + params.get("file") + "&path=" + this.id);
+            };
+
+            alel1.setAttribute("draggable", true);
+            alel1.addEventListener("dragstart", dragStart);
+            alel1.addEventListener("drop", dropEnd);
+            alel1.addEventListener("dragenter", cancelDefault);
+            alel1.addEventListener("dragover", cancelDefault);
+
+            updatePopupMenu(alel1, "folder");
+
+            let ulel1 = document.createElement("ul");
+
+            liel1.appendChild(alel1);
+            liel1.appendChild(ulel1);
+            return liel1;
         }
 
         function getFileElement(name, disabled, id) {

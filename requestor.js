@@ -683,9 +683,6 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
                 });
                 for (let stepnumber in tc.steps) {
                     var step = tc.steps[stepnumber];
-                    //                    if (step.disabled && step.disabled == true) {
-                    //                        continue;
-                    //                    }
                     if ((path + "/" + tc.name + "/" + step.name).localeCompare(params['path']) != 0) {
                         continue;
                     }
@@ -738,6 +735,7 @@ const onRequestHandler = async (req, res) => {
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
                 var tsobj = {}
                 tsobj.name = ts.name;
+		tsobj.type = 'ts';
                 tsobj.disabled = ts.disabled;
                 tsobj.folders = []
                 tsobj.files = []
@@ -747,6 +745,7 @@ const onRequestHandler = async (req, res) => {
 
                     var tcobj = {}
                     tcobj.name = tc.name;
+		    tcobj.type = 'tc';
                     tcobj.disabled = tc.disabled;
                     tcobj.folders = []
                     tcobj.files = []
@@ -755,6 +754,7 @@ const onRequestHandler = async (req, res) => {
                         var step = tc.steps[stepnumber];
                         var stepobj = {}
                         stepobj.name = step.name;
+			stepobj.type = 'step';
                         stepobj.disabled = step.disabled && step.disabled == true ? true : false;
                         tcobj.files.push(stepobj);
                     }
@@ -797,9 +797,5 @@ http2.createSecureServer({
     key: fs.readFileSync(__dirname + '//internal//localhost-privkey.pem'),
     cert: fs.readFileSync(__dirname + '//internal//localhost-cert.pem')
 }, onRequestHandler).listen(port, hostname, async () => {
-    //    loadDB("12345678901234567890");
-    //    let v = await db_all("12345678901234567890","SELECT sqlite_version();");
     console.log(`Server running at https://${hostname}:${port}/, Node.js ` + process.version);
-    //JSON.stringify(v));
-    //    console.log(path.normalize(__dirname + "/projects/12345678901234567890.db"));
 });
