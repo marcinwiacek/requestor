@@ -350,31 +350,36 @@ function getFolderElement(name, disabled,id) {
 	    return liel1;
 }
 
+function getFileElement(name, name2, disabled,id) {
+            const params = new URLSearchParams(window.location.search);
+
+                let liel2 = document.createElement("li");
+                liel2.setAttribute("class", "file");
+
+                console.log(id + name + "/" + name2);
+                let alel2 = document.createElement("a");
+                alel2.text = name2;
+                alel2.setAttribute("id", id + name + "/" + name2);
+                alel2.setAttribute("class", "step" + (disabled ? " disabled" : ""));
+                alel2.onclick = function() {
+                    loadRightPart("file=" + params.get("file") + "&path=" + this.id);
+                };
+
+                liel2.appendChild(alel2);
+	    return liel2;
+}
+
         function addFilesFolders(treeObj, parentDomObj, id) {
             const params = new URLSearchParams(window.location.search);
 
-const folderel = getFolderElement(treeObj.name, treeObj.disabled, id);
-
+	    const folderel = getFolderElement(treeObj.name, treeObj.disabled, id);
             parentDomObj.appendChild(folderel);
 
             treeObj.folders.forEach(function(folder, index) {
                 addFilesFolders(folder, folderel.children[1], id + treeObj.name + "/");
             });
             treeObj.files.forEach(function(file, index) {
-                let liel2 = document.createElement("li");
-                liel2.setAttribute("class", "file");
-
-                console.log(id + treeObj.name + "/" + file.name);
-                let alel2 = document.createElement("a");
-                alel2.text = file.name;
-                alel2.setAttribute("id", id + treeObj.name + "/" + file.name);
-                alel2.setAttribute("class", "step" + (file.disabled ? " disabled" : ""));
-                alel2.onclick = function() {
-                    loadRightPart("file=" + params.get("file") + "&path=" + this.id);
-                };
-
-                liel2.appendChild(alel2);
-                folderel.children[1].appendChild(liel2);
+                folderel.children[1].appendChild(getFileElement(treeObj.name, file.name, treeObj.disabled, id));
             });
         }
 
