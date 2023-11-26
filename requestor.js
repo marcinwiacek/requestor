@@ -493,15 +493,15 @@ async function parsePOSTPasteElement(req, params, res, jsonObj2) {
         newObj.name = params['name'];
         let elpath = params['path'].split("/");
         let elpath2 = params['newpath'].split("/");
-	if (elpath.length != elpath2.length) {
-	    if (elpath2.length==1) {
+        if (elpath.length != elpath2.length) {
+            if (elpath2.length == 1) {
                 el2.obj.testcases.unshift(newObj);
-	    } else if (elpath2.length==2) {
+            } else if (elpath2.length == 2) {
                 el2.obj.steps.unshift(newObj);
-	    }
-	} else {
-    	    el2.parent.splice(el2.index, 0, newObj);
-	}
+            }
+        } else {
+            el2.parent.splice(el2.index, 0, newObj);
+        }
     }
     sendPlain(req, res, "");
 }
@@ -745,7 +745,7 @@ const onRequestHandler = async (req, res) => {
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
                 var tsobj = {}
                 tsobj.name = ts.name;
-		tsobj.type = 'ts';
+                tsobj.type = 'ts';
                 tsobj.disabled = ts.disabled;
                 tsobj.folders = []
                 tsobj.files = []
@@ -755,7 +755,7 @@ const onRequestHandler = async (req, res) => {
 
                     var tcobj = {}
                     tcobj.name = tc.name;
-		    tcobj.type = 'tc';
+                    tcobj.type = 'tc';
                     tcobj.disabled = tc.disabled;
                     tcobj.folders = []
                     tcobj.files = []
@@ -764,7 +764,7 @@ const onRequestHandler = async (req, res) => {
                         var step = tc.steps[stepnumber];
                         var stepobj = {}
                         stepobj.name = step.name;
-			stepobj.type = 'step';
+                        stepobj.type = 'step';
                         stepobj.disabled = step.disabled && step.disabled == true ? true : false;
                         tcobj.files.push(stepobj);
                     }

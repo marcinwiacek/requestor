@@ -156,7 +156,7 @@
                     executePOST("file=" + params.get("file") + "&" + "op=newelement&" + "path=" + popupMenuID + "&" + "new=" + newName,
                         function(args) {
                             newEl = args[3] == 3 ? getFileElement(args[1], false, args[2]) :
-                                getFolderElement(args[1], false, args[2], args[3]==1?"ts":"tc");
+                                getFolderElement(args[1], false, args[2], args[3] == 1 ? "ts" : "tc");
 
                             el = document.getElementById(args[0]);
                             liparent = el.parentNode;
@@ -195,7 +195,7 @@
                     executePOST("file=" + params.get("file") + "&" + "op=newelementinside&" + "path=" + popupMenuID + "&" + "new=" + newName,
                         function(args) {
                             newEl = args[3] == 2 ? getFileElement(args[1], false, args[2]) :
-                                getFolderElement(args[1], false, args[2], args[3]==1?"ts":"tc");
+                                getFolderElement(args[1], false, args[2], args[3] == 1 ? "ts" : "tc");
 
                             el = document.getElementById(args[0]);
                             el.parentNode.children[2].prepend(newEl);
@@ -238,37 +238,36 @@
         function elementPaste() {
             let elpath1 = copyID.split("/");
             let elpath2 = popupMenuID.split("/");
-	    if (elpath1.length == elpath2.length || elpath2.length == elpath1.length-1) {
-	    } else {
-		return;
-	    }
+            if (elpath1.length == elpath2.length || elpath2.length == elpath1.length - 1) {} else {
+                return;
+            }
 
-                    let newName = elpath1[elpath1.length - 1] + "(copy)";
-		    if (elpath2.length==elpath1.length-1) {
-			newElementPath = popupMenuID+"/"+newName;
-		    } else {
-			elpath1 [elpath1.length-1] = newName;
-                	newElementPath = getPath(elpath1);
-		    }
+            let newName = elpath1[elpath1.length - 1] + "(copy)";
+            if (elpath2.length == elpath1.length - 1) {
+                newElementPath = popupMenuID + "/" + newName;
+            } else {
+                elpath1[elpath1.length - 1] = newName;
+                newElementPath = getPath(elpath1);
+            }
 
             params = new URLSearchParams(window.location.search);
             executePOST(
-                "file=" + params.get("file") + "&op=pasteelement&path=" + copyID + "&newpath=" + popupMenuID+"&name="+newName,
+                "file=" + params.get("file") + "&op=pasteelement&path=" + copyID + "&newpath=" + popupMenuID + "&name=" + newName,
                 function(args) {
 
-                    newEl = args[0]<3 ?
-                        getFolderElement(args[2], false, args[1], args[0]==1?"ts":"tc") :
+                    newEl = args[0] < 3 ?
+                        getFolderElement(args[2], false, args[1], args[0] == 1 ? "ts" : "tc") :
                         getFileElement(args[2], false, args[1]);
 
-		    if (args[3]==args[0]-1) {
-                            el = document.getElementById(popupMenuID);
-                            el.parentNode.children[2].prepend(newEl);
-} else {
-                    el = document.getElementById(popupMenuID);
-                    liparent = el.parentNode;
-                    liparent.parentNode.insertBefore(newEl, liparent);
-}
-                    if (args[0]<3) {
+                    if (args[3] == args[0] - 1) {
+                        el = document.getElementById(popupMenuID);
+                        el.parentNode.children[2].prepend(newEl);
+                    } else {
+                        el = document.getElementById(popupMenuID);
+                        liparent = el.parentNode;
+                        liparent.parentNode.insertBefore(newEl, liparent);
+                    }
+                    if (args[0] < 3) {
                         updateFolder(newEl);
                     }
                 },
@@ -331,7 +330,7 @@
             let alel1 = document.createElement("a");
             alel1.text = name;
             alel1.setAttribute("id", id);
-            alel1.setAttribute("class", "tcts" + (disabled ? " disabled" : "")+" "+type);
+            alel1.setAttribute("class", "tcts" + (disabled ? " disabled" : "") + " " + type);
             alel1.onclick = function() {
                 loadRightPart("file=" + params.get("file") + "&path=" + this.id);
             };
