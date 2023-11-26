@@ -95,7 +95,6 @@ async function executeRequest(req) {
                     certinfo += "Certificate\n";
                     certinfo += '  subject CN ' + cert.subject.CN + ', O ' + cert.subject.O + "\n";
                     certinfo += '  issuer CN ' + cert.issuer.CN + ', O ' + cert.issuer.O + "\n";
-                    //      console.log('  Subject alt name '+ cert.subjectaltname)+"\n";
                     certinfo += '  Valid ' + cert.valid_from + " - " + cert.valid_to + "\n";
                     certinfo += '  SHA256 ' + cert.fingerprint256 + "\n\n";
                     lastprint256 = cert.fingerprint256;
@@ -228,7 +227,7 @@ function sendHTML(req, res, text) {
 }
 
 function sendPlain(req, res, text) {
-    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Type', 'text/plain; charset=UTF-8');
     sendBody(req, res, text);
 }
 
