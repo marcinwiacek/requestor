@@ -489,9 +489,9 @@ async function parsePOSTPasteElement(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params);
     el2 = findElement2(jsonObj2, params, params['new']);
     if (el != null && el2 != null) {
-	    let newObj = JSON.parse(JSON.stringify(el.obj));
-	    newObj.name = newObj.name+"(copy)";
-            el2.parent.splice(el2.index, 0, newObj);
+        let newObj = JSON.parse(JSON.stringify(el.obj));
+        newObj.name = newObj.name + "(copy)";
+        el2.parent.splice(el2.index, 0, newObj);
     }
     sendPlain(req, res, "");
 }
@@ -707,7 +707,6 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
         }
     }
 }
-
 
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
