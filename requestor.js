@@ -162,7 +162,6 @@ async function executeRequest(req) {
             resp.certinfo = "";
             resolve(resp);
         }
-
     });
 }
 
@@ -494,6 +493,7 @@ async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
+//fixme delete from db
     el = findElement(jsonObj2, params);
     if (el != null) {
         el.parent.splice(el.index, 1);
@@ -563,6 +563,10 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
                 step.conLen = params['conlen'] == "true";
                 step.url = decodeURIComponent(params['url']);
                 let lines = tc.input;
+		if (lines.length==0) {
+                    sss = await request2(step, res, pathwithnum, times, params['file']);
+                    times.push(JSON.parse(sss).datetime);
+		} else {
                 let headers = []
                 for (let index2 in lines) {
                     let l = lines[index2];
@@ -593,6 +597,7 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
 
                     if (stepcopy.url == step.url) break;
                 }
+		}
 
             }
         }
