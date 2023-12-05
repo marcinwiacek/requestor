@@ -502,6 +502,7 @@ async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTPasteElement(req, params, res, jsonObj2) {
+//fixme paste the whole structure
     el = findElement(jsonObj2, params);
     el2 = findElement2(jsonObj2, params, params['newpath']);
     if (el != null && el2 != null) {
