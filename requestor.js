@@ -825,8 +825,7 @@ const onRequestHandler = async (req, res) => {
                 .replace("<!--FOLDERS_MENU-->",
                     readFileContentSync("/internal/project_folder.txt"))
                 .replace("<!--TC-->", "<script>tree = " + JSON.stringify(tree) + ";</script>")
-                .replace("<!--NAME-->", params['file'])
-                .replace("<!--RUN-->", "<p><a href=?file=" + params['file'] + "&run=1>run all</a>"));
+                .replace("<!--NAME-->", params['file']));
             return;
         }
     } else if (req.headers['content-type'] == "application/x-www-form-urlencoded") { // POST
