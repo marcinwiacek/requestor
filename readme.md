@@ -16,7 +16,6 @@ run for the whole suite / tc
 junit results
 runner
 own ssl cert
-wyszukiwanie blednych parametrow
 zmiana parameterow w body, headers
 
 # Why another app?
