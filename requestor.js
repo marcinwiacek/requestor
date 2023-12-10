@@ -82,12 +82,23 @@ async function executeRequest(req) {
         method2 = req.method == "get" ? https.get : https.request;
         if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
     }
+    resperror = "";
+    if (req.url.includes("{{") && req.url.includes("}}")) {
+	if (resperror) {
+	    resperror+="\n";
+	}
+        resperror += "Unresolved params";
+}
     if (method2 == null) {
         var resp = {}
         resp.body = '';
         resp.headers = [];
         resp.code = 0;
-        resp.error = "Error parsing url, supported http: and https: in this moment";
+	if (resperror) {
+	    resperror+="\n";
+	}
+        resperror += "Error parsing url, supported http: and https: in this moment";
+	resp.error = resperror;
         resp.certinfo = "";
         return (resp);
     }
@@ -124,7 +135,7 @@ async function executeRequest(req) {
                     resp.body = Buffer.concat(chunk).toString();
                     resp.headers = response.headers;
                     resp.code = response.statusCode;
-                    resp.error = "";
+	resp.error = resperror;
                     resp.certinfo = certinfo;
                     resolve(resp);
                 });
@@ -136,11 +147,15 @@ async function executeRequest(req) {
                 resp.body = '';
                 resp.headers = [];
                 resp.code = 0;
+	if (resperror) {
+	    resperror+="\n";
+	}
                 if (s == 'undefined ') {
-                    resp.error = e.message;
+                    resperror += e.message;
                 } else {
-                    resp.error = s;
+                    resperror += s;
                 }
+	resp.error = resperror;
                 resp.certinfo = certinfo;
                 resolve(resp);
             });
@@ -154,11 +169,15 @@ async function executeRequest(req) {
             resp.headers = [];
             resp.code = 0;
             var s = e.errors + " ";
+	if (resperror) {
+	    resperror+="\n";
+	}
             if (s == 'undefined ') {
-                resp.error = e.message;
+                resperror += e.message;
             } else {
-                resp.error = s;
+                resperror += s;
             }
+	resp.error = resperror;
             resp.certinfo = "";
             resolve(resp);
         }
