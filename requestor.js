@@ -165,16 +165,8 @@ async function executeRequest(req) {
     });
 }
 
-function generateDBRandomNumber() {
-    let dt = new Date();
-    let curDT = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
-        digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
-        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
-        digits(dt.getMilliseconds(), 3);
-    return curDT;
-}
 
-async function request2(req, res, name, times, filename) {
+async function request2(req, res, times, filename) {
     console.log("request " + JSON.stringify(req));
     console.log("start");
     let dt = new Date();
@@ -203,7 +195,10 @@ async function request2(req, res, name, times, filename) {
         }
     }
     if (!req.dbid) {
-        req.dbid = generateDBRandomNumber();
+        req.dbid =  dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
+        digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
+        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
+        digits(dt.getMilliseconds(), 3);
     }
     dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         curDT, req.dbid, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
@@ -334,7 +329,6 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
-        let pathwithnum = tsnumber;
         let path = suite.name;
         if (elpath.length == 1 && suite.name == elpath[0]) {
             sendPlain(req, res, readFileContentSync("/internal/ts.txt").replace("<!--NAME-->", suite.name));
@@ -359,7 +353,6 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                     continue;
                 }
                 var stepcopy = JSON.parse(JSON.stringify(step));
-                pathwithnum += "/" + tcnumber + "/" + stepnumber;
                 path += "/" + tc.name + "/" + step.name;
 
                 obiekt = readFileContentSync("/internal/step.txt").replace("<!--NAME-->",
@@ -545,7 +538,6 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
     for (let tsnumber in arr.testsuites) {
         var ts = arr.testsuites[tsnumber];
         console.log("testsuite name " + ts.name);
-        let pathwithnum = tsnumber;
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
             console.log("testcase name " + tc.name);
@@ -558,7 +550,6 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
                 if (step.name.localeCompare(params['runstep']) != 0) {
                     continue;
                 }
-                pathwithnum += "/" + tcnumber + "/" + stepnumber;
                 console.log("starting " + step.name + " vs " + params['runstep']);
                 step.method = params['method'];
                 step.headers = decodeURIComponent(params['headers']).split("\n");
@@ -568,7 +559,7 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
                 step.url = decodeURIComponent(params['url']);
                 let lines = tc.input;
                 if (lines.length == 0) {
-                    sss = await request2(step, res, pathwithnum, times, params['file']);
+                    sss = await request2(step, res, times, params['file']);
                     times.push(JSON.parse(sss).datetime);
                 } else {
                     let headers = []
@@ -596,7 +587,7 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
                         for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                             console.log(match)
                         }
-                        sss = await request2(stepcopy, res, pathwithnum, times, params['file']);
+                        sss = await request2(stepcopy, res, times, params['file']);
                         step.dbid = stepcopy.dbid;
                         times.push(JSON.parse(sss).datetime);
 
@@ -696,7 +687,6 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var ts = jsonObj[params['file']].testsuites[tsnumber];
         let path = ts.name;
-        let pathwithnum = tsnumber;
         console.log("testsuite name " + ts.name);
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
@@ -722,7 +712,6 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
                         continue;
                     }
                     if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
-                    if (!pathwithnum.includes("/")) pathwithnum += "/" + tcnumber + "/" + stepnumber;
                     var stepcopy = JSON.parse(JSON.stringify(step));
                     //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
                     for (let d in arra) {
