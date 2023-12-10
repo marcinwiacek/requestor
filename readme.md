@@ -1,10 +1,23 @@
 Requestor
 
 Application for sending, analizing and testing requests. Initially created as
-proof of concept, currently could be used as simpler replacement for SoapUI,
-Ready API, Postman, curl and similar tools. Written in Java Script, using
-nodeJS (=speed, available code, no problems with onboarding in some companies,
-support for all important features, etc.).
+proof of concept, currently could be used in various situations as replacement
+for SoapUI, Ready API, Postman, curl and similar tools. Written in Java Script,
+using nodeJS (=speed, available code, no problems with onboarding in some
+companies, support for all important features, etc.).
+
+# TODO
+params between steps
+drag & drop
+copy & paste all elements inside - copying, but displaying immediately
+new created elements with drag & drop
+copy with new dbid
+run for the whole suite / tc
+junit results
+runner
+own ssl cert
+wyszukiwanie blednych parametrow
+zmiana parameterow w body, headers
 
 # Why another app?
 Because many existing apps were written years ago and are obsolete
@@ -14,8 +27,8 @@ and sometimes have horrible GUI.
 Indeed. But don't expect all possible support in such situation. Time is money.
 
 # I want this and this function
-Wait or see previous point. Theoretically, if we don't have limit in nodeJS,
-it could be added.
+Wait or see previous point. Theoretically, if we don't have technical limits in
+nodeJS, it could be added.
 
 # Support
 GitHub or marcin (@) mwiacek (.) com. I will do my best, but I can't give
@@ -28,7 +41,7 @@ Linux kernel started this way. And today you have it in desktop, Android, etc.
 Yes. Month ago it was worse, year ago much worse. Normally you start from
 something horrible or small and improve it. This is called progress
 (Android 1.0 or Windows 1.0 were not excellent too). If you're not patient,
-write & propose something better or allow other to work.
+write & propose something better or allow big boys to work.
 
 # Installation
 1. install nodejs - ```sudo snap install node --classic --channel=20```
