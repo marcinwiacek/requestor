@@ -165,23 +165,13 @@ async function executeRequest(req) {
     });
 }
 
-function findtc(arr, tc) {
-    console.log("step name " + tc.name);
-    var stepcopy = JSON.parse(JSON.stringify(tc));
-    if (stepcopy.function != null) {
-        for (let servicenumber in arr.services) {
-            console.log("service name " + arr.services[servicenumber].name);
-            for (let functionnumber in arr.services[servicenumber].functions) {
-                console.log("function name " + arr.services[servicenumber].functions[functionnumber].name);
-                if (arr.services[servicenumber].functions[functionnumber].name == stepcopy.function) {
-                    stepcopy = JSON.parse(JSON.stringify(arr.services[servicenumber].functions[functionnumber]));
-                    stepcopy.urlprefix = arr.services[servicenumber].url;
-                    // stepcopy.url;
-                }
-            }
-        }
-    }
-    return stepcopy;
+function generateDBRandomNumber() {
+    let dt = new Date();
+    let curDT = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
+        digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
+        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
+        digits(dt.getMilliseconds(), 3);
+    return curDT;
 }
 
 async function request2(req, res, name, times, filename) {
@@ -212,13 +202,16 @@ async function request2(req, res, name, times, filename) {
             headers_res += headername + ": " + response.headers[headername] + "\n";
         }
     }
-    dbObj[filename].run(`insert into requests (dt, name, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-        curDT, name, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
+    if (!req.dbid) {
+        req.dbid = generateDBRandomNumber();
+    }
+    dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        curDT, req.dbid, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
         err => {
             console.log("error " + err)
         });
     console.log("end");
-    return "{" + (await getJSON(name, curDT, filename)) + ",\"oldtimes\":" + JSON.stringify(times) + "}";
+    return "{" + (await getJSON(req.dbid, curDT, filename)) + ",\"oldtimes\":" + JSON.stringify(times) + "}";
 }
 
 /*
@@ -310,7 +303,7 @@ function findElement2(jsonObj, params, pathString) {
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
     console.log(params);
-    loadFile(params['file']);
+    //    loadFile(params['file']);
     loadDB(params['file']);
     if (params["runstep"]) {
         return parsePOSTRunStep(req, params, res, jsonObj);
@@ -365,7 +358,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 if (elpath.length == 3 && suite.name == elpath[0] && tc.name == elpath[1] && step.name == elpath[2]) {} else {
                     continue;
                 }
-                var stepcopy = findtc(jsonObj[params['file']], step);
+                var stepcopy = JSON.parse(JSON.stringify(step));
                 pathwithnum += "/" + tcnumber + "/" + stepnumber;
                 path += "/" + tc.name + "/" + step.name;
 
@@ -388,22 +381,25 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                     .replace("<!--METHOD-->", stepcopy.method)
                     .replace("<!--PATH-->", "<script>path = '" + path + "';</script>");
                 var xxxx = "";
-                let rows = await db_all(params['file'], "SELECT dt from requests where name =\"" + pathwithnum + "\" order by dt desc");
-                var num = 0;
-                var del = "";
-                for (let row in rows) {
-                    xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
-                    if (num == maxResultsPerRequest) {
-                        if (del != "") del += ",";
-                        del += "'" + rows[row].dt + "'";
-                    } else {
-                        num++;
+                if (stepcopy.dbid) {
+                    let rows = await db_all(params['file'], "SELECT dt from requests where dbid =\"" + stepcopy.dbid + "\" order by dt desc");
+                    var num = 0;
+                    var del = "";
+                    for (let row in rows) {
+                        xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
+                        if (num == maxResultsPerRequest) {
+                            if (del != "") del += ",";
+                            del += "'" + rows[row].dt + "'";
+                        } else {
+                            num++;
+                        }
                     }
+                    if (del != "") {
+                        await db_all(params['file'], "DELETE from requests where dbid  =\"" + stepcopy.dbid + "\" and dt in (" + del + ")");
+                    }
+                    obiekt = obiekt.replace("<!--WHENLAST-->", xxxx);
                 }
-                if (del != "") {
-                    await db_all(params['file'], "DELETE from requests where name =\"" + pathwithnum + "\" and dt in (" + del + ")");
-                }
-                sendPlain(req, res, obiekt.replace("<!--WHENLAST-->", xxxx));
+                sendPlain(req, res, obiekt);
                 return;
             }
         }
@@ -416,7 +412,6 @@ async function parsePOSTRenameElement(req, params, res, jsonObj2) {
     if (el != null) {
         console.log(el);
         el.obj.name = params['new'];
-        //        await db_all(params['file'], "UPDATE requests set name =\"" + params['newpath'] + "\" where name =\"" + params['path'] + "\" ");
     }
     sendPlain(req, res, "");
 }
@@ -493,7 +488,7 @@ async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
-//fixme delete from db
+    //fixme delete from db
     el = findElement(jsonObj2, params);
     if (el != null) {
         el.parent.splice(el.index, 1);
@@ -502,7 +497,7 @@ async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTPasteElement(req, params, res, jsonObj2) {
-//fixme paste the whole structure
+    //fixme paste the whole structure
     el = findElement(jsonObj2, params);
     el2 = findElement2(jsonObj2, params, params['newpath']);
     if (el != null && el2 != null) {
@@ -524,9 +519,17 @@ async function parsePOSTPasteElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTSaveFile(req, params, res, jsonObj2) {
-    //change all positions in db
-    //pathwithnumber
-    fs.writeFile(path.normalize(__dirname + '/projects/ala'), JSON.stringify(jsonObj[params['file']]), function(err) {
+
+    const lastModified = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + params['file']))).mtime;
+
+    fs.rename(
+        path.normalize(__dirname + '/projects/' + params['file']),
+        path.normalize(__dirname + '/projects/' + params['file'] + lastModified),
+        function(err) {
+            if (err) console.log('ERROR: ' + err);
+        });
+
+    fs.writeFile(path.normalize(__dirname + '/projects/' + params['file']), JSON.stringify(jsonObj[params['file']], null, 2), function(err) {
         if (err) {
             return console.log(err);
         }
@@ -564,41 +567,42 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
                 step.conLen = params['conlen'] == "true";
                 step.url = decodeURIComponent(params['url']);
                 let lines = tc.input;
-		if (lines.length==0) {
+                if (lines.length == 0) {
                     sss = await request2(step, res, pathwithnum, times, params['file']);
                     times.push(JSON.parse(sss).datetime);
-		} else {
-                let headers = []
-                for (let index2 in lines) {
-                    let l = lines[index2];
-                    if (headers.length == 0) {
-                        headers = l.split(",");
-                        continue;
-                    }
-                    let ll = l.split(",");
-                    let i = 0;
-                    let arra = [];
-                    headers.forEach(function(h) {
-                        arra[h] = ll[i];
-                        i++;
-                    });
-                    console.log(arra);
-                    var stepcopy = findtc(arr, step);
-                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
-                    for (let d in arra) {
-                        console.log(d);
-                        console.log(arra[d]);
-                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                    }
-                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
-                        console.log(match)
-                    }
-                    sss = await request2(stepcopy, res, pathwithnum, times, params['file']);
-                    times.push(JSON.parse(sss).datetime);
+                } else {
+                    let headers = []
+                    for (let index2 in lines) {
+                        let l = lines[index2];
+                        if (headers.length == 0) {
+                            headers = l.split(",");
+                            continue;
+                        }
+                        let ll = l.split(",");
+                        let i = 0;
+                        let arra = [];
+                        headers.forEach(function(h) {
+                            arra[h] = ll[i];
+                            i++;
+                        });
+                        console.log(arra);
+                        var stepcopy = JSON.parse(JSON.stringify(step));
+                        //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
+                        for (let d in arra) {
+                            console.log(d);
+                            console.log(arra[d]);
+                            stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                        }
+                        for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
+                            console.log(match)
+                        }
+                        sss = await request2(stepcopy, res, pathwithnum, times, params['file']);
+                        step.dbid = stepcopy.dbid;
+                        times.push(JSON.parse(sss).datetime);
 
-                    if (stepcopy.url == step.url) break;
+                        if (stepcopy.url == step.url) break;
+                    }
                 }
-		}
 
             }
         }
@@ -616,7 +620,7 @@ function loadDB(name) {
             dbObj[name].exec(`
     create table requests (
     dt text not null,
-    name text not null,
+    dbid text not null,
     method text not null,
     url text not null,
     headers text not null,
@@ -653,9 +657,8 @@ function db_all(filename, sql) {
     });
 }
 
-async function getJSON(stepname, dt, file) {
-    console.log("searching for " + stepname);
-    let rows = await db_all(file, "SELECT * from requests where name =\"" + stepname + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
+async function getJSON(dbid, dt, file) {
+    let rows = await db_all(file, "SELECT * from requests where dbid =\"" + dbid + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
     if (rows == null) {
         let s = "\"datetime\":\"" + "\",";
         s += "\"datetime_res\":\"" + "\",";
@@ -720,8 +723,8 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
                     }
                     if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
                     if (!pathwithnum.includes("/")) pathwithnum += "/" + tcnumber + "/" + stepnumber;
-                    var stepcopy = findtc(jsonObj[params['file']], step);
-                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
+                    var stepcopy = JSON.parse(JSON.stringify(step));
+                    //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
                     for (let d in arra) {
                         console.log(d);
                         console.log(arra[d]);
@@ -730,7 +733,7 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
                     for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
                         console.log(match)
                     }
-                    sendPlain(req, res, "{" + await getJSON(pathwithnum, params['dt'], params['file']) + "}");
+                    sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
                 }
             }
         }
@@ -750,10 +753,12 @@ const onRequestHandler = async (req, res) => {
             sendCSS(req, res, readFileContentSync("/external/tabulator_midnight.min.css"));
             return;
         }
-
+        let deletefromdb = false;
         const params = url.parse(req.url, true).query;
         if (params['file'] && fs.existsSync(
                 path.normalize(__dirname + "/projects/" + params['file']))) {
+            deletefromdb = (!jsonObj[params['file']]);
+
             if (!loadFile(params['file'])) {
                 sendHTML(req, res, readFileContentSync("/internal/project.txt")
                     .replace("<!--NAME-->", "Error reading file"));
@@ -762,6 +767,7 @@ const onRequestHandler = async (req, res) => {
             loadDB(params['file']);
 
             let tree = [];
+            let alldbid = "'abc'";
 
             for (let tsnumber in jsonObj[params['file']].testsuites) {
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
@@ -789,10 +795,23 @@ const onRequestHandler = async (req, res) => {
                         stepobj.type = 'step';
                         stepobj.disabled = step.disabled && step.disabled == true ? true : false;
                         tcobj.files.push(stepobj);
+
+                        if (step.dbid) {
+                            alldbid += ",'" + step.dbid + "'";
+                        }
                     }
                     tsobj.folders.push(tcobj);
                 }
                 tree.push(tsobj);
+            }
+
+            if (deletefromdb) {
+                console.log(`delete from requests where dbid not in (` + alldbid + `)`);
+
+                dbObj[params['file']].run(`delete from requests where dbid not in (` + alldbid + `)`,
+                    err => {
+                        console.log("error " + err)
+                    });
             }
             sendHTML(req, res, readFileContentSync("/internal/project.txt")
                 .replace("<!--FOLDERS_MENU-->",
@@ -818,7 +837,7 @@ const onRequestHandler = async (req, res) => {
     let files = "";
     let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
     for (filenumber in all_files) {
-        if (all_files[filenumber].includes('.json.db')) continue;
+        if (!all_files[filenumber].endsWith('.json')) continue;
         files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a><br>";
     }
 

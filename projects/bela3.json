@@ -80,7 +80,9 @@
               ],
               "asserts": {
                 "code": "200"
-              }
+              },
+              "ignoreWrongSSL": false,
+              "dbid": "2023-12-10 20:30:49 206"
             },
             {
               "name": "step3",
