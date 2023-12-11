@@ -9,7 +9,7 @@ companies, support for all important features, etc.).
 # TODO
 params between steps
 drag & drop
-copy & paste all elements inside - copying, but displaying immediately
+copy & paste all elements inside - update folder
 new created elements with drag & drop
 copy with new dbid
 run for the whole suite / tc

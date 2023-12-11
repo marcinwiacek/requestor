@@ -84,21 +84,21 @@ async function executeRequest(req) {
     }
     resperror = "";
     if (req.url.includes("{{") && req.url.includes("}}")) {
-	if (resperror) {
-	    resperror+="\n";
-	}
+        if (resperror) {
+            resperror += "\n";
+        }
         resperror += "Unresolved params";
-}
+    }
     if (method2 == null) {
         var resp = {}
         resp.body = '';
         resp.headers = [];
         resp.code = 0;
-	if (resperror) {
-	    resperror+="\n";
-	}
+        if (resperror) {
+            resperror += "\n";
+        }
         resperror += "Error parsing url, supported http: and https: in this moment";
-	resp.error = resperror;
+        resp.error = resperror;
         resp.certinfo = "";
         return (resp);
     }
@@ -135,7 +135,7 @@ async function executeRequest(req) {
                     resp.body = Buffer.concat(chunk).toString();
                     resp.headers = response.headers;
                     resp.code = response.statusCode;
-	resp.error = resperror;
+                    resp.error = resperror;
                     resp.certinfo = certinfo;
                     resolve(resp);
                 });
@@ -147,15 +147,15 @@ async function executeRequest(req) {
                 resp.body = '';
                 resp.headers = [];
                 resp.code = 0;
-	if (resperror) {
-	    resperror+="\n";
-	}
+                if (resperror) {
+                    resperror += "\n";
+                }
                 if (s == 'undefined ') {
                     resperror += e.message;
                 } else {
                     resperror += s;
                 }
-	resp.error = resperror;
+                resp.error = resperror;
                 resp.certinfo = certinfo;
                 resolve(resp);
             });
@@ -169,15 +169,15 @@ async function executeRequest(req) {
             resp.headers = [];
             resp.code = 0;
             var s = e.errors + " ";
-	if (resperror) {
-	    resperror+="\n";
-	}
+            if (resperror) {
+                resperror += "\n";
+            }
             if (s == 'undefined ') {
                 resperror += e.message;
             } else {
                 resperror += s;
             }
-	resp.error = resperror;
+            resp.error = resperror;
             resp.certinfo = "";
             resolve(resp);
         }
@@ -214,10 +214,10 @@ async function request2(req, res, times, filename) {
         }
     }
     if (!req.dbid) {
-        req.dbid =  dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
-        digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
-        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
-        digits(dt.getMilliseconds(), 3);
+        req.dbid = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
+            digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
+            digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
+            digits(dt.getMilliseconds(), 3);
     }
     dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         curDT, req.dbid, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
@@ -285,6 +285,7 @@ function findElement2(jsonObj, params, pathString) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
         if (elpath.length == 1 && suite.name == elpath[0]) {
             retVal = [];
+            retVal.type = 'suite';
             retVal.obj = suite;
             retVal.index = tsnumber;
             retVal.parent = jsonObj[params['file']].testsuites;
@@ -294,6 +295,7 @@ function findElement2(jsonObj, params, pathString) {
             var tc = suite.testcases[tcnumber];
             if (elpath.length == 2 && suite.name == elpath[0] && tc.name == elpath[1]) {
                 retVal = [];
+                retVal.type = 'tc';
                 retVal.obj = tc;
                 retVal.index = tcnumber;
                 retVal.parent = suite.testcases;
@@ -303,6 +305,7 @@ function findElement2(jsonObj, params, pathString) {
                 var step = tc.steps[stepnumber];
                 if (elpath.length == 3 && suite.name == elpath[0] && tc.name == elpath[1] && step.name == elpath[2]) {
                     retVal = [];
+                    retVal.type = 'step';
                     retVal.obj = step;
                     retVal.index = stepnumber;
                     retVal.parent = tc.steps;
@@ -508,13 +511,64 @@ async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
     sendPlain(req, res, "");
 }
 
+function createStepTree(obj) {
+    var stepobj = {}
+    stepobj.name = obj.name;
+    stepobj.type = 'step';
+    stepobj.disabled = obj.disabled && obj.disabled == true ? true : false;
+    return stepobj;
+}
+
+function createTCTree(obj) {
+    var tcobj = {}
+    tcobj.name = obj.name;
+    tcobj.type = 'tc';
+    tcobj.disabled = obj.disabled;
+    tcobj.folders = []
+    tcobj.files = []
+
+    for (let stepnumber in obj.steps) {
+        var step = obj.steps[stepnumber];
+        tcobj.files.push(createStepTree(step));
+    }
+    return tcobj;
+
+}
+
+function createTSTree(obj) {
+    var tsobj = {}
+    tsobj.name = obj.name;
+    tsobj.type = 'ts';
+    tsobj.disabled = obj.disabled;
+    tsobj.folders = []
+    tsobj.files = []
+
+    for (let tcnumber in obj.testcases) {
+        var tc = obj.testcases[tcnumber];
+
+
+        tsobj.folders.push(createTCTree(tc));
+    }
+    return tsobj;
+}
+
 async function parsePOSTPasteElement(req, params, res, jsonObj2) {
     //fixme paste the whole structure
     el = findElement(jsonObj2, params);
     el2 = findElement2(jsonObj2, params, params['newpath']);
+    tree = [];
     if (el != null && el2 != null) {
         let newObj = JSON.parse(JSON.stringify(el.obj));
         newObj.name = params['name'];
+
+        if (el.type == 'suite') {
+            tree.push(createTSTree(newObj));
+        } else if (el.type == 'tc') {
+            tree.push(createTCTree(newObj));
+        } else {
+            tree.push(createStepTree(newObj));
+        }
+
         let elpath = params['path'].split("/");
         let elpath2 = params['newpath'].split("/");
         if (elpath.length != elpath2.length) {
@@ -527,7 +581,7 @@ async function parsePOSTPasteElement(req, params, res, jsonObj2) {
             el2.parent.splice(el2.index, 0, newObj);
         }
     }
-    sendPlain(req, res, "");
+    sendPlain(req, res, JSON.stringify(tree));
 }
 
 async function parsePOSTSaveFile(req, params, res, jsonObj2) {
@@ -812,6 +866,8 @@ const onRequestHandler = async (req, res) => {
                 }
                 tree.push(tsobj);
             }
+
+            console.log(JSON.stringify(tree));
 
             if (deletefromdb) {
                 console.log(`delete from requests where dbid not in (` + alldbid + `)`);

@@ -57,7 +57,7 @@
                 if (http.status != 200) {
                     alert(http.response);
                 } else {
-                    OKhandler(args, http.response);
+                    OKhandler(http.response, ...args);
                 }
             };
             http.onerror = function() {
@@ -106,7 +106,7 @@
 <body>
     <a href=".">back</a>
     <p>
-<div id=mainfile>File: <!--NAME--> <button onclick="savefile();">Save</button></div>
+    <div id=mainfile>File: <!--NAME--> <button onclick="savefile();">Save</button></div>
     </p>
 
     <div class="flex">
