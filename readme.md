@@ -7,9 +7,10 @@ using nodeJS (=speed, available code, no problems with onboarding in some
 companies, support for all important features, etc.).
 
 # TODO
+insert in first element error
 params between steps
 drag & drop
-copy & paste all elements inside - update folder
+copy & paste all elements inside - update folder na koncu i ustawienie odpowiedniego id w sciezce
 new created elements with drag & drop
 copy with new dbid
 run for the whole suite / tc

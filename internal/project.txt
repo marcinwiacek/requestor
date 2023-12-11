@@ -67,7 +67,7 @@
         }
 
         function loadRightPart(url) {
-            executePOST(url, function(args, response) {
+            executePOST(url, function(response, ...args) {
                 var tmp = document.createElement("div");
                 tmp.innerHTML = response;
                 const scriptElements = tmp.querySelectorAll("script");
