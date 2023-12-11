@@ -605,6 +605,7 @@ async function parsePOSTSaveFile(req, params, res, jsonObj2) {
 
 async function parsePOSTRunStep(req, params, res, jsonObj2) {
     var sss = "";
+console.log("fire run step ");
     console.log(params);
     let arr = jsonObj[params['file']];
     let times = [];
@@ -651,20 +652,16 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
                         });
                         console.log(arra);
                         var stepcopy = JSON.parse(JSON.stringify(step));
-                        //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
                         for (let d in arra) {
-                            console.log(d);
                             console.log(arra[d]);
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                        }
-                        for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
-                            console.log(match)
                         }
                         sss = await request2(stepcopy, res, times, params['file']);
                         step.dbid = stepcopy.dbid;
                         times.push(JSON.parse(sss).datetime);
-
-                        if (stepcopy.url == step.url) break;
+                        if (stepcopy.url.length == step.url.length) {
+			break;
+			}
                     }
                 }
 
