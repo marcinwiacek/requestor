@@ -201,7 +201,7 @@
 
         const params = new URLSearchParams(window.location.search);
         http.send(            "file=" +            params.get("file") +
-            "&runstep=" +            document.getElementById("name").value +
+            "&runstep=" +            document.getElementById("id").value +
             "&headers=" +            encodeURIComponent(document.getElementById("header").value) +
             "&body=" +            encodeURIComponent(document.getElementById("body").value) +
             "&url=" +            encodeURIComponent(document.getElementById("url").value) +
@@ -219,6 +219,7 @@
         <tr>
             <td valign="bottom">
                 <br />Name <input type="text" id="name" value="<!--NAME-->" size="61" />
+               
             </td>
             <td valign="bottom">
                     When

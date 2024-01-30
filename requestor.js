@@ -621,7 +621,7 @@ console.log("fire run step ");
                     continue;
                 }
                 console.log(step.name + " vs " + params['runstep']);
-                if (step.name.localeCompare(params['runstep']) != 0) {
+                if ((ts.name + "/" + tc.name + "/" + step.name).localeCompare(params['runstep']) != 0) {
                     continue;
                 }
                 console.log("starting " + step.name + " vs " + params['runstep']);

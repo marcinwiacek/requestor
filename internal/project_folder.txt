@@ -368,6 +368,7 @@
             alel2.setAttribute("id", id);
             alel2.setAttribute("class", "step" + (disabled ? " disabled" : ""));
             alel2.onclick = function() {
+                document.getElementById("id").value = this.id;
                 loadRightPart("file=" + params.get("file") + "&path=" + this.id);
             };
 
