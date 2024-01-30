@@ -7,7 +7,6 @@ using nodeJS (=speed, available code, no problems with onboarding in some
 companies, support for all important features, etc.).
 
 # TODO
-insert in first element error
 copy & paste all elements inside - update folder na koncu i ustawienie odpowiedniego id w sciezce
 copy with new dbid
 drag & drop
