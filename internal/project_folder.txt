@@ -112,13 +112,13 @@
                             el.text = args[2];
                             var toggler = document.getElementsByClassName("tcts");
                             for (var i = 0; i < toggler.length; i++) {
-                                if (toggler[i].id && toggler[i].id.startsWith(popupMenuID)) {
+                                if (toggler[i].id && toggler[i].id === popupMenuID) {
                                     toggler[i].id = toggler[i].id.replace(args[1], args[3]);
                                 }
                             }
                             var toggler = document.getElementsByClassName("step");
                             for (var i = 0; i < toggler.length; i++) {
-                                if (toggler[i].id && toggler[i].id.startsWith(popupMenuID)) {
+                                if (toggler[i].id && toggler[i].id === popupMenuID) {
                                     toggler[i].id = toggler[i].id.replace(args[1], args[3]);
                                 }
                             }
