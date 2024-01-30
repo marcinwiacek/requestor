@@ -558,6 +558,7 @@ async function parsePOSTPasteElement(req, params, res, jsonObj2) {
     el2 = findElement2(jsonObj2, params, params['newpath']);
     tree = [];
     if (el != null && el2 != null) {
+console.log ("el and el2 found");
         let newObj = JSON.parse(JSON.stringify(el.obj));
         newObj.name = params['name'];
 

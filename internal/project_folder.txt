@@ -261,16 +261,21 @@
                 function(...args) {
                     if (args[4] == args[1] - 1) {
                         el = document.getElementById(popupMenuID);
+console.log("first")
                         JSON.parse(args[0]).forEach(function(folder, index) {
                             el.parentNode.children[2].prepend(addFilesFolders(folder, ""));
                         });
                     } else {
+console.log("second")
+
                         el = document.getElementById(popupMenuID);
                         liparent = el.parentNode;
 
+console.log(args);
+
                         JSON.parse(args[0]).forEach(function(folder, index) {
                             liparent.parentNode.insertBefore(
-                                addFilesFolders(folder, liparent));
+                                addFilesFolders(folder, liparent),liparent);
                         });
                     }
                     /*                    if (args[1] < 3) {
