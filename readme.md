@@ -7,10 +7,12 @@ using nodeJS (=speed, available code, no problems with onboarding in some
 companies, support for all important features, etc.).
 
 # TODO
-copy & paste all elements inside - update folder na koncu i ustawienie odpowiedniego id w sciezce
 copy with new dbid
+copy & paste all elements inside - update folder na koncu i ustawienie odpowiedniego id w sciezce
+
 drag & drop
 new created elements with drag & drop
+
 run for the whole suite / tc
 junit results
 runner
