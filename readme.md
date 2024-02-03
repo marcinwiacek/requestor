@@ -7,10 +7,10 @@ using nodeJS (=speed, available code, no problems with onboarding in some
 companies, support for all important features, etc.).
 
 # TODO
-copy with new dbid
-
 drag & drop
 new created elements with drag & drop
+
+edycja danych - zmienione parametry
 
 run for the whole suite / tc
 junit results

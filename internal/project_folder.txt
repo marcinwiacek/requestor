@@ -326,6 +326,9 @@
 
             console.log("file/folder drop " + oldId + " " + newId + " " + isFolder1 + " " + isFolder2);
 
+        //    copyID = oldId;
+        //    popupMenuID = newId;
+	//    elementPaste();
         }
 
         function getFolderElement(name, disabled, id, type) {
