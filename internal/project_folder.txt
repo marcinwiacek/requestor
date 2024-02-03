@@ -254,6 +254,8 @@
                 elpath1.pop();
                 newElementPath = getPath(elpath1);
             }
+	    newElementPath = newElementPath + "/";
+	    if (newElementPath == "/") newElementPath = "";
 
             params = new URLSearchParams(window.location.search);
             executePOST(
@@ -262,16 +264,13 @@
                     if (args[4] == args[1] - 1) {
                         el = document.getElementById(popupMenuID);
                         JSON.parse(args[0]).forEach(function(folder, index) {
-                            el.parentNode.children[2].prepend(addFilesFolders(folder, args[2] + "/"));
+                            el.parentNode.children[2].prepend(addFilesFolders(folder, args[2]));
                         });
                     } else {
-                        el = document.getElementById(popupMenuID);
-                        liparent = el.parentNode;
-                        console.log(el);
-                        console.log(el.parentNode);
+                        el = document.getElementById(popupMenuID).parentNode;
 
                         JSON.parse(args[0]).forEach(function(folder, index) {
-                            liparent.parentNode.insertBefore(addFilesFolders(folder, args[2] + "/"), liparent);
+                            el.parentNode.insertBefore(addFilesFolders(folder, args[2]), el);
                         });
                     }
                     var toggler = document.getElementsByClassName("folder");
@@ -404,7 +403,7 @@
                 return x;
             } else {
                 return getFileElement(treeObj.name, treeObj.disabled,
-                    id + treeObj.name); //treeObj.name + "/" + treeObj.name);
+                    id + treeObj.name);
             }
         }
 
