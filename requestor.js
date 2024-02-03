@@ -356,6 +356,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         return parsePOSTNewElementInside(req, params, res, jsonObj);
     } else if (params["op"] == "pasteelement") {
         return parsePOSTPasteElement(req, params, res, jsonObj);
+    } else if (params["op"] == "dropelement") {
+        return parsePOSTPasteFromDragElement(req, params, res, jsonObj);
     } else if (params["op"] == "renameelement") {
         return parsePOSTRenameElement(req, params, res, jsonObj);
     } else if (params["op"] == "enabledisableelement") {
@@ -607,6 +609,39 @@ console.log ("el and el2 found");
     }
     sendPlain(req, res, JSON.stringify(tree));
 }
+
+async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
+    el = findElement(jsonObj2, params, true);
+    el2 = findElement2(jsonObj2, params, params['newpath'], false);
+    tree = [];
+    if (el != null && el2 != null) {
+console.log ("el and el2 found");
+        let newObj = JSON.parse(JSON.stringify(el.obj));
+        newObj.name = params['name'];
+
+        if (el.type == 'suite') {
+            tree.push(createTSTree(newObj));
+        } else if (el.type == 'tc') {
+            tree.push(createTCTree(newObj));
+        } else {
+            tree.push(createStepTree(newObj));
+        }
+
+        let elpath = params['path'].split("/");
+        let elpath2 = params['newpath'].split("/");
+        if (elpath.length != elpath2.length) {
+            if (elpath2.length == 1) {
+                el2.obj.testcases.unshift(newObj);
+            } else if (elpath2.length == 2) {
+                el2.obj.steps.unshift(newObj);
+            }
+        } else {
+            el2.parent.splice(el2.index, 0, newObj);
+        }
+    }
+    sendPlain(req, res, JSON.stringify(tree));
+}
+
 
 async function parsePOSTSaveFile(req, params, res, jsonObj2) {
 
