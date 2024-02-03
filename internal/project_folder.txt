@@ -250,11 +250,9 @@
             let newName = elpath1[elpath1.length - 1] + "(copy)";
             if (elpath2.length == elpath1.length - 1) {
                 newElementPath = popupMenuID;
-console.log("a" +popupMenuID + " "+newName);
             } else {
-		elpath1.pop();
+                elpath1.pop();
                 newElementPath = getPath(elpath1);
-console.log("b" +newElementPath);
             }
 
             params = new URLSearchParams(window.location.search);
@@ -263,21 +261,23 @@ console.log("b" +newElementPath);
                 function(...args) {
                     if (args[4] == args[1] - 1) {
                         el = document.getElementById(popupMenuID);
-console.log("first")
-                        el.parentNode.children[2].prepend(
-	                    getFileElement(args[3], false, args[2] + "/" + args[3]));
+                        JSON.parse(args[0]).forEach(function(folder, index) {
+                            el.parentNode.children[2].prepend(addFilesFolders(folder, args[2] + "/"));
+                        });
                     } else {
-console.log("second")
                         el = document.getElementById(popupMenuID);
                         liparent = el.parentNode;
-console.log(args);
-                        liparent.parentNode.insertBefore(
-	                    getFileElement(args[3], false, args[2] + "/" + args[3]),liparent);
+                        console.log(el);
+                        console.log(el.parentNode);
+
+                        JSON.parse(args[0]).forEach(function(folder, index) {
+                            liparent.parentNode.insertBefore(addFilesFolders(folder, args[2] + "/"), liparent);
+                        });
                     }
-                    /*                    if (args[1] < 3) {
-                                            updateFolder(newEl);
-                                        }
-                    */
+                    var toggler = document.getElementsByClassName("folder");
+                    for (var i = 0; i < toggler.length; i++) {
+                        updateFolder(toggler[i]);
+                    }
                 },
                 elpath1.length, newElementPath, newName, elpath2.length
             );
@@ -339,7 +339,6 @@ console.log(args);
             alel1.text = name;
             alel1.setAttribute("id", id);
             alel1.setAttribute("class", "tcts" + (disabled ? " disabled" : "") + " " + type);
-console.log("adding clickable folder "+id);
             alel1.onclick = function() {
                 loadRightPart("file=" + params.get("file") + "&path=" + this.id);
             };
@@ -369,7 +368,6 @@ console.log("adding clickable folder "+id);
             alel2.text = name;
             alel2.setAttribute("id", id);
             alel2.setAttribute("class", "step" + (disabled ? " disabled" : ""));
-console.log("adding clickable file "+id);
             alel2.onclick = function() {
                 document.getElementById("id").value = this.id;
                 loadRightPart("file=" + params.get("file") + "&path=" + this.id);
@@ -406,11 +404,13 @@ console.log("adding clickable file "+id);
                 return x;
             } else {
                 return getFileElement(treeObj.name, treeObj.disabled,
-                    id + treeObj.name + "/" + treeObj.name);
+                    id + treeObj.name); //treeObj.name + "/" + treeObj.name);
             }
         }
 
         function updateFolder(obj) {
+            const first = obj.firstChild;
+            if (first.innerHTML == "\u25BC " || first.innerHTML == "\u25B6 ") return;
             const node = document.createElement("a");
             node.innerHTML = obj.classList.contains("folder-open") ?
                 "\u25BC " :
