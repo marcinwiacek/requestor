@@ -6,7 +6,16 @@ as replacement for SoapUI, Ready API, Postman, curl and similar tools.
 Written in Java Script using nodeJS (=speed, available code, no problems with onboarding
 in some companies, support for all important features, etc.).
 
+# Goals
+* Creating simple app, which will provide all important technical elements for fast starting
+and making testing requests (without bla, bla, bla)
+* Avoiding stupid, annoying actions in such software (user should be focused on this, what
+should be done, not on tool itself)
+* Providing support for modern elements like HTTP/2
+
 # TODO
+wrong IDs after copy TC to other TC
+
 drag & drop
 new created elements with drag & drop
 
@@ -51,6 +60,21 @@ any SLA with free version. Time is money.
 
 # There is no big company staying behind this
 Linux kernel started this way too. And today you have it in desktop, Android, etc.
+
+# Why nodeJS?
+In my life I have used many languages, for example:
+
+* assembler was powerfull (but required too much effort)
+* C nice (but not very welcome in business environments)
+* C++ and Rust overcomplicated
+* Java boring (which gave me the chance to pay bills)
+* Pascal/Delphi perfect solution for creating powerfull GUI apps without big errors (but unfortunatelly dropped in market)
+* PHP/Basic/Visual Basic limited and prepared for some scenarios only
+* Sharp languages (C#, etc.) made wrong first impressions (I remember, how wrong they were in first versions)
+
+JavaScript itself is not very good language (or more honestly, it's ugly language), but in combination with nodeJS allowed me for creating [very nice Sobieski+ concept](https://mwiacek.com/www/?q=node/401) with full file CMS solution with chats, Google integration, multiuser work and many other features.
+
+I believe, that this combination has got future for next years. It doesn't mean of course, that in the future I will not use [Carbon](https://github.com/carbon-language/carbon-lang) or something else.
 
 # Installation
 1. ```sudo snap install node --classic --channel=20```
