@@ -52,7 +52,6 @@
     <div id="menu"></div>
 
     <div class="hide" id="stepmenu" style="border: 5px outset black; background-color: white">
-        File<p>
             <a onclick="elementNew()">New</a><br />
             <a onclick="elementRename()">Rename</a><br />
             <a onclick="elementEnableDisable()">Disable/enable</a><br />
@@ -62,7 +61,6 @@
     </div>
 
     <div class="hide" id="foldermenu" style="border: 5px outset black; background-color: white">
-        Folder<p>
             <a onclick="elementNew()">New</a><br />
             <a onclick="elementRename()">Rename</a><br />
             <a onclick="elementEnableDisable()">Disable/enable</a><br />
@@ -251,8 +249,8 @@
             if (elpath2.length == elpath1.length - 1) {
                 newElementPath = popupMenuID;
             } else {
-                elpath1.pop();
-                newElementPath = getPath(elpath1);
+                elpath2.pop();
+                newElementPath = getPath(elpath2);
             }
             newElementPath = newElementPath + "/";
             if (newElementPath == "/") newElementPath = "";
@@ -325,6 +323,7 @@
             let isFolder2 = document.getElementById(newId).classList.contains("tcts");
 
             console.log("file/folder drop " + oldId + " " + newId + " " + isFolder1 + " " + isFolder2);
+//fixme: correct names update
 
             copyID = oldId;
             popupMenuID = newId;
@@ -335,15 +334,16 @@
                 return;
             }
 
-            let newName = elpath1[elpath1.length - 1];
+//            let newName = elpath1[elpath1.length - 1];
             if (elpath2.length == elpath1.length - 1) {
                 newElementPath = popupMenuID;
             } else {
-                elpath1.pop();
-                newElementPath = getPath(elpath1);
+                elpath2.pop();
+                newElementPath = getPath(elpath2);
             }
             newElementPath = newElementPath + "/";
             if (newElementPath == "/") newElementPath = "";
+	    console.log("new Element Path "+newElementPath);
 
             params = new URLSearchParams(window.location.search);
 
@@ -379,6 +379,7 @@
 
         function getFolderElement(name, disabled, id, type) {
             const params = new URLSearchParams(window.location.search);
+console.log("adding folder "+id);
 
             let liel1 = document.createElement("li");
             liel1.setAttribute("class", "folder folder-open");
@@ -408,7 +409,7 @@
 
         function getFileElement(name, disabled, id) {
             const params = new URLSearchParams(window.location.search);
-
+console.log("adding file "+id);
             let liel2 = document.createElement("li");
             liel2.setAttribute("class", "file");
 

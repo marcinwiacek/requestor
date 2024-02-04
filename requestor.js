@@ -299,7 +299,7 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
             } else if (deleteOriginal) {
                 console.log("deleting");
                 retVal.obj = JSON.parse(JSON.stringify(suite));
-                delete jsonObj[params['file']].testsuites[tsnumber];
+                jsonObj[params['file']].testsuites.splice(tsnumber,1);
             } else {
                 retVal.obj = suite;
             }
@@ -321,7 +321,7 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                 } else if (deleteOriginal) {
                     console.log("deleting");
                     retVal.obj = JSON.parse(JSON.stringify(tc));
-                    delete suite.testcases[tcnumber];
+                    suite.testcases.splice(tcnumber,1);
                 } else {
                     retVal.obj = tc;
                 }
@@ -341,7 +341,7 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                     } else if (deleteOriginal) {
                         console.log("deleting");
                         retVal.obj = JSON.parse(JSON.stringify(step));
-                        delete tc.steps[stepnumber];
+                        tc.steps.splice(stepnumber,1);
                     } else {
                         retVal.obj = step;
                     }
@@ -632,6 +632,8 @@ async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
         console.log("el and el2 found");
         let newObj = JSON.parse(JSON.stringify(el.obj));
         //        newObj.name = params['name'];
+
+console.log(newObj);
 
         if (el.type == 'suite') {
             tree.push(createTSTree(newObj));
