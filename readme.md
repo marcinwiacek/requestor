@@ -14,9 +14,9 @@ should be done, not on tool itself)
 * Providing support for modern elements like HTTP/2
 
 # TODO
-wrong IDs after copy TC to other TC
-new created elements with drag & drop
-edycja danych - zmienione parametry
+ewentualna zmiana nazw przy przenoszeniu
+czasami przy drag i drop zle budowanie drzewka
+edycja danych
 
 run for the whole suite / tc
 junit results
