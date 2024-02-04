@@ -8,17 +8,14 @@ in some companies, support for all important features, etc.).
 
 # Goals
 * Creating simple app, which will provide all important technical elements for fast starting
-and making testing requests (without bla, bla, bla)
+and making testing for requests (without bla, bla, bla)
 * Avoiding stupid, annoying actions in such software (user should be focused on this, what
 should be done, not on tool itself)
 * Providing support for modern elements like HTTP/2
 
 # TODO
 wrong IDs after copy TC to other TC
-
-drag & drop
 new created elements with drag & drop
-
 edycja danych - zmienione parametry
 
 run for the whole suite / tc

@@ -254,8 +254,8 @@
                 elpath1.pop();
                 newElementPath = getPath(elpath1);
             }
-	    newElementPath = newElementPath + "/";
-	    if (newElementPath == "/") newElementPath = "";
+            newElementPath = newElementPath + "/";
+            if (newElementPath == "/") newElementPath = "";
 
             params = new URLSearchParams(window.location.search);
             executePOST(
@@ -273,6 +273,10 @@
                             el.parentNode.insertBefore(addFilesFolders(folder, args[2]), el);
                         });
                     }
+                    el = document.getElementById(popupMenuID);
+                    //fixme for folder also parent parent
+                    el.parentNode.remove();
+
                     var toggler = document.getElementsByClassName("folder");
                     for (var i = 0; i < toggler.length; i++) {
                         updateFolder(toggler[i]);
@@ -326,9 +330,55 @@
 
             console.log("file/folder drop " + oldId + " " + newId + " " + isFolder1 + " " + isFolder2);
 
-        //    copyID = oldId;
-        //    popupMenuID = newId;
-	//    elementPaste();
+            copyID = oldId;
+            popupMenuID = newId;
+
+            let elpath1 = copyID.split("/");
+            let elpath2 = popupMenuID.split("/");
+            if (elpath1.length == elpath2.length || elpath2.length == elpath1.length - 1) {} else {
+                return;
+            }
+
+            let newName = elpath1[elpath1.length - 1];
+            if (elpath2.length == elpath1.length - 1) {
+                newElementPath = popupMenuID;
+            } else {
+                elpath1.pop();
+                newElementPath = getPath(elpath1);
+            }
+            newElementPath = newElementPath + "/";
+            if (newElementPath == "/") newElementPath = "";
+
+            params = new URLSearchParams(window.location.search);
+
+            executePOST(
+                "file=" + params.get("file") + "&op=dropelement&path=" + copyID + "&newpath=" + popupMenuID,
+                function(...args) {
+                    if (args[3] == args[1] - 1) {
+                        el = document.getElementById(popupMenuID);
+                        JSON.parse(args[0]).forEach(function(folder, index) {
+                            el.parentNode.children[2].prepend(addFilesFolders(folder, args[2]));
+                        });
+                    } else {
+                        el = document.getElementById(popupMenuID).parentNode;
+
+                        JSON.parse(args[0]).forEach(function(folder, index) {
+                            el.parentNode.insertBefore(addFilesFolders(folder, args[2]), el);
+                        });
+                    }
+                    el = document.getElementById(copyID);
+                    //fixme for folder also parent parent
+                    el.parentNode.remove();
+
+                    var toggler = document.getElementsByClassName("folder");
+                    for (var i = 0; i < toggler.length; i++) {
+                        updateFolder(toggler[i]);
+                    }
+
+                    copyID = "";
+                },
+                elpath1.length, newElementPath, elpath2.length
+            );
         }
 
         function getFolderElement(name, disabled, id, type) {

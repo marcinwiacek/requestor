@@ -274,11 +274,13 @@ function sendCSS(req, res, text) {
     sendBody(req, res, text);
 }
 
-function findElement(jsonObj, params, deleteDBID) {
-    return findElement2(jsonObj, params, params['path'], deleteDBID);
+function findElement(jsonObj, params, deleteDBID, deleteOriginal) {
+    return findElement2(jsonObj, params, params['path'], deleteDBID, deleteOriginal);
 }
 
-function findElement2(jsonObj, params, pathString,deleteDBID) {
+function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
+    console.log(deleteOriginal);
+
     let elpath = pathString.split("/");
 
     for (let tsnumber in jsonObj[params['file']].testsuites) {
@@ -286,17 +288,21 @@ function findElement2(jsonObj, params, pathString,deleteDBID) {
         if (elpath.length == 1 && suite.name == elpath[0]) {
             retVal = [];
             retVal.type = 'suite';
-	    if (deleteDBID) {
-            retVal.obj = JSON.parse(JSON.stringify(suite));
-    		for (let tcnumber in retVal.obj.testcases) {
-	        	var tc = retVal.obj.testcases[tcnumber];
-		        for (let stepnumber in tc.steps) {
-				delete tc.steps[stepnumber].dbid;
-			}
-		    }
-		} else {
-            retVal.obj = suite;
-	    }
+            if (deleteDBID) {
+                retVal.obj = JSON.parse(JSON.stringify(suite));
+                for (let tcnumber in retVal.obj.testcases) {
+                    var tc = retVal.obj.testcases[tcnumber];
+                    for (let stepnumber in tc.steps) {
+                        delete tc.steps[stepnumber].dbid;
+                    }
+                }
+            } else if (deleteOriginal) {
+                console.log("deleting");
+                retVal.obj = JSON.parse(JSON.stringify(suite));
+                delete jsonObj[params['file']].testsuites[tsnumber];
+            } else {
+                retVal.obj = suite;
+            }
             retVal.index = tsnumber;
             retVal.parent = jsonObj[params['file']].testsuites;
             return retVal;
@@ -307,14 +313,18 @@ function findElement2(jsonObj, params, pathString,deleteDBID) {
                 retVal = [];
                 retVal.type = 'tc';
                 retVal.obj = tc;
-		if (deleteDBID) {
-                retVal.obj = JSON.parse(JSON.stringify(tc));
-	            for (let stepnumber in retVal.obj.steps) {
-			delete retVal.obj.steps[stepnumber].dbid;
-		    }
-		} else {
-                retVal.obj = tc;
-		}
+                if (deleteDBID) {
+                    retVal.obj = JSON.parse(JSON.stringify(tc));
+                    for (let stepnumber in retVal.obj.steps) {
+                        delete retVal.obj.steps[stepnumber].dbid;
+                    }
+                } else if (deleteOriginal) {
+                    console.log("deleting");
+                    retVal.obj = JSON.parse(JSON.stringify(tc));
+                    delete suite.testcases[tcnumber];
+                } else {
+                    retVal.obj = tc;
+                }
                 retVal.index = tcnumber;
                 retVal.parent = suite.testcases;
                 return retVal;
@@ -325,12 +335,16 @@ function findElement2(jsonObj, params, pathString,deleteDBID) {
                     retVal = [];
                     retVal.type = 'step';
                     retVal.obj = step;
-		    if (deleteDBID) {
-                    retVal.obj = JSON.parse(JSON.stringify(step));
-delete retVal.obj.dbid;
-} else {
-                    retVal.obj = step;
-}
+                    if (deleteDBID) {
+                        retVal.obj = JSON.parse(JSON.stringify(step));
+                        delete retVal.obj.dbid;
+                    } else if (deleteOriginal) {
+                        console.log("deleting");
+                        retVal.obj = JSON.parse(JSON.stringify(step));
+                        delete tc.steps[stepnumber];
+                    } else {
+                        retVal.obj = step;
+                    }
                     retVal.index = stepnumber;
                     retVal.parent = tc.steps;
                     return retVal;
@@ -449,7 +463,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 }
 
 async function parsePOSTRenameElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false);
+    el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         console.log(el);
         el.obj.name = params['new'];
@@ -458,7 +472,7 @@ async function parsePOSTRenameElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTNewElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false);
+    el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         let elpath = params['path'].split("/");
         if (elpath.length == 3) {
@@ -489,7 +503,7 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false);
+    el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         console.log("found");
         let elpath = params['path'].split("/");
@@ -517,7 +531,7 @@ async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false);
+    el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         if (el.obj.disabled == true) {
             delete el.obj.disabled;
@@ -530,7 +544,7 @@ async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
 
 async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
     //fixme delete from db
-    el = findElement(jsonObj2, params, false);
+    el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         el.parent.splice(el.index, 1);
     }
@@ -579,11 +593,11 @@ function createTSTree(obj) {
 }
 
 async function parsePOSTPasteElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, true);
-    el2 = findElement2(jsonObj2, params, params['newpath'], false);
+    el = findElement(jsonObj2, params, true, false);
+    el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
     tree = [];
     if (el != null && el2 != null) {
-console.log ("el and el2 found");
+        console.log("el and el2 found");
         let newObj = JSON.parse(JSON.stringify(el.obj));
         newObj.name = params['name'];
 
@@ -611,13 +625,13 @@ console.log ("el and el2 found");
 }
 
 async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, true);
-    el2 = findElement2(jsonObj2, params, params['newpath'], false);
+    el = findElement(jsonObj2, params, false, true);
+    el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
     tree = [];
     if (el != null && el2 != null) {
-console.log ("el and el2 found");
+        console.log("el and el2 found");
         let newObj = JSON.parse(JSON.stringify(el.obj));
-        newObj.name = params['name'];
+        //        newObj.name = params['name'];
 
         if (el.type == 'suite') {
             tree.push(createTSTree(newObj));
@@ -664,7 +678,7 @@ async function parsePOSTSaveFile(req, params, res, jsonObj2) {
 
 async function parsePOSTRunStep(req, params, res, jsonObj2) {
     var sss = "";
-console.log("fire run step ");
+    console.log("fire run step ");
     console.log(params);
     let arr = jsonObj[params['file']];
     let times = [];
@@ -719,8 +733,8 @@ console.log("fire run step ");
                         step.dbid = stepcopy.dbid;
                         times.push(JSON.parse(sss).datetime);
                         if (stepcopy.url.length == step.url.length) {
-			break;
-			}
+                            break;
+                        }
                     }
                 }
 
