@@ -631,7 +631,6 @@ async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
     if (el != null && el2 != null) {
         console.log("el and el2 found");
         let newObj = JSON.parse(JSON.stringify(el.obj));
-        console.log(newObj);
 
         let elpath = params['path'].split("/");
         let elpath2 = params['newpath'].split("/");
@@ -679,6 +678,8 @@ async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
             el2.parent.splice(el2.index, 0, newObj);
         }
 
+        console.log(newObj);
+console.log(el.type);
         if (el.type == 'suite') {
             tree.push(createTSTree(newObj));
         } else if (el.type == 'tc') {

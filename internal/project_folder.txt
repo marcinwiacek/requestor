@@ -329,7 +329,7 @@
 
             let elpath1 = copyID.split("/");
             let elpath2 = popupMenuID.split("/");
-            if (elpath2.length > elpath1.length) {
+            if (elpath2.length > elpath1.length || Math.abs(elpath2.length-elpath1.length)==2) {
                 console.log("not possible");
                 return;
             }
@@ -337,25 +337,36 @@
             console.log("copyID " + copyID);
             console.log("popupMenuID " + popupMenuID);
 
-            if (elpath2.length == elpath1.length - 1) {
-                newElementPath = popupMenuID;
-            } else {
+            if (elpath2.length == elpath1.length) {
                 elpath2.pop();
                 newElementPath = getPath(elpath2);
+            } else {
+                newElementPath = popupMenuID;
             }
             newElementPath = newElementPath + "/";
             if (newElementPath == "/") newElementPath = "";
+            elpath2 = popupMenuID.split("/");
 
             params = new URLSearchParams(window.location.search);
             executePOST(
                 "file=" + params.get("file") + "&op=dropelement&path=" + copyID + "&newpath=" + popupMenuID,
                 function(...args) {
-                    el = document.getElementById(popupMenuID);
                     console.log(args);
-                    console.log(el);
-                    JSON.parse(args[0]).forEach(function(folder, index) {
-                        el.parentNode.children[2].prepend(addFilesFolders(folder, args[1]));
-                    });
+                    if (args[3] == args[4]) {
+                        el = document.getElementById(popupMenuID).parentNode;
+                        console.log(el);
+
+                        JSON.parse(args[0]).forEach(function(folder, index) {
+                            el.parentNode.insertBefore(addFilesFolders(folder, args[1]), el);
+                        });
+                    } else {
+                        el = document.getElementById(popupMenuID);
+                        console.log(el);
+
+                        JSON.parse(args[0]).forEach(function(folder, index) {
+                            el.parentNode.children[2].prepend(addFilesFolders(folder, args[1]));
+                        });
+                    }
 
                     el = document.getElementById(args[2]);
                     el.parentNode.remove();
@@ -365,7 +376,7 @@
                         updateFolder(toggler[i]);
                     }
                 },
-                newElementPath,copyID
+                newElementPath, copyID, elpath1.length, elpath2.length
             );
 
             copyID = "";
