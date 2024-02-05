@@ -299,7 +299,7 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
             } else if (deleteOriginal) {
                 console.log("deleting");
                 retVal.obj = JSON.parse(JSON.stringify(suite));
-                jsonObj[params['file']].testsuites.splice(tsnumber,1);
+                jsonObj[params['file']].testsuites.splice(tsnumber, 1);
             } else {
                 retVal.obj = suite;
             }
@@ -321,7 +321,7 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                 } else if (deleteOriginal) {
                     console.log("deleting");
                     retVal.obj = JSON.parse(JSON.stringify(tc));
-                    suite.testcases.splice(tcnumber,1);
+                    suite.testcases.splice(tcnumber, 1);
                 } else {
                     retVal.obj = tc;
                 }
@@ -341,7 +341,7 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                     } else if (deleteOriginal) {
                         console.log("deleting");
                         retVal.obj = JSON.parse(JSON.stringify(step));
-                        tc.steps.splice(stepnumber,1);
+                        tc.steps.splice(stepnumber, 1);
                     } else {
                         retVal.obj = step;
                     }
@@ -631,9 +631,53 @@ async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
     if (el != null && el2 != null) {
         console.log("el and el2 found");
         let newObj = JSON.parse(JSON.stringify(el.obj));
-        //        newObj.name = params['name'];
+        console.log(newObj);
 
-console.log(newObj);
+        let elpath = params['path'].split("/");
+        let elpath2 = params['newpath'].split("/");
+        if (elpath.length != elpath2.length) {
+            if (elpath2.length == 1) {
+                while (true) {
+                    found = false;
+                    for (let tcnumber in el2.obj.testcases) {
+                        var tc = el2.obj.testcases[tcnumber];
+                        if (tc.name === newObj.name) {
+                            newObj.name = newObj.name + "(copy)";
+                            found = true;
+                        }
+                    }
+                    if (!found) break;
+                }
+                el2.obj.testcases.unshift(newObj);
+            } else if (elpath2.length == 2) {
+                while (true) {
+                    found = false;
+                    for (let stepnumber in el2.obj.steps) {
+                        var step = el2.obj.steps[stepnumber];
+                        if (step.name === newObj.name) {
+                            newObj.name = newObj.name + "(copy)";
+                            found = true;
+                        }
+                    }
+                    if (!found) break;
+                }
+
+                el2.obj.steps.unshift(newObj);
+            }
+        } else {
+            while (true) {
+                found = false;
+                for (let stepnumber in el2.obj.steps) {
+                    var step = el2.obj.steps[stepnumber];
+                    if (step.name === newObj.name) {
+                        newObj.name = newObj.name + "(copy)";
+                        found = true;
+                    }
+                }
+                if (!found) break;
+            }
+            el2.parent.splice(el2.index, 0, newObj);
+        }
 
         if (el.type == 'suite') {
             tree.push(createTSTree(newObj));
@@ -643,17 +687,6 @@ console.log(newObj);
             tree.push(createStepTree(newObj));
         }
 
-        let elpath = params['path'].split("/");
-        let elpath2 = params['newpath'].split("/");
-        if (elpath.length != elpath2.length) {
-            if (elpath2.length == 1) {
-                el2.obj.testcases.unshift(newObj);
-            } else if (elpath2.length == 2) {
-                el2.obj.steps.unshift(newObj);
-            }
-        } else {
-            el2.parent.splice(el2.index, 0, newObj);
-        }
     }
     sendPlain(req, res, JSON.stringify(tree));
 }
