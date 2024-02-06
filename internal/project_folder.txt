@@ -79,6 +79,10 @@
     <!--TC-->
 
     <script>
+        var popupMenuID = "";
+        var popupMenuName = "";
+        var copyID = "";
+
         function getPath(path) {
             var retVal = "";
             for (i = 0; i < path.length; i++) {
@@ -239,6 +243,37 @@
         }
 
         function elementPaste() {
+	    PasteDrop("paste");
+            document.getElementById(popupMenuName).classList.toggle("show");
+        }
+
+        function cancelDefault(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+
+        function dragStart(e) {
+            e.dataTransfer.setData("text/plain", e.target.id);
+        }
+
+        function dropEnd(e) {
+            cancelDefault(e);
+
+            copyID = e.dataTransfer.getData("text/plain");
+            popupMenuID = e.target.id;
+
+            let isFolder1 = document.getElementById(copyID).classList.contains("tcts");
+            let isFolder2 = document.getElementById(popupMenuID).classList.contains("tcts");
+            console.log("file/folder drop " + copyID + " " + popupMenuID + " " + isFolder1 + " " + isFolder2);
+
+	    PasteDrop("drop");
+
+	    el = document.getElementById(copyID);
+            el.parentNode.remove();
+        }
+
+	function PasteDrop(name) {
             let elpath1 = copyID.split("/");
             let elpath2 = popupMenuID.split("/");
             if (elpath2.length > elpath1.length || Math.abs(elpath2.length-elpath1.length)==2) {
@@ -261,7 +296,7 @@
 
             params = new URLSearchParams(window.location.search);
             executePOST(
-                "file=" + params.get("file") + "&op=pasteelement&path=" + copyID + "&newpath=" + popupMenuID,
+                "file=" + params.get("file") + "&op="+name+"element&path=" + copyID + "&newpath=" + popupMenuID,
                 function(...args) {
                     console.log(args);
                     if (args[3] == args[4]) {
@@ -280,64 +315,14 @@
                         });
                     }
 
-                    var toggler = document.getElementsByClassName("folder");
-                    for (var i = 0; i < toggler.length; i++) {
-                        updateFolder(toggler[i]);
-                    }
+
+		    updateAllFolders();
                 },
                 newElementPath, copyID, elpath1.length, elpath2.length
             );
 
             copyID = "";
-            document.getElementById(popupMenuName).classList.toggle("show");
-        }
-
-        function updatePopupMenu(toggler, name) {
-            toggler.addEventListener("contextmenu", (e) => {
-                popupMenuID = e.target.id;
-                popupMenuName = name + "menu";
-                document.getElementById(name + "menu").classList.toggle("show");
-                e.preventDefault();
-            });
-            toggler.addEventListener("mousemove", (e) => {
-                if (document.getElementById(name + "menu").classList.contains("show"))
-                    return;
-                if (!e) e = window.event;
-                document.getElementById(name + "menu").style.top = e.pageY + "px";
-                document.getElementById(name + "menu").style.left = e.pageX + "px";
-            });
-        }
-
-        var popupMenuID = "";
-        var popupMenuName = "";
-        var copyID = "";
-
-
-        function cancelDefault(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }
-
-        function dragStart(e) {
-            e.dataTransfer.setData("text/plain", e.target.id);
-        }
-
-        function dropEnd(e) {
-            cancelDefault(e);
-
-            let oldId = e.dataTransfer.getData("text/plain");
-            let newId = e.target.id;
-
-            let isFolder1 = document.getElementById(oldId).classList.contains("tcts");
-            let isFolder2 = document.getElementById(newId).classList.contains("tcts");
-
-            console.log("file/folder drop " + oldId + " " + newId + " " + isFolder1 + " " + isFolder2);
-
-            copyID = oldId;
-            popupMenuID = newId;
-
-        }
+	}
 
         function getFolderElement(name, disabled, id, type) {
             const params = new URLSearchParams(window.location.search);
@@ -433,16 +418,35 @@
             obj.prepend(node);
         }
 
+	function updateAllFolders() {
+            var toggler = document.getElementsByClassName("folder");
+            for (var i = 0; i < toggler.length; i++) {
+                updateFolder(toggler[i]);
+            }
+	}
+
+        function updatePopupMenu(toggler, name) {
+            toggler.addEventListener("contextmenu", (e) => {
+                popupMenuID = e.target.id;
+                popupMenuName = name + "menu";
+                document.getElementById(name + "menu").classList.toggle("show");
+                e.preventDefault();
+            });
+            toggler.addEventListener("mousemove", (e) => {
+                if (document.getElementById(name + "menu").classList.contains("show"))
+                    return;
+                if (!e) e = window.event;
+                document.getElementById(name + "menu").style.top = e.pageY + "px";
+                document.getElementById(name + "menu").style.left = e.pageX + "px";
+            });
+        }
+
         ulel = document.createElement("ul");
         document.getElementById("menu").appendChild(ulel);
         tree.forEach(function(folder, index) {
             ulel.appendChild(addFilesFolders(folder, ""));
         });
 
-        var toggler = document.getElementsByClassName("folder");
-        for (var i = 0; i < toggler.length; i++) {
-            updateFolder(toggler[i]);
-        }
-
+	updateAllFolders();
         updatePopupMenu(document.getElementById("mainfile"), "mainfile");
     </script>

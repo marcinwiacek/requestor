@@ -616,6 +616,7 @@ function PasteElement (req, params, res, jsonObj2, deleteOriginal) {
                     found = false;
                     for (let tcnumber in el2.obj.testcases) {
                         var tc = el2.obj.testcases[tcnumber];
+console.log("comparing "+tc.name+" " +newObj.name);
                         if (tc.name === newObj.name) {
                             newObj.name = newObj.name + "(copy)";
                             found = true;
@@ -629,6 +630,7 @@ function PasteElement (req, params, res, jsonObj2, deleteOriginal) {
                     found = false;
                     for (let stepnumber in el2.obj.steps) {
                         var step = el2.obj.steps[stepnumber];
+console.log("comparing "+step.name+" " +newObj.name);
                         if (step.name === newObj.name) {
                             newObj.name = newObj.name + "(copy)";
                             found = true;
@@ -642,13 +644,11 @@ function PasteElement (req, params, res, jsonObj2, deleteOriginal) {
         } else {
             while (true) {
                 found = false;
-                for (let stepnumber in el2.obj.steps) {
-                    var step = el2.obj.steps[stepnumber];
-                    if (step.name === newObj.name) {
+console.log("comparing "+el2.obj.name+" " +newObj.name);
+                    if (el2.obj.name === newObj.name) {
                         newObj.name = newObj.name + "(copy)";
                         found = true;
                     }
-                }
                 if (!found) break;
             }
             el2.parent.splice(el2.index, 0, newObj);
