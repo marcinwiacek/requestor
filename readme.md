@@ -15,6 +15,7 @@ should be done, not on tool itself)
 
 # TODO
 usuwanie historii przy paste
+czasem zle dodaje nazwe przy paste / drop
 kolejnosc przy drag i drop
 edycja danych
 

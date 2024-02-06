@@ -446,6 +446,7 @@
         tree.forEach(function(folder, index) {
             ulel.appendChild(addFilesFolders(folder, ""));
         });
+	delete tree;
 
 	updateAllFolders();
         updatePopupMenu(document.getElementById("mainfile"), "mainfile");

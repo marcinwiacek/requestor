@@ -279,10 +279,7 @@ function findElement(jsonObj, params, deleteDBID, deleteOriginal) {
 }
 
 function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
-    console.log(deleteOriginal);
-
     let elpath = pathString.split("/");
-
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
         if (elpath.length == 1 && suite.name == elpath[0]) {
@@ -297,7 +294,6 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                     }
                 }
             } else if (deleteOriginal) {
-                console.log("deleting");
                 retVal.obj = JSON.parse(JSON.stringify(suite));
                 jsonObj[params['file']].testsuites.splice(tsnumber, 1);
             } else {
@@ -319,7 +315,6 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                         delete retVal.obj.steps[stepnumber].dbid;
                     }
                 } else if (deleteOriginal) {
-                    console.log("deleting");
                     retVal.obj = JSON.parse(JSON.stringify(tc));
                     suite.testcases.splice(tcnumber, 1);
                 } else {
@@ -339,7 +334,6 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                         retVal.obj = JSON.parse(JSON.stringify(step));
                         delete retVal.obj.dbid;
                     } else if (deleteOriginal) {
-                        console.log("deleting");
                         retVal.obj = JSON.parse(JSON.stringify(step));
                         tc.steps.splice(stepnumber, 1);
                     } else {
@@ -358,7 +352,6 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
     console.log(params);
-    //    loadFile(params['file']);
     loadDB(params['file']);
     if (params["runstep"]) {
         return parsePOSTRunStep(req, params, res, jsonObj);
@@ -572,7 +565,6 @@ function createTCTree(obj) {
         tcobj.files.push(createStepTree(step));
     }
     return tcobj;
-
 }
 
 function createTSTree(obj) {
@@ -585,8 +577,6 @@ function createTSTree(obj) {
 
     for (let tcnumber in obj.testcases) {
         var tc = obj.testcases[tcnumber];
-
-
         tsobj.folders.push(createTCTree(tc));
     }
     return tsobj;
@@ -616,7 +606,6 @@ function PasteElement (req, params, res, jsonObj2, deleteOriginal) {
                     found = false;
                     for (let tcnumber in el2.obj.testcases) {
                         var tc = el2.obj.testcases[tcnumber];
-console.log("comparing "+tc.name+" " +newObj.name);
                         if (tc.name === newObj.name) {
                             newObj.name = newObj.name + "(copy)";
                             found = true;
@@ -630,7 +619,6 @@ console.log("comparing "+tc.name+" " +newObj.name);
                     found = false;
                     for (let stepnumber in el2.obj.steps) {
                         var step = el2.obj.steps[stepnumber];
-console.log("comparing "+step.name+" " +newObj.name);
                         if (step.name === newObj.name) {
                             newObj.name = newObj.name + "(copy)";
                             found = true;
@@ -644,7 +632,6 @@ console.log("comparing "+step.name+" " +newObj.name);
         } else {
             while (true) {
                 found = false;
-console.log("comparing "+el2.obj.name+" " +newObj.name);
                     if (el2.obj.name === newObj.name) {
                         newObj.name = newObj.name + "(copy)";
                         found = true;
@@ -654,8 +641,6 @@ console.log("comparing "+el2.obj.name+" " +newObj.name);
             el2.parent.splice(el2.index, 0, newObj);
         }
 
-        console.log(newObj);
-console.log(el.type);
         if (el.type == 'suite') {
             tree.push(createTSTree(newObj));
         } else if (el.type == 'tc') {
@@ -663,7 +648,6 @@ console.log(el.type);
         } else {
             tree.push(createStepTree(newObj));
         }
-
     }
     sendPlain(req, res, JSON.stringify(tree));
 }
@@ -910,47 +894,26 @@ const onRequestHandler = async (req, res) => {
             loadDB(params['file']);
 
             let tree = [];
-            let alldbid = "'abc'";
-
-            for (let tsnumber in jsonObj[params['file']].testsuites) {
-                var ts = jsonObj[params['file']].testsuites[tsnumber];
-                var tsobj = {}
-                tsobj.name = ts.name;
-                tsobj.type = 'ts';
-                tsobj.disabled = ts.disabled;
-                tsobj.folders = []
-                tsobj.files = []
-
-                for (let tcnumber in ts.testcases) {
-                    var tc = ts.testcases[tcnumber];
-
-                    var tcobj = {}
-                    tcobj.name = tc.name;
-                    tcobj.type = 'tc';
-                    tcobj.disabled = tc.disabled;
-                    tcobj.folders = []
-                    tcobj.files = []
-
-                    for (let stepnumber in tc.steps) {
-                        var step = tc.steps[stepnumber];
-                        var stepobj = {}
-                        stepobj.name = step.name;
-                        stepobj.type = 'step';
-                        stepobj.disabled = step.disabled && step.disabled == true ? true : false;
-                        tcobj.files.push(stepobj);
-
-                        if (step.dbid) {
-                            alldbid += ",'" + step.dbid + "'";
-                        }
-                    }
-                    tsobj.folders.push(tcobj);
-                }
-                tree.push(tsobj);
-            }
-
+                for (let tsnumber in jsonObj[params['file']].testsuites) {
+                    var ts = jsonObj[params['file']].testsuites[tsnumber];
+		    tree.push(createTSTree(ts));
+		}
             console.log(JSON.stringify(tree));
 
             if (deletefromdb) {
+                let alldbid = "'abc'";
+                for (let tsnumber in jsonObj[params['file']].testsuites) {
+                    var ts = jsonObj[params['file']].testsuites[tsnumber];
+                    for (let tcnumber in ts.testcases) {
+                        var tc = ts.testcases[tcnumber];
+                        for (let stepnumber in tc.steps) {
+                            var step = tc.steps[stepnumber];
+                            if (step.dbid) {
+                                alldbid += ",'" + step.dbid + "'";
+                            }
+                        }
+                    }
+                }
                 console.log(`delete from requests where dbid not in (` + alldbid + `)`);
 
                 dbObj[params['file']].run(`delete from requests where dbid not in (` + alldbid + `)`,
