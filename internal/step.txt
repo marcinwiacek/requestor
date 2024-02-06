@@ -218,8 +218,7 @@
     <table>
         <tr>
             <td valign="bottom">
-                <br />Name <input type="text" id="name" value="<!--NAME-->" size="61" />
-               
+                <br />Name <input type="text" id="name" value="<!--NAME-->" size="61" />               
             </td>
             <td valign="bottom">
                     When
@@ -248,12 +247,10 @@
                 <!--URLPREFIX-->&nbsp;&nbsp;
                 <input type="text" id="url" value="<!--URL-->" size="57" />
                 <p>
-                    Headers<br /><textarea cols="80" rows="5" id="header">
-<!--HEADER--></textarea>
+                    Headers<br /><textarea cols="80" rows="5" id="header"><!--HEADER--></textarea>
                 </p>
                 <p>
-                    Body<br /><textarea cols="80" rows="7" id="body">
-<!--BODY--></textarea>
+                    Body<br /><textarea cols="80" rows="7" id="body"><!--BODY--></textarea>
                 </p>
                 <p>
                     <input type="checkbox" id="ignorewrongssl" <!--SSLIGNORE--> />Ignore SSL

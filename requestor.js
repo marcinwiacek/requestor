@@ -184,21 +184,20 @@ async function executeRequest(req) {
     });
 }
 
+function getDateString(dt) {
+    return dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
+        digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
+        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
+        digits(dt.getMilliseconds(), 3);
+}
 
 async function request2(req, res, times, filename) {
     console.log("request " + JSON.stringify(req));
     console.log("start");
     let dt = new Date();
-    let curDT = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
-        digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
-        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
-        digits(dt.getMilliseconds(), 3);
+    let curDT = getDateString(dt);
     var response = await executeRequest(req);
-    let dt2 = new Date();
-    let curDT2 = dt2.getFullYear() + "-" + digits(dt2.getMonth() + 1, 2) + "-" +
-        digits(dt2.getDate(), 2) + " " + digits(dt2.getHours(), 2) + ":" +
-        digits(dt2.getMinutes(), 2) + ":" + digits(dt2.getSeconds(), 2) + " " +
-        digits(dt2.getMilliseconds(), 3);
+    let curDT2 = getDateString(new Date());
     var headers = "";
     var headers_res = "";
     for (let headername in req.headers) {
@@ -213,12 +212,7 @@ async function request2(req, res, times, filename) {
             headers_res += headername + ": " + response.headers[headername] + "\n";
         }
     }
-    if (!req.dbid) {
-        req.dbid = dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
-            digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
-            digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
-            digits(dt.getMilliseconds(), 3);
-    }
+    if (!req.dbid) req.dbid = getDateString(dt);
     dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         curDT, req.dbid, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
         err => {
