@@ -14,6 +14,8 @@ should be done, not on tool itself)
 * Providing support for modern elements like HTTP/2
 
 # TODO
+kolejnosc przy drag i drop
+zmiany w paste takie jak przy drop
 edycja danych
 
 run for the whole suite / tc

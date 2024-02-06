@@ -593,39 +593,15 @@ function createTSTree(obj) {
 }
 
 async function parsePOSTPasteElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, true, false);
-    el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
-    tree = [];
-    if (el != null && el2 != null) {
-        console.log("el and el2 found");
-        let newObj = JSON.parse(JSON.stringify(el.obj));
-        newObj.name = params['name'];
-
-        if (el.type == 'suite') {
-            tree.push(createTSTree(newObj));
-        } else if (el.type == 'tc') {
-            tree.push(createTCTree(newObj));
-        } else {
-            tree.push(createStepTree(newObj));
-        }
-
-        let elpath = params['path'].split("/");
-        let elpath2 = params['newpath'].split("/");
-        if (elpath.length != elpath2.length) {
-            if (elpath2.length == 1) {
-                el2.obj.testcases.unshift(newObj);
-            } else if (elpath2.length == 2) {
-                el2.obj.steps.unshift(newObj);
-            }
-        } else {
-            el2.parent.splice(el2.index, 0, newObj);
-        }
-    }
-    sendPlain(req, res, JSON.stringify(tree));
+    PasteElement(req, params, res, jsonObj2, false);
 }
 
 async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false, true);
+    PasteElement(req, params, res, jsonObj2, true);
+}
+
+function PasteElement (req, params, res, jsonObj2, deleteOriginal) {
+    el = findElement(jsonObj2, params, false, false);
     el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
     tree = [];
     if (el != null && el2 != null) {
@@ -691,7 +667,6 @@ console.log(el.type);
     }
     sendPlain(req, res, JSON.stringify(tree));
 }
-
 
 async function parsePOSTSaveFile(req, params, res, jsonObj2) {
 
