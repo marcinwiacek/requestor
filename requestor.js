@@ -577,15 +577,15 @@ function createTSTree(obj) {
 }
 
 async function parsePOSTPasteElement(req, params, res, jsonObj2) {
-    PasteElement(req, params, res, jsonObj2, false);
+    PasteElement(req, params, res, jsonObj2, true, false);
 }
 
 async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
-    PasteElement(req, params, res, jsonObj2, true);
+    PasteElement(req, params, res, jsonObj2, false, true);
 }
 
-function PasteElement (req, params, res, jsonObj2, deleteOriginal) {
-    el = findElement(jsonObj2, params, false, deleteOriginal);
+function PasteElement (req, params, res, jsonObj2, deleteDB, deleteOriginal) {
+    el = findElement(jsonObj2, params, deleteDB, deleteOriginal);
     el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
     tree = [];
     if (el != null && el2 != null) {

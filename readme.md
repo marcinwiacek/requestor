@@ -14,12 +14,12 @@ should be done, not on tool itself)
 * Providing support for modern elements like HTTP/2
 
 # TODO
-usuwanie historii przy paste
 edycja danych
 
+runner
 run for the whole suite / tc
 junit results
-runner
+
 own ssl cert
 params between steps
 zmiana parameterow w body, headers
