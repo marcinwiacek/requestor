@@ -243,6 +243,7 @@
         function elementPaste() {
 	    PasteDrop("paste");
             document.getElementById(popupMenuName).classList.toggle("show");
+            copyID = "";
         }
 
         function cancelDefault(e) {
@@ -269,6 +270,7 @@
 
 	    el = document.getElementById(copyID);
             el.parentNode.remove();
+            copyID = "";
         }
 
 	function PasteDrop(name) {
@@ -317,8 +319,6 @@
                 },
                 newElementPath, copyID, elpath1.length, elpath2.length
             );
-
-            copyID = "";
 	}
 
         function getFolderElement(name, disabled, id, type) {

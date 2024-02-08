@@ -294,7 +294,7 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                 retVal.obj = suite;
             }
             retVal.index = tsnumber;
-            retVal.parent = jsonObj[params['file']].testsuites;
+            retVal.parentarray = jsonObj[params['file']].testsuites;
             return retVal;
         }
         for (let tcnumber in suite.testcases) {
@@ -315,7 +315,7 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                     retVal.obj = tc;
                 }
                 retVal.index = tcnumber;
-                retVal.parent = suite.testcases;
+                retVal.parentarray = suite.testcases;
                 return retVal;
             }
             for (let stepnumber in tc.steps) {
@@ -334,7 +334,7 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                         retVal.obj = step;
                     }
                     retVal.index = stepnumber;
-                    retVal.parent = tc.steps;
+                    retVal.parentarray = tc.steps;
                     return retVal;
                 }
             }
@@ -472,18 +472,18 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
             newStep.conLen = true;
             newStep.url = "https://";
             newStep.headers = "";
-            el.parent.splice(el.index, 0, newStep);
+            el.parentarray.splice(el.index, 0, newStep);
         } else if (elpath.length == 2) {
             let newTC = {};
             newTC.name = params["new"];
             newTC.steps = [];
             newTC.input = [];
-            el.parent.splice(el.index, 0, newTC);
+            el.parentarray.splice(el.index, 0, newTC);
         } else if (elpath.length == 1) {
             let newTS = {};
             newTS.name = params["new"];
             newTS.testcases = [];
-            el.parent.splice(el.index, 0, newTS);
+            el.parentarray.splice(el.index, 0, newTS);
         }
     }
     sendPlain(req, res, "");
@@ -533,7 +533,7 @@ async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
     //fixme delete from db
     el = findElement(jsonObj2, params, false, false);
     if (el != null) {
-        el.parent.splice(el.index, 1);
+        el.parentarray.splice(el.index, 1);
     }
     sendPlain(req, res, "");
 }
@@ -585,7 +585,7 @@ async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
 }
 
 function PasteElement (req, params, res, jsonObj2, deleteOriginal) {
-    el = findElement(jsonObj2, params, false, false);
+    el = findElement(jsonObj2, params, false, deleteOriginal);
     el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
     tree = [];
     if (el != null && el2 != null) {
@@ -594,6 +594,7 @@ function PasteElement (req, params, res, jsonObj2, deleteOriginal) {
 
         let elpath = params['path'].split("/");
         let elpath2 = params['newpath'].split("/");
+
         if (elpath.length != elpath2.length) {
             if (elpath2.length == 1) {
                 while (true) {
@@ -624,15 +625,18 @@ function PasteElement (req, params, res, jsonObj2, deleteOriginal) {
                 el2.obj.steps.unshift(newObj);
             }
         } else {
-            while (true) {
-                found = false;
-                    if (el2.obj.name === newObj.name) {
-                        newObj.name = newObj.name + "(copy)";
-                        found = true;
+                while (true) {
+                    found = false;
+                    for (let xnumber in el2.parentarray) {
+                        var x = el2.parentarray[xnumber];
+                        if (x.name === newObj.name) {
+                            newObj.name = newObj.name + "(copy)";
+                            found = true;
+                        }
                     }
-                if (!found) break;
-            }
-            el2.parent.splice(el2.index, 0, newObj);
+                    if (!found) break;
+                }
+            el2.parentarray.splice(el2.index, 0, newObj);
         }
 
         if (el.type == 'suite') {
