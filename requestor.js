@@ -398,7 +398,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 xxxx += "`;</script>";
                 sendPlain(req, res, obiekt
                     .replace("<!--PATH-->", "<script>path = '" + path + "';</script>")
-.replace("<!--DATA-->", xxxx));
+                    .replace("<!--DATA-->", xxxx));
                 return;
             }
             for (let stepnumber in tc.steps) {
@@ -464,40 +464,40 @@ async function parsePOSTRenameElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTNewElement(req, params, res, jsonObj2) {
-if (params['path']=="") {
-            let newTS = {};
-            newTS.name = params["new"];
-            newTS.testcases = [];
-    jsonObj[params['file']].testsuites.unshift(newTS);
-} else {
-    el = findElement(jsonObj2, params, false, false);
-    if (el != null) {
-        let elpath = params['path'].split("/");
-        if (elpath.length == 3) {
-            let newStep = {};
-            newStep.name = params["new"];
-            newStep.method = "POST";
-            newStep.headers = "";
-            newStep.body = "";
-            newStep.ignoreWrongSSL = true;
-            newStep.conLen = true;
-            newStep.url = "https://";
-            newStep.headers = "";
-            el.parentarray.splice(el.index, 0, newStep);
-        } else if (elpath.length == 2) {
-            let newTC = {};
-            newTC.name = params["new"];
-            newTC.steps = [];
-            newTC.input = [];
-            el.parentarray.splice(el.index, 0, newTC);
-        } else if (elpath.length == 1) {
-            let newTS = {};
-            newTS.name = params["new"];
-            newTS.testcases = [];
-            el.parentarray.splice(el.index, 0, newTS);
+    if (params['path'] == "") {
+        let newTS = {};
+        newTS.name = params["new"];
+        newTS.testcases = [];
+        jsonObj[params['file']].testsuites.unshift(newTS);
+    } else {
+        el = findElement(jsonObj2, params, false, false);
+        if (el != null) {
+            let elpath = params['path'].split("/");
+            if (elpath.length == 3) {
+                let newStep = {};
+                newStep.name = params["new"];
+                newStep.method = "POST";
+                newStep.headers = "";
+                newStep.body = "";
+                newStep.ignoreWrongSSL = true;
+                newStep.conLen = true;
+                newStep.url = "https://";
+                newStep.headers = "";
+                el.parentarray.splice(el.index, 0, newStep);
+            } else if (elpath.length == 2) {
+                let newTC = {};
+                newTC.name = params["new"];
+                newTC.steps = [];
+                newTC.input = [];
+                el.parentarray.splice(el.index, 0, newTC);
+            } else if (elpath.length == 1) {
+                let newTS = {};
+                newTS.name = params["new"];
+                newTS.testcases = [];
+                el.parentarray.splice(el.index, 0, newTS);
+            }
         }
     }
-}
     sendPlain(req, res, "");
 }
 
@@ -553,7 +553,7 @@ async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
 async function parsePOSTSetData(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params, false, false);
     if (el != null) {
-el.obj.input = params['data'].split("\n");
+        el.obj.input = params['data'].split("\n");
     }
     sendPlain(req, res, "");
 }
@@ -604,7 +604,7 @@ async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
     PasteElement(req, params, res, jsonObj2, false, true);
 }
 
-function PasteElement (req, params, res, jsonObj2, deleteDB, deleteOriginal) {
+function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
     el = findElement(jsonObj2, params, deleteDB, deleteOriginal);
     el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
     tree = [];
@@ -645,17 +645,17 @@ function PasteElement (req, params, res, jsonObj2, deleteDB, deleteOriginal) {
                 el2.obj.steps.unshift(newObj);
             }
         } else {
-                while (true) {
-                    found = false;
-                    for (let xnumber in el2.parentarray) {
-                        var x = el2.parentarray[xnumber];
-                        if (x.name === newObj.name) {
-                            newObj.name = newObj.name + "(copy)";
-                            found = true;
-                        }
+            while (true) {
+                found = false;
+                for (let xnumber in el2.parentarray) {
+                    var x = el2.parentarray[xnumber];
+                    if (x.name === newObj.name) {
+                        newObj.name = newObj.name + "(copy)";
+                        found = true;
                     }
-                    if (!found) break;
                 }
+                if (!found) break;
+            }
             el2.parentarray.splice(el2.index, 0, newObj);
         }
 
@@ -912,10 +912,10 @@ const onRequestHandler = async (req, res) => {
             loadDB(params['file']);
 
             let tree = [];
-                for (let tsnumber in jsonObj[params['file']].testsuites) {
-                    var ts = jsonObj[params['file']].testsuites[tsnumber];
-		    tree.push(createTSTree(ts));
-		}
+            for (let tsnumber in jsonObj[params['file']].testsuites) {
+                var ts = jsonObj[params['file']].testsuites[tsnumber];
+                tree.push(createTSTree(ts));
+            }
             console.log(JSON.stringify(tree));
 
             if (deletefromdb) {

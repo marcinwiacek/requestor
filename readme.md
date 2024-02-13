@@ -101,6 +101,6 @@ or something else.
 # Formatting source (info for me in development)
 1. ```npm -g install js-beautify```
 2. ```npm -g install html-beautify```
-3. ```js-beautify -e "\n" ng1.js > x```
+3. ```js-beautify -e "\n" requestor.js > x```
 4. ```html-beautify -e "\n" project.html > x```
 5. ```sudo apt install retext```

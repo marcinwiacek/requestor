@@ -69,19 +69,19 @@
 
     table.on("dataChanged", function(data) {
         var csvData = "";
-console.log(data);
-first = true;
-            for (columnNum in table.getColumnDefinitions()) {
-if (!first) csvData+=",";
-first =false;
-                csvData+=table.getColumnDefinitions()[columnNum].title;
-            }
+        console.log(data);
+        first = true;
+        for (columnNum in table.getColumnDefinitions()) {
+            if (!first) csvData += ",";
+            first = false;
+            csvData += table.getColumnDefinitions()[columnNum].title;
+        }
         for (var key in data) {
-first = true;
+            first = true;
             csvData += "\n";
             for (var key2 in data[key]) {
-if (!first) csvData+=",";
-first =false;
+                if (!first) csvData += ",";
+                first = false;
                 csvData += data[key][key2];
             }
         }
@@ -103,7 +103,7 @@ first =false;
             "file=" +
             params.get("file") +
             "&op=setdata" +
-            "&path=" + path + 
+            "&path=" + path +
             "&data=" +
             encodeURIComponent(csvData),
         );
@@ -134,4 +134,3 @@ first =false;
         table.setColumns(newColumns);
     });
 </script>
-

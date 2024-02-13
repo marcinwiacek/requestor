@@ -104,14 +104,15 @@
 </head>
 
 <body>
-<div id='mainfile'>
-    <a href=".">back</a> &nbsp; File: <!--NAME--> <button onclick="savefile();">Save</button></div>
+    <div id='mainfile'>
+        <a href=".">back</a> &nbsp; File: <!--NAME--> <button onclick="savefile();">Save</button>
+    </div>
 
     <div class="flex">
         <div id="one" class="split">
             <!--FOLDERS_MENU-->
         </div>
-         <input type="hidden" id="id" />
+        <input type="hidden" id="id" />
         <div id="two" class="split">
             <!--OBIEKT-->
             <!--RUN-->
