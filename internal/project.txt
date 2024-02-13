@@ -104,7 +104,7 @@
 </head>
 
 <body>
-<div id=mainfile>
+<div id='mainfile'>
     <a href=".">back</a> &nbsp; File: <!--NAME--> <button onclick="savefile();">Save</button></div>
 
     <div class="flex">

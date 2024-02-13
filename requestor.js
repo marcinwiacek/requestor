@@ -459,6 +459,12 @@ async function parsePOSTRenameElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTNewElement(req, params, res, jsonObj2) {
+if (params['path']=="") {
+            let newTS = {};
+            newTS.name = params["new"];
+            newTS.testcases = [];
+    jsonObj[params['file']].testsuites.unshift(newTS);
+} else {
     el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         let elpath = params['path'].split("/");
@@ -486,6 +492,7 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
             el.parentarray.splice(el.index, 0, newTS);
         }
     }
+}
     sendPlain(req, res, "");
 }
 

@@ -72,7 +72,6 @@
     </div>
 
     <div class="hide" id="mainfilemenu" style="border: 5px outset black; background-color: white">
-        Main<p>
             <a onclick="elementNew()">New</a><br />
     </div>
 
@@ -146,6 +145,7 @@
 
         function elementNew() {
             let oldName = "";
+            if (popupMenuID=="/") popupMenuID = "";
             let elpath = popupMenuID.split("/");
 
             while (true) {
@@ -165,9 +165,14 @@
                             newEl = args[4] == 3 ? getFileElement(args[2], false, args[3]) :
                                 getFolderElement(args[2], false, args[3], args[4] == 1 ? "ts" : "tc");
 
+        if (args[1]=="") {
+	    document.getElementById("menu").firstChild.appendChild(newEl,args[2]);
+	} else {
                             el = document.getElementById(args[1]);
                             liparent = el.parentNode;
                             liparent.parentNode.insertBefore(newEl, liparent);
+	}
+
 
                             if (args[4] != 3) {
                                 updateFolder(newEl);
@@ -446,5 +451,7 @@
 	delete tree;
 
 	updateAllFolders();
-        updatePopupMenu(document.getElementById("mainfile"), "mainfile");
+        main = document.getElementById("mainfile");
+	main.setAttribute("id", "/");
+        updatePopupMenu(main, "mainfile");
     </script>

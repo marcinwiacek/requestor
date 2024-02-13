@@ -5,11 +5,11 @@ Initially created as proof of concept, currently could be used as replacement fo
 Ready API, Postman, JMeter, curl and other similar tools.
 
 # Goals
-* Creating simple & powerfull app, which will provide all important technical elements
+* creating simple & powerfull app, which will provide all important technical elements
 * for fast starting and making testing for requests (without bla, bla, bla)
-* Avoiding stupid, annoying elements visible in similar software
+* avoiding stupid, annoying elements visible in similar software
 (user should be focused on this, what could be/should be done, not on tool)
-* Providing support for modern elements like HTTP/2
+* providing support for modern elements like HTTP/2
 
 # TODO
 edycja danych
@@ -47,14 +47,17 @@ nodeJS, it could be added.
 doesn't show it - currently (Node 20.11) it's Node limit.
 
 # Support
-GitHub or marcin (@) mwiacek (.) com. I will do my best, but I can't give
-any SLA with free version. Time is money.
+* GitHub and/or 
+* marcin ( at ) mwiacek (.) com + marcin.wiacek.work ( at ) gmail (.) com
+(the best send your message to both).
+
+I will do my best, but I can't give any SLA with free version. Time is money.
 
 # There is no big company staying behind this
 1. Linux kernel started in the same way. And today you have it in desktop, Android, etc.
 2. Author is testing for many years and has got practical experience
-(+ want to work smart, not hard) = **Requestor** doesn't need big money to have the most important
-things
+(+ want to work smart, not hard) = **Requestor** doesn't need big money to
+have the most important things and working state
 
 # Why nodeJS?
 In my life I have used many languages, for example:
