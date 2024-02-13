@@ -12,7 +12,7 @@ Ready API, Postman, JMeter, curl and other similar tools.
 * providing support for modern elements like HTTP/2
 
 # TODO
-edycja danych
+add column przy edycji danych
 
 runner
 run for the whole suite / tc
@@ -33,10 +33,17 @@ your requests to the project member(s) will have lower priority (in other words:
 what we can, but will have to pay bills and do some other things too)
 
 # Code is horrible, all should go to the trash, bla, bla, bla
-Yes. Month ago it was worse, year ago worse than month ago. I strongly believe, that normally
-you start from something horrible / small, improve it & this is called progress
-(Android 1.0, Windows 1.0 or even iOS 1.0 were not excellent). If you're not patient,
-write & propose something better or shut up and allow big boys to work.
+Yes. It's. Month ago it was worse, year ago worse than month ago and tomorrow
+will be / can be better.
+
+Do you feel better with these knowledge?
+
+I strongly believe, that normally you start from something horrible / small
+& improve it as long as required (Android 1.0, Windows 1.0 or even iOS 1.0 
+were not excellent, but without them we would not see current versions).
+During this process you get experience, users and maybe also time and sponsors.
+It accelerates things till we moment, when we see snowball effect.
+If you're not patient, write & propose something better or shut up and allow big boys to work.
 
 # I want this and this function
 Wait or see previous points. Theoretically, if we don't have technical limits in

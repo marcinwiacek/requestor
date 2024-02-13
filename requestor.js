@@ -365,6 +365,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         return parsePOSTEnableDisableElement(req, params, res, jsonObj);
     } else if (params["op"] == "deleteelement") {
         return parsePOSTDeleteElement(req, params, res, jsonObj);
+    } else if (params["op"] == "setdata" && params["data"]) {
+        return parsePOSTSetData(req, params, res, jsonObj);
     } else if (params["op"] == "getstep" && params["dt"]) {
         return parsePOSTGetStep(req, params, res, jsonObj);
     } else if (!(params['file'] && fs.existsSync(
@@ -392,8 +394,11 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 for (var inputnumber in tc.input) {
                     xxxx += tc.input[inputnumber] + "\n";
                 }
+                path += "/" + tc.name;
                 xxxx += "`;</script>";
-                sendPlain(req, res, obiekt.replace("<!--DATA-->", xxxx));
+                sendPlain(req, res, obiekt
+                    .replace("<!--PATH-->", "<script>path = '" + path + "';</script>")
+.replace("<!--DATA-->", xxxx));
                 return;
             }
             for (let stepnumber in tc.steps) {
@@ -541,6 +546,14 @@ async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         el.parentarray.splice(el.index, 1);
+    }
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTSetData(req, params, res, jsonObj2) {
+    el = findElement(jsonObj2, params, false, false);
+    if (el != null) {
+el.obj.input = params['data'].split("\n");
     }
     sendPlain(req, res, "");
 }

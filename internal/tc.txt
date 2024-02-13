@@ -3,6 +3,7 @@
 </form>
 
 <div>
+    <!--PATH-->
     <button onclick="table.clearData();return false;">Clear data</button>
     <button onclick="table.addRow({});return false;">Add row</button>
     <button onclick="addColumn();return false;">Add column</button>
@@ -68,18 +69,21 @@
 
     table.on("dataChanged", function(data) {
         var csvData = "";
-        for (var key in data) {
-            for (var key2 in data[key]) {
-                csvData += key2 + ",";
+console.log(data);
+first = true;
+            for (columnNum in table.getColumnDefinitions()) {
+if (!first) csvData+=",";
+first =false;
+                csvData+=table.getColumnDefinitions()[columnNum].title;
             }
-            break;
-        }
-        csvData += "\n";
         for (var key in data) {
-            for (var key2 in data[key]) {
-                csvData += data[key][key2] + ",";
-            }
+first = true;
             csvData += "\n";
+            for (var key2 in data[key]) {
+if (!first) csvData+=",";
+first =false;
+                csvData += data[key][key2];
+            }
         }
 
         http = createPOST();
@@ -87,7 +91,6 @@
             if (http.status != 200) {
                 alert(http.response);
             }
-            alert(http.response);
         };
 
         http.onerror = function() {
@@ -99,11 +102,10 @@
         http.send(
             "file=" +
             params.get("file") +
-            "&tc=" +
-            document.getElementById("name").value +
-            //+"&dt="+encodeURIComponent(document.getElementById("whenlast").value)
-            "&d=" +
-            encodeURIComponent(csvData.replaceAll(",\n", "\n")),
+            "&op=setdata" +
+            "&path=" + path + 
+            "&data=" +
+            encodeURIComponent(csvData),
         );
     });
 
