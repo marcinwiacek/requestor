@@ -5,6 +5,7 @@
     <script src="../external/split.min.js"></script>
     <link href="../external/tabulator_midnight.min.css" rel="stylesheet" />
     <script type="text/javascript" src="../external/tabulator.min.js"></script>
+<title><!--NAME--> - Requestor</title>
 
     <style>
         .flex {
@@ -105,7 +106,9 @@
 
 <body>
     <div id='mainfile'>
-        <a href=".">back</a> &nbsp; File: <!--NAME--> <button onclick="savefile();">Save</button>
+<button title='Return to index' onclick="window.location.href='/';">&lt;</button>
+&nbsp;&nbsp;&nbsp;<button title='Saves changes to file (with backup)' onclick="savefile();">Save</button>
+&nbsp;&nbsp;&nbsp;&nbsp;<button title='Run everything from file'>Run all</button>
     </div>
 
     <div class="flex">

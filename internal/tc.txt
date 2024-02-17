@@ -21,8 +21,13 @@
     </button>
 </div>
 
-<div id="data-table"></div>
+<p><div id="data-table"></div>
 <!--DATA-->
+
+    <p><button onclick='table.deleteColumn("name");return false;'>
+    Run
+    </button>
+
 <script>
     function addColumn() {
         while (true) {

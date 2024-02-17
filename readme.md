@@ -13,6 +13,7 @@ Ready API, Postman, JMeter, curl and other similar tools.
 
 # TODO
 add column przy edycji danych
+redirect http to https
 
 runner
 run for the whole suite / tc

@@ -2,7 +2,26 @@
 <html>
 
 <head>
+<title>Requestor</title>
+</head><body>
     <!--FILES-->
-</head>
+    
+<p>
+    <button onclick='addFile();return false;'>
+        New file
+    </button>
+    
+    <script>
+    function addFile() {
+        while (true) {
+            var x = prompt("Please enter new file name");
+            if (x == null) break;
+            if (x == "") continue;
+            break;
+        }
+    }
+
+</script>
+</body>
 
 </html>
