@@ -346,6 +346,9 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
     console.log(params);
+    if (params["op"] == "newfile") {
+        return parsePOSTNewFile(req, params, res, jsonObj);
+    }
     loadDB(params['file']);
     if (params["runstep"]) {
         return parsePOSTRunStep(req, params, res, jsonObj);
@@ -686,6 +689,18 @@ async function parsePOSTSaveFile(req, params, res, jsonObj2) {
             return console.log(err);
         }
     });
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTNewFile(req, params, res, jsonObj2) {
+
+    fs.writeFile(path.normalize(__dirname + '/projects/' + params['name']+".json"), 
+    "{ \"format\": \"created by requestor\",\"testsuites\": []}", function(err) {
+        if (err) {
+            return console.log(err);
+        }
+    });
+    
     sendPlain(req, res, "");
 }
 
