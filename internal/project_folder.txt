@@ -93,6 +93,8 @@
         }
 
         function elementRename() {
+            document.getElementById(popupMenuName).classList.toggle("show");
+
             let elpath = popupMenuID.split("/");
             let oldName = elpath[elpath.length - 1];
 
@@ -129,7 +131,6 @@
                     break;
                 }
             }
-            document.getElementById(popupMenuName).classList.toggle("show");
         }
 
         function elementEnableDisable() {
@@ -144,6 +145,8 @@
         }
 
         function elementNew() {
+            document.getElementById(popupMenuName).classList.toggle("show");
+
             let oldName = "";
             if (popupMenuID == "/") popupMenuID = "";
             let elpath = popupMenuID.split("/");
@@ -186,10 +189,11 @@
                     break;
                 }
             }
-            document.getElementById(popupMenuName).classList.toggle("show");
         }
 
         function elementNewInside() {
+            document.getElementById(popupMenuName).classList.toggle("show");
+
             let oldName = "";
             let elpath = popupMenuID.split("/");
 
@@ -224,7 +228,6 @@
                     break;
                 }
             }
-            document.getElementById(popupMenuName).classList.toggle("show");
         }
 
         function elementDelete() {

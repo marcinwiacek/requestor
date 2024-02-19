@@ -87,11 +87,6 @@ support for all important features, etc (I believe, that this combination has go
 It doesn't mean of course, that in the future I will not use [Carbon](https://github.com/carbon-language/carbon-lang)
 or something else.
 
-# Installation
-1. ```sudo snap install node --classic --channel=20```
-2. ```sudo npm install sqlite3```
-3. ```node requestor.js```
-
 # Used projects
 1. [Split](https://github.com/nathancahill/split) (MIT)
 2. [Tabulator](https://tabulator.info/docs/5.5/install) (MIT)
@@ -105,3 +100,8 @@ or something else.
 3. ```js-beautify -e "\n" requestor.js > x```
 4. ```html-beautify -e "\n" project.html > x```
 5. ```sudo apt install retext```
+
+# Installation
+1. ```sudo snap install node --classic --channel=20```
+2. ```sudo npm install sqlite3```
+3. ```node requestor.js```
