@@ -15,141 +15,150 @@
     <button onclick='table.copyToClipboard("all");return false;'>Copy to clipboard</button>
 </div>
 
-<p><div id="data-table"></div>
+<p>
+<div id="data-table"></div>
 <!--DATA-->
 
-    <p><button onclick='table.deleteColumn("name");return false;'>
-    Run
+<p><button onclick='table.deleteColumn("name");return false;'>
+        Run
     </button>
 
-<script>
-
-var headerContextMenu = [
-    {
-        label:"Hide Column",
-        action:function(e, column){
-            column.hide();
-        }
-    },
-]
-
-    function addColumn() {
-        while (true) {
-            var x = prompt("Please enter unique column name");
-            if (x == null) break;
-            if (x == "") continue;
-            for (columnNum in table.getColumnDefinitions()) {
-                if (table.getColumnDefinitions()[columnNum].title == x) {
-                    x = "";
-                    break;
-                }
+    <script>
+        var headerContextMenu = [{
+            label: "Hide Column",
+            action: function(e, column) {
+                column.hide();
             }
-            if (x == "") continue;
-            table.addColumn({
-                title: x,
-                field: x
-            }, true, x);
- dataUpdated();
-            break;
+        }, ]
+
+        function addColumn() {
+            while (true) {
+                var x = prompt("Please enter unique column name");
+                if (x == null) break;
+                if (x == "") continue;
+                for (columnNum in table.getColumnDefinitions()) {
+                    if (table.getColumnDefinitions()[columnNum].title == x) {
+                        x = "";
+                        break;
+                    }
+                }
+                if (x == "") continue;
+                table.addColumn({
+                    title: x,
+                    field: x
+                }, true, x);
+
+                var csvData2 = csvGen("-");
+                console.log("brum" + csvData2);
+                table.setData(csvData2);
+
+                dataUpdated();
+                break;
+            }
         }
-    }
 
-    var table = new Tabulator("#data-table", {
- columnDefaults:{
-headerContextMenu:headerContextMenu
-    },
-        height: 205,
-        data: csvData,
-        importFormat: "csv",
-        layout: "fitColumns",
-        autoColumns: true,
-        movableColumns: true,
-	placeholder: 'You can create data for your requests',
-        //    history:true,
-        //    movableRows: true,
-        //    movableRowsConnectedElements: "#drop-area"
-	selectableRows:true,
-        addRowPos: "top",
-        clipboard: true,
-    });
+        var table = new Tabulator("#data-table", {
+            columnDefaults: {
+                headerContextMenu: headerContextMenu
+            },
+            height: 205,
+            data: csvData,
+            importFormat: "csv",
+            layout: "fitColumns",
+            autoColumns: true,
+            movableColumns: true,
+            placeholder: 'You can create data for your requests',
+            //    history:true,
+            //    movableRows: true,
+            //    movableRowsConnectedElements: "#drop-area"
+            selectableRows: true,
+            addRowPos: "top",
+            clipboard: true,
+        });
 
-    table.on("movableRowsElementDrop", function(e, element, row) {
-        var div = document.createElement("div");
-        div.textContent = row.getData().name;
-        element.appendChild(div);
-    });
+        table.on("movableRowsElementDrop", function(e, element, row) {
+            var div = document.createElement("div");
+            div.textContent = row.getData().name;
+            element.appendChild(div);
+        });
 
-function dataUpdated() {
-var data = table.getData();
-        var csvData = "";
-        console.log(data);
-        first = true;
-        for (columnNum in table.getColumnDefinitions()) {
-            if (!first) csvData += ",";
-            first = false;
-            csvData += table.getColumnDefinitions()[columnNum].title;
-        }
-        for (var key in data) {
+        function csvGen(newColumn) {
+            var data = table.getData();
+            var csvData = "";
+            //        console.log(data);
             first = true;
-            csvData += "\n";
-            for (var key2 in data[key]) {
+            for (columnNum in table.getColumnDefinitions()) {
                 if (!first) csvData += ",";
                 first = false;
-                csvData += data[key][key2];
+                csvData += table.getColumnDefinitions()[columnNum].title;
             }
-        }
-
-        http = createPOST();
-        http.onload = function() {
-            if (http.status != 200) {
-//                alert(http.response);
-            }
-        };
-
-        http.onerror = function() {
-            alert("request error");
-        };
-
-        const params = new URLSearchParams(window.location.search);
-        console.log(params);
-        http.send(
-            "file=" +
-            params.get("file") +
-            "&op=setdata" +
-            "&path=" + path +
-            "&data=" +
-            encodeURIComponent(csvData),
-        );
-}
-
-    table.on("dataChanged", function(data) {
- dataUpdated();
-    });
-
-    table.on("dataProcessed", function() {
-        var newColumns = [];
-        var aColumns = table.getColumns();
-        for (var i = 0; i < aColumns.length; i++) {
-            aColumns[i]._column.definition.editor = "input";
-            aColumns[i]._column.definition.headerDblClick = function(e, column) {
-                let name = prompt(
-                    "Please enter column name",
-                    column._column.definition.title,
-                );
-                var newColumns = [];
-                var aColumns = table.getColumns();
-                for (var i = 0; i < aColumns.length; i++) {
-                    if (aColumns[i]._column.definition == column._column.definition) {
-                        aColumns[i]._column.definition.title = name;
-                    }
-                    newColumns.push(aColumns[i]._column.definition);
+            for (var key in data) {
+                first = true;
+                csvData += "\n";
+                if (newColumn != "") csvData += ",";
+                for (var key2 in data[key]) {
+                    if (!first) csvData += ",";
+                    first = false;
+                    csvData += data[key][key2];
                 }
-                table.setColumns(newColumns);
- dataUpdated();
-
-            };
-            newColumns.push(aColumns[i]._column.definition);
+            }
+            return csvData;
         }
-        table.setColumns(newColumns);
-    });
-</script>
+
+        function dataUpdated() {
+            csvData = csvGen("");
+
+            http = createPOST();
+            http.onload = function() {
+                if (http.status != 200) {
+                    //                alert(http.response);
+                }
+            };
+
+            http.onerror = function() {
+                alert("request error");
+            };
+
+            const params = new URLSearchParams(window.location.search);
+            console.log(params);
+            http.send(
+                "file=" +
+                params.get("file") +
+                "&op=setdata" +
+                "&path=" + path +
+                "&data=" +
+                encodeURIComponent(csvData),
+            );
+        }
+
+        table.on("dataChanged", function(data) {
+            dataUpdated();
+        });
+
+        table.on("dataProcessed", function() {
+            var newColumns = [];
+            var aColumns = table.getColumns();
+            for (var i = 0; i < aColumns.length; i++) {
+                aColumns[i]._column.definition.editor = "input";
+                aColumns[i]._column.definition.headerDblClick = function(e, column) {
+                    let name = prompt(
+                        "Please enter column name",
+                        column._column.definition.title,
+                    );
+                    var newColumns = [];
+                    var aColumns = table.getColumns();
+                    for (var i = 0; i < aColumns.length; i++) {
+                        if (aColumns[i]._column.definition == column._column.definition) {
+                            aColumns[i]._column.definition.title = name;
+                        }
+                        newColumns.push(aColumns[i]._column.definition);
+                    }
+                    table.setColumns(newColumns);
+                    dataUpdated();
+
+                };
+                newColumns.push(aColumns[i]._column.definition);
+            }
+            table.setColumns(newColumns);
+        });
+    </script>

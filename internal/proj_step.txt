@@ -147,7 +147,7 @@
         };
 
         const params = new URLSearchParams(window.location.search);
-        http.send("file=" + params.get("file") +"&op=getstep&path=" +path + "&dt=" +encodeURIComponent(document.getElementById("whenlast").value));
+        http.send("file=" + params.get("file") + "&op=getstep&path=" + path + "&dt=" + encodeURIComponent(document.getElementById("whenlast").value));
         return false;
     }
 
@@ -211,7 +211,6 @@
 
         return false;
     }
-
 </script>
 <!--PATH-->
 <form onsubmit="return sendNewStep()">
@@ -221,10 +220,10 @@
                 <br />Name <input type="text" id="name" value="<!--NAME-->" size="58" />
             </td>
             <td valign="bottom">
-                    When
-                    <select id="whenlast" onchange="selectLastDate()">
-                        <!--WHENLAST-->
-                    </select>
+                When
+                <select id="whenlast" onchange="selectLastDate()">
+                    <!--WHENLAST-->
+                </select>
             </td>
             <td valign="bottom"></td>
         </tr>

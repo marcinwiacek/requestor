@@ -1,54 +1,53 @@
 <script>
-function createPOST() {
-            var http = new XMLHttpRequest();
-            var url =
-                window.location.protocol + "//" + window.location.hostname + ":" +
-                window.location.port + window.location.pathname;
-            http.open("POST", url, true);
-            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            return http;
-        }
+    function createPOST() {
+        var http = new XMLHttpRequest();
+        var url =
+            window.location.protocol + "//" + window.location.hostname + ":" +
+            window.location.port + window.location.pathname;
+        http.open("POST", url, true);
+        http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        return http;
+    }
 
-        function executePOST(URL, OKhandler, ...args) {
-            http = createPOST();
-            http.onload = function() {
-                if (http.status != 200) {
-                    alert(http.response);
-                } else {
-                    OKhandler(http.response, ...args);
-                }
-            };
-            http.onerror = function() {
-                alert("request error");
-            };
-            http.send(URL);
-        }
-        
+    function executePOST(URL, OKhandler, ...args) {
+        http = createPOST();
+        http.onload = function() {
+            if (http.status != 200) {
+                alert(http.response);
+            } else {
+                OKhandler(http.response, ...args);
+            }
+        };
+        http.onerror = function() {
+            alert("request error");
+        };
+        http.send(URL);
+    }
 
-var source=null;
- function setupSSE() {
-   if (source != null && source.readyState!=2) return;
-   source = new EventSource("?sse=1");
-   console.log('sse setup');
-   source.onopen = function(e) {
-     console.log("SSE open");
-   }
-   source.onerror = function(e) {
-   if (source.readyState == EventSource.CLOSED) {
-     console.log("SSE closed");
-   } else {
-     console.log("SSE error");
-   }
-   source.close();
-   setTimeout(function() {
-     setupSSE();
-   }, 5000); /* 5 seconds */
-  };
-  source.addEventListener("r", function(event) {
-   console.log('reload on sse');
-   window.location.reload();
-  });
- }
- setupSSE();
- 
+    var source = null;
+
+    function setupSSE() {
+        if (source != null && source.readyState != 2) return;
+        source = new EventSource("?sse=1");
+        console.log('sse setup');
+        source.onopen = function(e) {
+            console.log("SSE open");
+        }
+        source.onerror = function(e) {
+            if (source.readyState == EventSource.CLOSED) {
+                console.log("SSE closed");
+            } else {
+                console.log("SSE error");
+            }
+            source.close();
+            setTimeout(function() {
+                setupSSE();
+            }, 5000); /* 5 seconds */
+        };
+        source.addEventListener("r", function(event) {
+            console.log('reload on sse');
+            window.location.reload();
+        });
+    }
+    // setupSSE();
 </script>

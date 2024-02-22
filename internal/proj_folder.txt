@@ -1,7 +1,8 @@
     <style>
-	a {
+        a {
             cursor: pointer;
-	}
+        }
+
         ul {
             list-style-type: none;
             margin: 0;
@@ -52,7 +53,7 @@
         }
     </style>
 
-<p>
+    <p>
     <div id="menu"></div>
     <div style="display:none" id="emptymenu">
         <a onclick="elementNew(true)">New testsuite</a><br />
@@ -181,7 +182,7 @@
                             if (args[4] != 3) {
                                 updateFolder(newEl);
                             }
-        document.getElementById("emptymenu").style.display = 'none';
+                            document.getElementById("emptymenu").style.display = 'none';
 
                         },
                         popupMenuID,
@@ -279,10 +280,10 @@
 
             if (PasteDrop("drop")) {
 
-            el = document.getElementById(copyID);
-            el.parentNode.remove();
-            copyID = "";
-	    }
+                el = document.getElementById(copyID);
+                el.parentNode.remove();
+                copyID = "";
+            }
         }
 
         function PasteDrop(name) {
@@ -331,7 +332,7 @@
                 },
                 newElementPath, copyID, elpath1.length, elpath2.length
             );
-return true;
+            return true;
         }
 
         function getFolderElement(name, disabled, id, type) {
@@ -440,18 +441,18 @@ return true;
                 popupMenuID = e.target.id;
                 popupMenuName = name + "menu";
 
-if (name=="folder") {
-p = e.target.id.split("/");
-if (p.length==1) {
-                document.getElementById(name + "menunew").innerHTML = "New testsuite";
-                document.getElementById(name + "menunewinside").innerHTML = "New testcase";
+                if (name == "folder") {
+                    p = e.target.id.split("/");
+                    if (p.length == 1) {
+                        document.getElementById(name + "menunew").innerHTML = "New testsuite";
+                        document.getElementById(name + "menunewinside").innerHTML = "New testcase";
 
 
-} else {
-                document.getElementById(name + "menunew").innerHTML = "New testcase";
-                document.getElementById(name + "menunewinside").innerHTML = "New step";
-}
-}
+                    } else {
+                        document.getElementById(name + "menunew").innerHTML = "New testcase";
+                        document.getElementById(name + "menunewinside").innerHTML = "New step";
+                    }
+                }
                 document.getElementById(name + "menu").classList.toggle("show");
                 e.preventDefault();
             });
@@ -464,9 +465,9 @@ if (p.length==1) {
             });
         }
 
-if (tree.length == 0) {
-        document.getElementById("emptymenu").style.display = 'block';
-}
+        if (tree.length == 0) {
+            document.getElementById("emptymenu").style.display = 'block';
+        }
         ulel = document.createElement("ul");
         document.getElementById("menu").appendChild(ulel);
         tree.forEach(function(folder, index) {

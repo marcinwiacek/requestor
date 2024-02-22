@@ -2,32 +2,33 @@
 <html>
 
 <head>
-<title>Requestor</title>
- <!--JSLIB-->
-</head><body>
-    <!--FILES-->
-<p>
-    <button onclick='addFile();return false;'>
-        New file
-    </button>
+    <title>Requestor</title>
+    <!--JSLIB-->
+</head>
 
-    <script>       
-    function addFile() {
-        while (true) {
-            var x = prompt("Please enter new file name");
-            if (x == null) break;
-            if (x == "") continue;
-             executePOST("op=newfile&" + "name=" + x,
+<body>
+    <!--FILES-->
+    <p>
+        <button onclick='addFile();return false;'>
+            New file
+        </button>
+
+        <script>
+            function addFile() {
+                while (true) {
+                    var x = prompt("Please enter new file name");
+                    if (x == null) break;
+                    if (x == "") continue;
+                    executePOST("op=newfile&" + "name=" + x,
                         function(...args) {
-			    window.location.href='/';
+                            window.location.href = '/';
                         },
                         x,
                     );
-            break;
-        }
-    }
-
-</script>
+                    break;
+                }
+            }
+        </script>
 </body>
 
 </html>

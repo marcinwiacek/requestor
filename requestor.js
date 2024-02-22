@@ -694,13 +694,14 @@ async function parsePOSTSaveFile(req, params, res, jsonObj2) {
 
 async function parsePOSTNewFile(req, params, res, jsonObj2) {
 
-    fs.writeFile(path.normalize(__dirname + '/projects/' + params['name']+".json"), 
-    "{ \"format\": \"created by requestor\",\"testsuites\": []}", function(err) {
-        if (err) {
-            return console.log(err);
-        }
-    });
-    
+    fs.writeFile(path.normalize(__dirname + '/projects/' + params['name'] + ".json"),
+        "{ \"format\": \"created by requestor\",\"testsuites\": []}",
+        function(err) {
+            if (err) {
+                return console.log(err);
+            }
+        });
+
     sendPlain(req, res, "");
 }
 
@@ -919,12 +920,11 @@ function parseGETWithSseParam(req, res, userName, token) {
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
         const params = url.parse(req.url, true).query;
-console.log(params);
+        console.log(params);
 
- if (params["sse"]) { // PUSH functionality
-//            parseGETWithSseParam(req, res, userName, cookieSessionToken);
-}
-
+        if (params["sse"]) { // PUSH functionality
+            //            parseGETWithSseParam(req, res, userName, cookieSessionToken);
+        }
 
         var l = ["/external/split.min.js", "/external/split.min.js.map", "/external/tabulator.min.js", "/external/tabulator.min.js.map", "/external/tabulator_midnight.min.css.map"];
         for (u in l) {
@@ -978,8 +978,8 @@ console.log(params);
                     });
             }
             sendHTML(req, res, readFileContentSync("/internal/proj.txt")
-                            .replace("<!--JSLIB-->",
-                    readFileContentSync("/internal/libjs.txt"))                    
+                .replace("<!--JSLIB-->",
+                    readFileContentSync("/internal/libjs.txt"))
                 .replace("<!--FOLDERS_MENU-->",
                     readFileContentSync("/internal/proj_folder.txt"))
                 .replace("<!--TC-->", "<script>tree = " + JSON.stringify(tree) + ";</script>")
@@ -1006,8 +1006,8 @@ console.log(params);
         files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a><br>";
     }
 
-    sendHTML(req, res, readFileContentSync("/internal/index.txt").replace("<!--FILES-->", files)  .replace("<!--JSLIB-->",
-                    readFileContentSync("/internal/libjs.txt"))      );
+    sendHTML(req, res, readFileContentSync("/internal/index.txt").replace("<!--FILES-->", files).replace("<!--JSLIB-->",
+        readFileContentSync("/internal/libjs.txt")));
 };
 
 http2.createSecureServer({
