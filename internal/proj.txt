@@ -5,6 +5,7 @@
     <script src="../external/split.min.js"></script>
     <link href="../external/tabulator_midnight.min.css" rel="stylesheet" />
     <script type="text/javascript" src="../external/tabulator.min.js"></script>
+    <!--JSLIB-->
 <title><!--NAME--> - Requestor</title>
 
     <style>
@@ -42,31 +43,6 @@
         }
     </style>
     <script>
-        function createPOST() {
-            var http = new XMLHttpRequest();
-            var url =
-                window.location.protocol + "//" + window.location.hostname + ":" +
-                window.location.port + window.location.pathname;
-            http.open("POST", url, true);
-            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            return http;
-        }
-
-        function executePOST(URL, OKhandler, ...args) {
-            http = createPOST();
-            http.onload = function() {
-                if (http.status != 200) {
-                    alert(http.response);
-                } else {
-                    OKhandler(http.response, ...args);
-                }
-            };
-            http.onerror = function() {
-                alert("request error");
-            };
-            http.send(URL);
-        }
-
         function loadRightPart(url) {
             executePOST(url, function(response, ...args) {
                 var tmp = document.createElement("div");
@@ -105,7 +81,7 @@
 </head>
 
 <body>
-    <div id='mainfile'>
+    <div>
 <button title='Return to index' onclick="window.location.href='/';">&lt;</button>
 &nbsp;&nbsp;&nbsp;<button title='Saves changes to file (with backup)' onclick="savefile();">Save</button>
 &nbsp;&nbsp;&nbsp;&nbsp;<button title='Run everything from file'>Run all</button>

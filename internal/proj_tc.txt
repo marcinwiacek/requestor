@@ -4,21 +4,15 @@
 
 <div>
     <!--PATH-->
-    <button onclick="table.clearData();return false;">Clear data</button>
-    <button onclick="table.addRow({});return false;">Add row</button>
+    <button onclick="table.clearData();dataUpdated();return false;">Clear data</button>
+    <button onclick="table.addRow({});dataUpdated();return false;">Add row</button>
     <button onclick="addColumn();return false;">Add column</button>
-    <button onclick='table.deleteColumn("name");return false;'>
-        Delete column
-    </button>
-    <button onclick='table.import("csv",".csv");return false;'>
-        Load from CSV file
-    </button>
-    <button onclick='table.download("csv", "data.csv", {delimiter:","});return false;'>
-        Save to CSV file
-    </button>
-    <button onclick='table.copyToClipboard("all");return false;'>
-        Copy to clipboard
-    </button>
+    <button onclick='table.deleteColumn("name");dataUpdated();return false;'>Delete column</button>
+    <button onclick="table.selectRow();return false;">Select all</button>
+    <button onclick='table.deselectRow();return false;'>Deselect all</button>
+    <button onclick='table.import("csv",".csv");dataUpdated();return false;'>Load from CSV file</button>
+    <button onclick='table.download("csv", "data.csv", {delimiter:","});return false;'>Save to CSV file</button>
+    <button onclick='table.copyToClipboard("all");return false;'>Copy to clipboard</button>
 </div>
 
 <p><div id="data-table"></div>
@@ -29,6 +23,16 @@
     </button>
 
 <script>
+
+var headerContextMenu = [
+    {
+        label:"Hide Column",
+        action:function(e, column){
+            column.hide();
+        }
+    },
+]
+
     function addColumn() {
         while (true) {
             var x = prompt("Please enter unique column name");
@@ -45,25 +49,28 @@
                 title: x,
                 field: x
             }, true, x);
+ dataUpdated();
             break;
         }
     }
 
     var table = new Tabulator("#data-table", {
+ columnDefaults:{
+headerContextMenu:headerContextMenu
+    },
         height: 205,
         data: csvData,
         importFormat: "csv",
         layout: "fitColumns",
         autoColumns: true,
         movableColumns: true,
+	placeholder: 'You can create data for your requests',
         //    history:true,
-        addRowPos: "top",
-        paginationSize: 7,
-        paginationCounter: "rows",
-        clipboard: true,
         //    movableRows: true,
-        //    movableRowsConnectedElements: "#drop-area",
-        //    movableColumns: true
+        //    movableRowsConnectedElements: "#drop-area"
+	selectableRows:true,
+        addRowPos: "top",
+        clipboard: true,
     });
 
     table.on("movableRowsElementDrop", function(e, element, row) {
@@ -72,7 +79,8 @@
         element.appendChild(div);
     });
 
-    table.on("dataChanged", function(data) {
+function dataUpdated() {
+var data = table.getData();
         var csvData = "";
         console.log(data);
         first = true;
@@ -94,7 +102,7 @@
         http = createPOST();
         http.onload = function() {
             if (http.status != 200) {
-                alert(http.response);
+//                alert(http.response);
             }
         };
 
@@ -112,6 +120,10 @@
             "&data=" +
             encodeURIComponent(csvData),
         );
+}
+
+    table.on("dataChanged", function(data) {
+ dataUpdated();
     });
 
     table.on("dataProcessed", function() {
@@ -133,6 +145,8 @@
                     newColumns.push(aColumns[i]._column.definition);
                 }
                 table.setColumns(newColumns);
+ dataUpdated();
+
             };
             newColumns.push(aColumns[i]._column.definition);
         }

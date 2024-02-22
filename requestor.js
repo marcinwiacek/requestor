@@ -385,14 +385,14 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
         let path = suite.name;
         if (elpath.length == 1 && suite.name == elpath[0]) {
-            sendPlain(req, res, readFileContentSync("/internal/ts.txt").replace("<!--NAME-->", suite.name));
+            sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt").replace("<!--NAME-->", suite.name));
             return;
         }
 
         for (let tcnumber in suite.testcases) {
             var tc = suite.testcases[tcnumber];
             if (elpath.length == 2 && suite.name == elpath[0] && tc.name == elpath[1]) {
-                obiekt = readFileContentSync("/internal/tc.txt").replace("<!--NAME-->", tc.name);
+                obiekt = readFileContentSync("/internal/proj_tc.txt").replace("<!--NAME-->", tc.name);
                 var xxxx = "<script>var csvData =`";
                 for (var inputnumber in tc.input) {
                     xxxx += tc.input[inputnumber] + "\n";
@@ -412,7 +412,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 var stepcopy = JSON.parse(JSON.stringify(step));
                 path += "/" + tc.name + "/" + step.name;
 
-                obiekt = readFileContentSync("/internal/step.txt").replace("<!--NAME-->",
+                obiekt = readFileContentSync("/internal/proj_step.txt").replace("<!--NAME-->",
                     stepcopy.name);
                 if (stepcopy.urlprefix) obiekt = obiekt.replace("<!--URLPREFIX-->", stepcopy.urlprefix);
                 obiekt = obiekt.replace("<!--URL-->", stepcopy.url);
@@ -900,8 +900,32 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
     }
 }
 
+function parseGETWithSseParam(req, res, userName, token) {
+    //check field format
+    //            console.log(req.headers);
+    //fixme - we need checking URL beginning
+    let id = req.headers['referer'].match(/.*chat\/pokaz\/([0-9]+)$/);
+    if (id && fs.existsSync(__dirname + "//chat//" + id[1] + ".txt")) {
+        return addToCallback(req, res, id[1], callbackChat, userName, false, token);
+    }
+    id = req.headers['referer'].match(/.*([a-ząż]+)\/pokaz\/([0-9]+)(\/ver{1,1}[0-9]*)?$/);
+    if (id && fs.existsSync(__dirname + "//texts//" + id[2] + ".txt")) {
+        return addToCallback(req, res, id[2], callbackText, userName, false, token);
+    }
+    const params = url.parse(req.headers['referer'], true).query;
+    addToCallback(req, res, params["q"] ? params["q"] : "", callbackOther, userName, true, token);
+}
+
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
+        const params = url.parse(req.url, true).query;
+console.log(params);
+
+ if (params["sse"]) { // PUSH functionality
+//            parseGETWithSseParam(req, res, userName, cookieSessionToken);
+}
+
+
         var l = ["/external/split.min.js", "/external/split.min.js.map", "/external/tabulator.min.js", "/external/tabulator.min.js.map", "/external/tabulator_midnight.min.css.map"];
         for (u in l) {
             if (req.url == l[u]) {
@@ -914,13 +938,12 @@ const onRequestHandler = async (req, res) => {
             return;
         }
         let deletefromdb = false;
-        const params = url.parse(req.url, true).query;
         if (params['file'] && fs.existsSync(
                 path.normalize(__dirname + "/projects/" + params['file']))) {
             deletefromdb = (!jsonObj[params['file']]);
 
             if (!loadFile(params['file'])) {
-                sendHTML(req, res, readFileContentSync("/internal/project.txt")
+                sendHTML(req, res, readFileContentSync("/internal/proj.txt")
                     .replace("<!--NAME-->", "Error reading file"));
                 return;
             }
@@ -954,9 +977,11 @@ const onRequestHandler = async (req, res) => {
                         console.log("error " + err)
                     });
             }
-            sendHTML(req, res, readFileContentSync("/internal/project.txt")
+            sendHTML(req, res, readFileContentSync("/internal/proj.txt")
+                            .replace("<!--JSLIB-->",
+                    readFileContentSync("/internal/libjs.txt"))                    
                 .replace("<!--FOLDERS_MENU-->",
-                    readFileContentSync("/internal/project_folder.txt"))
+                    readFileContentSync("/internal/proj_folder.txt"))
                 .replace("<!--TC-->", "<script>tree = " + JSON.stringify(tree) + ";</script>")
                 .replace("<!--NAME-->", params['file']));
             return;
@@ -981,7 +1006,8 @@ const onRequestHandler = async (req, res) => {
         files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a><br>";
     }
 
-    sendHTML(req, res, readFileContentSync("/internal/index.txt").replace("<!--FILES-->", files));
+    sendHTML(req, res, readFileContentSync("/internal/index.txt").replace("<!--FILES-->", files)  .replace("<!--JSLIB-->",
+                    readFileContentSync("/internal/libjs.txt"))      );
 };
 
 http2.createSecureServer({

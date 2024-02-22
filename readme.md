@@ -12,16 +12,15 @@ Ready API, Postman, JMeter, curl and other similar tools.
 * providing support for modern elements like HTTP/2
 
 # TODO
-add column przy edycji danych
-redirect http to https
-
-runner
 run for the whole suite / tc
 junit results
+runner
 
 own ssl cert
 params between steps
 zmiana parameterow w body, headers
+
+redirect http to https
 
 # Why another app?
 Because many existing apps were written years ago, are obsolete and sometimes have horrible GUI.
@@ -55,7 +54,7 @@ nodeJS, it could be added.
 doesn't show it - currently (Node 20.11) it's Node limit.
 
 # Support
-* GitHub and/or 
+* GitHub and/or
 * marcin ( at ) mwiacek (.) com + marcin.wiacek.work ( at ) gmail (.) com
 (the best send your message to both).
 

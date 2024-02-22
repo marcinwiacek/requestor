@@ -1,4 +1,7 @@
     <style>
+	a {
+            cursor: pointer;
+	}
         ul {
             list-style-type: none;
             margin: 0;
@@ -49,10 +52,14 @@
         }
     </style>
 
+<p>
     <div id="menu"></div>
+    <div style="display:none" id="emptymenu">
+        <a onclick="elementNew(true)">New testsuite</a><br />
+    </div>
 
     <div class="hide" id="stepmenu" style="border: 5px outset black; background-color: white">
-        <a onclick="elementNew()">New</a><br />
+        <a onclick="elementNew(false)">New step</a><br />
         <a onclick="elementRename()">Rename</a><br />
         <a onclick="elementEnableDisable()">Disable/enable</a><br />
         <a onclick="elementDelete()">Delete</a><br />
@@ -61,18 +68,13 @@
     </div>
 
     <div class="hide" id="foldermenu" style="border: 5px outset black; background-color: white">
-        <a onclick="elementNew()">New</a><br />
+        <a onclick="elementNew(false)" id="foldermenunew">New</a><br />
+        <a onclick="elementNewInside()" id="foldermenunewinside">New inside</a><br />
         <a onclick="elementRename()">Rename</a><br />
         <a onclick="elementEnableDisable()">Disable/enable</a><br />
         <a onclick="elementDelete()">Delete</a><br />
         <a onclick="elementCopy()">Copy</a><br />
         <a onclick="elementPaste()">Paste</a><br />
-        <hr>
-        <a onclick="elementNewInside()">New inside</a><br />
-    </div>
-
-    <div class="hide" id="mainfilemenu" style="border: 5px outset black; background-color: white">
-        <a onclick="elementNew()">New</a><br />
     </div>
 
     <!--TC-->
@@ -144,8 +146,8 @@
             document.getElementById(popupMenuName).classList.toggle("show");
         }
 
-        function elementNew() {
-            document.getElementById(popupMenuName).classList.toggle("show");
+        function elementNew(empty) {
+            if (!empty) document.getElementById(popupMenuName).classList.toggle("show");
 
             let oldName = "";
             if (popupMenuID == "/") popupMenuID = "";
@@ -176,10 +178,11 @@
                                 liparent.parentNode.insertBefore(newEl, liparent);
                             }
 
-
                             if (args[4] != 3) {
                                 updateFolder(newEl);
                             }
+        document.getElementById("emptymenu").style.display = 'none';
+
                         },
                         popupMenuID,
                         newName,
@@ -274,11 +277,12 @@
             let isFolder2 = document.getElementById(popupMenuID).classList.contains("tcts");
             console.log("file/folder drop " + copyID + " " + popupMenuID + " " + isFolder1 + " " + isFolder2);
 
-            PasteDrop("drop");
+            if (PasteDrop("drop")) {
 
             el = document.getElementById(copyID);
             el.parentNode.remove();
             copyID = "";
+	    }
         }
 
         function PasteDrop(name) {
@@ -286,7 +290,7 @@
             let elpath2 = popupMenuID.split("/");
             if (elpath2.length > elpath1.length || Math.abs(elpath2.length - elpath1.length) == 2) {
                 console.log("not possible");
-                return;
+                return false;
             }
 
             console.log("copyID " + copyID);
@@ -327,6 +331,7 @@
                 },
                 newElementPath, copyID, elpath1.length, elpath2.length
             );
+return true;
         }
 
         function getFolderElement(name, disabled, id, type) {
@@ -434,6 +439,19 @@
             toggler.addEventListener("contextmenu", (e) => {
                 popupMenuID = e.target.id;
                 popupMenuName = name + "menu";
+
+if (name=="folder") {
+p = e.target.id.split("/");
+if (p.length==1) {
+                document.getElementById(name + "menunew").innerHTML = "New testsuite";
+                document.getElementById(name + "menunewinside").innerHTML = "New testcase";
+
+
+} else {
+                document.getElementById(name + "menunew").innerHTML = "New testcase";
+                document.getElementById(name + "menunewinside").innerHTML = "New step";
+}
+}
                 document.getElementById(name + "menu").classList.toggle("show");
                 e.preventDefault();
             });
@@ -446,6 +464,9 @@
             });
         }
 
+if (tree.length == 0) {
+        document.getElementById("emptymenu").style.display = 'block';
+}
         ulel = document.createElement("ul");
         document.getElementById("menu").appendChild(ulel);
         tree.forEach(function(folder, index) {
@@ -454,7 +475,4 @@
         delete tree;
 
         updateAllFolders();
-        main = document.getElementById("mainfile");
-        main.setAttribute("id", "/");
-        updatePopupMenu(main, "mainfile");
     </script>
