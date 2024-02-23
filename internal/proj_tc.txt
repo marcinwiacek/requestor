@@ -19,9 +19,7 @@
 <div id="data-table"></div>
 <!--DATA-->
 
-<p><button onclick='table.deleteColumn("name");return false;'>
-        Run
-    </button>
+<p><button onclick='runPath(path);return false;'>Run testcase</button>
 
     <script>
         var headerContextMenu = [{

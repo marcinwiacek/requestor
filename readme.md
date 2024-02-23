@@ -8,7 +8,7 @@ Ready API, Postman, JMeter, curl and other similar tools.
 * creating simple & powerfull app, which will provide all important technical elements
 * for fast starting and making testing for requests (without bla, bla, bla)
 * avoiding stupid, annoying elements visible in similar software
-(user should be focused on this, what could be/should be done, not on tool)
+(user should be focused on this, what could be/should be done, not on the tool)
 * providing support for modern elements like HTTP/2
 
 # TODO

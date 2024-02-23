@@ -1,4 +1,11 @@
 <script>
+    function runPath(path) {
+        params = new URLSearchParams(window.location.search);
+        executePOST("file=" + params.get("file") + "&" + "op=run&" + "path=" + path,
+            function(...args) {}
+        );
+    }
+
     function createPOST() {
         var http = new XMLHttpRequest();
         var url =
@@ -49,5 +56,5 @@
             window.location.reload();
         });
     }
-    // setupSSE();
+    setupSSE();
 </script>

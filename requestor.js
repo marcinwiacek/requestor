@@ -10,6 +10,7 @@ const zlib = require('zlib');
 const child_process = require('child_process');
 const sqlite3 = require('sqlite3');
 const tls = require('node:tls');
+const crypto = require('crypto');
 
 const hostname = '127.0.0.1';
 const port = 3000;
@@ -17,6 +18,7 @@ const maxResultsPerRequest = 500;
 
 let jsonObj = [];
 let dbObj = [];
+callback = [];
 
 function readFileContentSync(fileName, callback) {
     //FIXME: checking if path is going out
@@ -352,6 +354,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     loadDB(params['file']);
     if (params["runstep"]) {
         return parsePOSTRunStep(req, params, res, jsonObj);
+    } else if (params["op"] == "run") {
+        return parsePOSTRun(req, params, res, jsonObj);
     } else if (params["op"] == "savefile") {
         return parsePOSTSaveFile(req, params, res, jsonObj);
     } else if (params["op"] == "newelement") {
@@ -674,7 +678,6 @@ function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
 }
 
 async function parsePOSTSaveFile(req, params, res, jsonObj2) {
-
     const lastModified = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + params['file']))).mtime;
 
     fs.rename(
@@ -759,6 +762,106 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                         }
                         sss = await request2(stepcopy, res, times, params['file']);
+                        step.dbid = stepcopy.dbid;
+                        times.push(JSON.parse(sss).datetime);
+                        if (stepcopy.url.length == step.url.length) {
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    sendPlain(req, res, sss);
+}
+
+async function addToRunReport(file, p, answer) {
+    console.log(answer);
+    a2 = JSON.parse(answer);
+    fs.appendFile(path.normalize(__dirname + '/runlog.txt'),
+        "Path " + p + "\nRequest\n" + a2.method + " " + a2.url + "\n" + a2.datetime +
+        "\n\nResponse\n" + a2.datetime_res + "\n\n",
+        function(err) {
+            if (err) {
+                return console.log(err);
+            }
+        });
+}
+
+async function parsePOSTRun(req, params, res, jsonObj2) {
+    var sss = "";
+    console.log("fire run step ");
+    console.log(params);
+    let arr = jsonObj[params['file']];
+    let times = [];
+    let p = params['path'].split("/");
+    console.log("p is " + p);
+    fs.appendFile(path.normalize(__dirname + '/runlog.txt'),
+        "Run\nPath '" + params['path'] + "'\n\n",
+        function(err) {
+            if (err) {
+                return console.log(err);
+            }
+        });
+    let runit = false;
+    for (let tsnumber in arr.testsuites) {
+        var ts = arr.testsuites[tsnumber];
+        //        console.log("testsuite name " + ts.name);
+        if (params['path'] == "" || ts.name.localeCompare(p[0]) == 0) {} else {
+            continue;
+        }
+        //        if ((ts.name + "/" + tc.name + "/" + step.name).localeCompare(params['runstep']) != 0) {
+        for (let tcnumber in ts.testcases) {
+            var tc = ts.testcases[tcnumber];
+            //            console.log("testcase name " + tc.name);
+
+            if (params['path'] == "" || p.length == 1 || (p.length > 1 && tc.name.localeCompare(p[1]) == 0)) {} else {
+                continue;
+            }
+            for (let stepnumber in tc.steps) {
+                var step = tc.steps[stepnumber];
+                if (tc.disabled && tc.disabled == true) {
+                    continue;
+                }
+                //                console.log(step.name + " vs " + params['runstep']);
+                if (params['path'] == "" || p.length < 3 || (p.length == 3 && tc.name.localeCompare(p[1]) == 0)) {} else {
+                    continue;
+                }
+                console.log("starting " + step.name + " vs " + params['path']);
+                /*                step.method = params['method'];
+                                step.headers = decodeURIComponent(params['headers']).split("\n");
+                                step.body = decodeURIComponent(params['body']);
+                                step.ignoreWrongSSL = params['ssl'] == "true";
+                                step.conLen = params['conlen'] == "true";
+                                step.url = decodeURIComponent(params['url']);*/
+                let lines = tc.input;
+                if (lines.length == 0) {
+                    sss = await request2(step, res, times, params['file']);
+                    times.push(JSON.parse(sss).datetime);
+                } else {
+                    let headers = []
+                    for (let index2 in lines) {
+                        let l = lines[index2];
+                        if (headers.length == 0) {
+                            headers = l.split(",");
+                            continue;
+                        }
+                        let ll = l.split(",");
+                        let i = 0;
+                        let arra = [];
+                        headers.forEach(function(h) {
+                            arra[h] = ll[i];
+                            i++;
+                        });
+                        console.log(arra);
+                        var stepcopy = JSON.parse(JSON.stringify(step));
+                        for (let d in arra) {
+                            console.log(arra[d]);
+                            stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                        }
+                        sss = await request2(stepcopy, res, times, params['file']);
+                        addToRunReport("", ts.name + "/" + tc.name + "/" + step.name, sss);
                         step.dbid = stepcopy.dbid;
                         times.push(JSON.parse(sss).datetime);
                         if (stepcopy.url.length == step.url.length) {
@@ -923,6 +1026,34 @@ const onRequestHandler = async (req, res) => {
         console.log(params);
 
         if (params["sse"]) { // PUSH functionality
+            res.writeHead(200, {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'text/event-stream',
+                'Connection': 'keep-alive'
+            });
+            const session = crypto.randomBytes(32).toString('base64');
+            callback[session] = res;
+            /*    if (!callback[id]) callback[id] = [];
+                // order consistent with CallbackField
+                callback[id][session] = [res];
+            */
+            res.on('close', function() {
+                console.log('closing callback ' + callback[session]);
+                //        for (let index in sessions) {
+                /*            sessionEntry = sessions[index];
+                            if (sessionEntry[SessionField.Expiry] < Date.now()) {
+                                if (sessionEntry[SessionField.RefreshCallback] != null) clearTimeout(sessionEntry[SessionField.RefreshCallback]);
+                                sessions.splice(index, 1);
+                                continue;
+                            }
+                            if (sessionEntry[SessionField.SessionToken] == callback[id][session][CallbackField.SessionToken]) {
+                                if (sessionEntry[SessionField.RefreshCallback] != null) clearTimeout(sessionEntry[SessionField.RefreshCallback]);
+                                break;
+                            }*/
+                //        }
+                delete callback[session];
+            });
+            return;
             //            parseGETWithSseParam(req, res, userName, cookieSessionToken);
         }
 

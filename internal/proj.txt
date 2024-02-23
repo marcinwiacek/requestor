@@ -84,7 +84,7 @@
     <div>
         <button title='Return to index' onclick="window.location.href='/';">&lt;</button>
         &nbsp;&nbsp;&nbsp;<button title='Saves changes to file (with backup)' onclick="savefile();">Save</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;<button title='Run everything from file'>Run all</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;<button onclick='runPath("");return false;' title='Run everything from file'>Run all</button>
     </div>
 
     <div class="flex">

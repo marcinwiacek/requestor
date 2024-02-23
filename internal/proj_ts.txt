@@ -1,5 +1,6 @@
 <br>
+<!--PATH-->
 <form>
     Name: <input type="text" id="name" name="name" value="<!--NAME-->">
-    <p><input type="submit" value='Run'>
+    <p><button onclick='runPath(path);return false;'>Run testsuite</button>
 </form>
