@@ -57,6 +57,13 @@ function digits(a, b) {
     return x;
 }
 
+function getDateString(dt) {
+    return dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
+        digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
+        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
+        digits(dt.getMilliseconds(), 3);
+}
+
 async function executeRequest(req) {
     var q = url.parse(req.url, true);
     var certinfo = '';
@@ -180,13 +187,6 @@ async function executeRequest(req) {
             resolve(resp);
         }
     });
-}
-
-function getDateString(dt) {
-    return dt.getFullYear() + "-" + digits(dt.getMonth() + 1, 2) + "-" +
-        digits(dt.getDate(), 2) + " " + digits(dt.getHours(), 2) + ":" +
-        digits(dt.getMinutes(), 2) + ":" + digits(dt.getSeconds(), 2) + " " +
-        digits(dt.getMilliseconds(), 3);
 }
 
 async function request2(req, res, times, filename) {
@@ -336,6 +336,569 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
     return null;
 }
 
+function createStepTree(obj) {
+    var stepobj = {}
+    stepobj.name = obj.name;
+    stepobj.type = 'step';
+    stepobj.disabled = obj.disabled && obj.disabled == true ? true : false;
+    return stepobj;
+}
+
+function createTCTree(obj) {
+    var tcobj = {}
+    tcobj.name = obj.name;
+    tcobj.type = 'tc';
+    tcobj.disabled = obj.disabled;
+    tcobj.folders = []
+    tcobj.files = []
+
+    for (let stepnumber in obj.steps) {
+        var step = obj.steps[stepnumber];
+        tcobj.files.push(createStepTree(step));
+    }
+    return tcobj;
+}
+
+function createTSTree(obj) {
+    var tsobj = {}
+    tsobj.name = obj.name;
+    tsobj.type = 'ts';
+    tsobj.disabled = obj.disabled;
+    tsobj.folders = []
+    tsobj.files = []
+
+    for (let tcnumber in obj.testcases) {
+        var tc = obj.testcases[tcnumber];
+        tsobj.folders.push(createTCTree(tc));
+    }
+    return tsobj;
+}
+
+async function addToRunReport(file, p, answer) {
+    a2 = JSON.parse(answer);
+
+    s = "Step '" + p + "'\nRequest " + a2.datetime + "\n" +
+        a2.method + " " + a2.url + "\n";
+    for (let str in a2.headers) {
+        s += a2.headers[str] + "\n";
+    }
+    s += "\n" + decodeURIComponent(a2.body);
+    s += "\n\n" +
+        (a2.error == "" ? "Response " : "Error ") +
+        a2.datetime_res + "\n" +
+        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res) + "\n") +
+        "HTTP code " + a2.code_res + "\n";
+    for (let str in a2.headers_res) {
+        s += decodeURIComponent(a2.headers_res[str]) + "\n";
+    }
+    s += "\n" + decodeURIComponent(a2.body_res) + "\n";
+    s += "\n\n";
+
+    fs.appendFile(path.normalize(__dirname + '/runlog.txt'), s,
+        function(err) {
+            if (err) {
+                //                return console.log(err);
+            }
+        });
+}
+
+async function addToRunReportHTML(file, p, answer) {
+    a2 = JSON.parse(answer);
+
+    s = "<b>Step '" + p + "'</b><br>Request " + a2.datetime + "<br>" +
+        a2.method + " " + a2.url + "<br><pre>";
+    for (let str in a2.headers) {
+        s += a2.headers[str] + "\n";
+    }
+    s += "\n" + decodeURIComponent(a2.body);
+    s += "</pre><p>" +
+        (a2.error == "" ? "Response " : "Error ") +
+        a2.datetime_res + "<br>" +
+        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res) + "<br>") +
+        "HTTP code " + a2.code_res + "<br><pre>";
+    for (let str in a2.headers_res) {
+        s += decodeURIComponent(a2.headers_res[str]) + "\n";
+    }
+    s += "\n" + decodeURIComponent(a2.body_res) + "</pre>";
+    s += "<p>";
+    fs.appendFile(path.normalize(__dirname + '/runlog.htm'), s,
+        function(err) {
+            if (err) {
+                //                return console.log(err);
+            }
+        });
+}
+
+function loadDB(name) {
+    if (!dbObj[name]) {
+        dbObj[name] = new sqlite3.Database(path.normalize(__dirname + "/projects/" + name + ".db"), async (err) => {
+            if (err) {
+                console.log("DB error " + err);
+                exit(1);
+            }
+            dbObj[name].exec(`
+    create table requests (
+    dt text not null,
+    dbid text not null,
+    method text not null,
+    url text not null,
+    headers text not null,
+    body text not null,
+    ssl_ignore smallint not null,
+    cert_res text not null,
+    error_res text,
+    headers_res text not null,
+    body_res text not null,
+    code_res SMALLINT not null,
+    dt_res text not null
+    );`, () => {});
+            let v = await db_all(name, "SELECT sqlite_version();");
+            console.log(JSON.stringify(v));
+        });
+    }
+}
+
+function db_all(filename, sql) {
+    return new Promise((resolve, reject) => {
+        const q = [];
+        dbObj[filename].each(sql, (err, row) => {
+                if (err) {
+                    reject(err);
+                }
+                q.push(row);
+            },
+            (err, n) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(q);
+            });
+    });
+}
+
+async function getJSON(dbid, dt, file) {
+    let rows = await db_all(file, "SELECT * from requests where dbid =\"" + dbid + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
+    if (rows == null) {
+        let s = "\"datetime\":\"" + "\",";
+        s += "\"datetime_res\":\"" + "\",";
+        s += "\"errors\":\"" + "\",";
+        s += "\"cert_res\":\"" + "\",";
+        s += "\"ssl_ignore\":\"" + false + "\",";
+        s += "\"code_res\":\"" + "\",";
+        s += "\"url\":\"" + "\",";
+        s += "\"method\":\"GET" + "\",";
+        s += "\"headers\":[\"";
+        s += "\"],\"body\":\"" + "\",";
+        s += "\"headers_res\":[\""
+        s += "\"],\"body_res\":\"" + "\"";
+        return s;
+    }
+
+    let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
+    s += "\"datetime_res\":\"" + decodeURIComponent(rows[0].dt_res) + "\",";
+    s += "\"errors\":\"" + encodeURIComponent(rows[0].error_res) + "\",";
+    s += "\"cert_res\":\"" + encodeURIComponent(rows[0].cert_res) + "\",";
+    s += "\"ssl_ignore\":\"" + rows[0].ssl_ignore + "\",";
+    s += "\"code_res\":\"" + rows[0].code_res + "\",";
+    s += "\"url\":\"" + rows[0].url + "\",";
+    s += "\"method\":\"" + rows[0]["method"] + "\",";
+    s += "\"headers\":[\"" + encodeURIComponent(rows[0]["headers"]);
+    s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
+    s += "\"headers_res\":[\"" + encodeURIComponent(rows[0]["headers_res"]);
+    s += "\"],\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
+    return s;
+}
+
+async function parsePOSTRenameElement(req, params, res, jsonObj2) {
+    el = findElement(jsonObj2, params, false, false);
+    if (el != null) {
+        el.obj.name = params['new'];
+    }
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTNewElement(req, params, res, jsonObj2) {
+    if (params['path'] == "") {
+        let newTS = {};
+        newTS.name = params["new"];
+        newTS.testcases = [];
+        jsonObj[params['file']].testsuites.unshift(newTS);
+    } else {
+        el = findElement(jsonObj2, params, false, false);
+        if (el != null) {
+            let elpath = params['path'].split("/");
+            if (elpath.length == 3) {
+                let newStep = {};
+                newStep.name = params["new"];
+                newStep.method = "POST";
+                newStep.headers = "";
+                newStep.body = "";
+                newStep.ignoreWrongSSL = true;
+                newStep.conLen = true;
+                newStep.url = "https://";
+                newStep.headers = "";
+                el.parentarray.splice(el.index, 0, newStep);
+            } else if (elpath.length == 2) {
+                let newTC = {};
+                newTC.name = params["new"];
+                newTC.steps = [];
+                newTC.input = [];
+                el.parentarray.splice(el.index, 0, newTC);
+            } else if (elpath.length == 1) {
+                let newTS = {};
+                newTS.name = params["new"];
+                newTS.testcases = [];
+                el.parentarray.splice(el.index, 0, newTS);
+            }
+        }
+    }
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
+    el = findElement(jsonObj2, params, false, false);
+    if (el != null) {
+        let elpath = params['path'].split("/");
+        if (elpath.length == 2) {
+            let newStep = {};
+            newStep.name = params["new"];
+            newStep.method = "POST";
+            newStep.headers = "";
+            newStep.body = "";
+            newStep.ignoreWrongSSL = true;
+            newStep.conLen = true;
+            newStep.url = "https://";
+            newStep.headers = "";
+            el.obj.steps.unshift(newStep);
+        } else if (elpath.length == 1) {
+            let newTC = {};
+            newTC.name = params["new"];
+            newTC.steps = [];
+            newTC.input = [];
+            el.obj.testcases.unshift(newTC);
+        }
+    }
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
+    el = findElement(jsonObj2, params, false, false);
+    if (el != null) {
+        if (el.obj.disabled == true) {
+            delete el.obj.disabled;
+        } else {
+            el.obj.disabled = true;
+        }
+    }
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
+    //fixme delete from db
+    el = findElement(jsonObj2, params, false, false);
+    if (el != null) {
+        el.parentarray.splice(el.index, 1);
+    }
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTSetData(req, params, res, jsonObj2) {
+    el = findElement(jsonObj2, params, false, false);
+    if (el != null) {
+        el.obj.input = params['data'].split("\n");
+    }
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTSaveFile(req, params, res, jsonObj2) {
+    const lastModified = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + params['file']))).mtime;
+
+    fs.rename(
+        path.normalize(__dirname + '/projects/' + params['file']),
+        path.normalize(__dirname + '/projects/' + params['file'] + lastModified),
+        function(err) {
+            //            if (err) console.log('ERROR: ' + err);
+        });
+
+    fs.writeFile(path.normalize(__dirname + '/projects/' + params['file']), JSON.stringify(jsonObj[params['file']], null, 2), function(err) {
+        if (err) {
+            //            return console.log(err);
+        }
+    });
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTNewFile(req, params, res, jsonObj2) {
+
+    fs.writeFile(path.normalize(__dirname + '/projects/' + params['name'] + ".json"),
+        "{ \"format\": \"created by requestor\",\"testsuites\": []}",
+        function(err) {
+            if (err) {
+                //                return console.log(err);
+            }
+        });
+
+    sendPlain(req, res, "");
+}
+
+async function parsePOSTRunStep(req, params, res, jsonObj2) {
+    var sss = "";
+    let arr = jsonObj[params['file']];
+    let times = [];
+    for (let tsnumber in arr.testsuites) {
+        var ts = arr.testsuites[tsnumber];
+        for (let tcnumber in ts.testcases) {
+            var tc = ts.testcases[tcnumber];
+            for (let stepnumber in tc.steps) {
+                var step = tc.steps[stepnumber];
+                if (tc.disabled && tc.disabled == true) {
+                    continue;
+                }
+                if ((ts.name + "/" + tc.name + "/" + step.name).localeCompare(params['runstep']) != 0) {
+                    continue;
+                }
+                step.method = params['method'];
+                step.headers = decodeURIComponent(params['headers']).split("\n");
+                step.body = decodeURIComponent(params['body']);
+                step.ignoreWrongSSL = params['ssl'] == "true";
+                step.conLen = params['conlen'] == "true";
+                step.url = decodeURIComponent(params['url']);
+                let lines = tc.input;
+                if (lines.length == 0) {
+                    sss = await request2(step, res, times, params['file']);
+                    times.push(JSON.parse(sss).datetime);
+                } else {
+                    let headers = []
+                    for (let index2 in lines) {
+                        let l = lines[index2];
+                        if (headers.length == 0) {
+                            headers = l.split(",");
+                            continue;
+                        }
+                        let ll = l.split(",");
+                        let i = 0;
+                        let arra = [];
+                        headers.forEach(function(h) {
+                            arra[h] = ll[i];
+                            i++;
+                        });
+                        var stepcopy = JSON.parse(JSON.stringify(step));
+                        for (let d in arra) {
+                            stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                        }
+                        sss = await request2(stepcopy, res, times, params['file']);
+                        step.dbid = stepcopy.dbid;
+                        times.push(JSON.parse(sss).datetime);
+                        if (stepcopy.url.length == step.url.length) {
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    sendPlain(req, res, sss);
+}
+
+async function parsePOSTRun(req, params, res, jsonObj2) {
+    var sss = "";
+    let arr = jsonObj[params['file']];
+    let times = [];
+    let p = params['path'].split("/");
+    fs.appendFile(path.normalize(__dirname + '/runlog.txt'),
+        "Run '" + params['path'] + "'\n\n",
+        function(err) {
+            if (err) {
+                //                return console.log(err);
+            }
+        });
+    let runit = false;
+    for (let tsnumber in arr.testsuites) {
+        var ts = arr.testsuites[tsnumber];
+        if (params['path'] == "" || ts.name.localeCompare(p[0]) == 0) {} else {
+            continue;
+        }
+        for (let tcnumber in ts.testcases) {
+            var tc = ts.testcases[tcnumber];
+            if (params['path'] == "" || p.length == 1 || (p.length > 1 && tc.name.localeCompare(p[1]) == 0)) {} else {
+                continue;
+            }
+            for (let stepnumber in tc.steps) {
+                var step = tc.steps[stepnumber];
+                if (tc.disabled && tc.disabled == true) {
+                    continue;
+                }
+                //                console.log(step.name + " vs " + params['runstep']);
+                if (params['path'] == "" || p.length < 3 || (p.length == 3 && tc.name.localeCompare(p[1]) == 0)) {} else {
+                    continue;
+                }
+                let lines = tc.input;
+                if (lines.length == 0) {
+                    sss = await request2(step, res, times, params['file']);
+                    for (let i in callback) {
+                        if (callback[i].file == params['file']) {
+                            callback[i].res.write("event: r\n");
+                            callback[i].res.write("data: " +
+                                "Executing " + ts.name + "/" + tc.name + "/" + step.name + "\n\n");
+                        }
+                    }
+                    times.push(JSON.parse(sss).datetime);
+                } else {
+                    let iteration = 1;
+                    let headers = []
+                    for (let index2 in lines) {
+                        let l = lines[index2];
+                        if (headers.length == 0) {
+                            headers = l.split(",");
+                            continue;
+                        }
+                        let ll = l.split(",");
+                        let i = 0;
+                        let arra = [];
+                        headers.forEach(function(h) {
+                            arra[h] = ll[i];
+                            i++;
+                        });
+                        var stepcopy = JSON.parse(JSON.stringify(step));
+                        for (let d in arra) {
+                            stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                        }
+                        sss = await request2(stepcopy, res, times, params['file']);
+                        for (let i in callback) {
+                            if (callback[i].file == params['file']) {
+                                callback[i].res.write("event: r\n");
+                                callback[i].res.write("data: " +
+                                    "Executing " + ts.name + "/" + tc.name + "/" + step.name + " line " + iteration + "\n\n");
+                            }
+                        }
+                        addToRunReport("", ts.name + "/" + tc.name + "/" + step.name, sss);
+                        addToRunReportHTML("", ts.name + "/" + tc.name + "/" + step.name, sss);
+                        iteration++;
+                        step.dbid = stepcopy.dbid;
+                        times.push(JSON.parse(sss).datetime);
+                        if (stepcopy.url.length == step.url.length) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for (let i in callback) {
+        if (callback[i].file == params['file']) {
+            callback[i].res.write("event: r\n");
+            callback[i].res.write("data: \n\n");
+        }
+    }
+    sendPlain(req, res, sss);
+}
+
+function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
+    el = findElement(jsonObj2, params, deleteDB, deleteOriginal);
+    el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
+    tree = [];
+    if (el != null && el2 != null) {
+        let newObj = JSON.parse(JSON.stringify(el.obj));
+
+        let elpath = params['path'].split("/");
+        let elpath2 = params['newpath'].split("/");
+
+        if (elpath.length != elpath2.length) {
+            if (elpath2.length == 1) {
+                while (true) {
+                    found = false;
+                    for (let tcnumber in el2.obj.testcases) {
+                        var tc = el2.obj.testcases[tcnumber];
+                        if (tc.name === newObj.name) {
+                            newObj.name = newObj.name + "(copy)";
+                            found = true;
+                        }
+                    }
+                    if (!found) break;
+                }
+                el2.obj.testcases.unshift(newObj);
+            } else if (elpath2.length == 2) {
+                while (true) {
+                    found = false;
+                    for (let stepnumber in el2.obj.steps) {
+                        var step = el2.obj.steps[stepnumber];
+                        if (step.name === newObj.name) {
+                            newObj.name = newObj.name + "(copy)";
+                            found = true;
+                        }
+                    }
+                    if (!found) break;
+                }
+
+                el2.obj.steps.unshift(newObj);
+            }
+        } else {
+            while (true) {
+                found = false;
+                for (let xnumber in el2.parentarray) {
+                    var x = el2.parentarray[xnumber];
+                    if (x.name === newObj.name) {
+                        newObj.name = newObj.name + "(copy)";
+                        found = true;
+                    }
+                }
+                if (!found) break;
+            }
+            el2.parentarray.splice(el2.index, 0, newObj);
+        }
+
+        if (el.type == 'suite') {
+            tree.push(createTSTree(newObj));
+        } else if (el.type == 'tc') {
+            tree.push(createTCTree(newObj));
+        } else {
+            tree.push(createStepTree(newObj));
+        }
+    }
+    sendPlain(req, res, JSON.stringify(tree));
+}
+
+async function parsePOSTGetStep(req, params, res, jsonObj2) {
+    for (let tsnumber in jsonObj[params['file']].testsuites) {
+        var ts = jsonObj[params['file']].testsuites[tsnumber];
+        let path = ts.name;
+        for (let tcnumber in ts.testcases) {
+            var tc = ts.testcases[tcnumber];
+            let lines = tc.input;
+            let headers = []
+            for (let index2 in lines) {
+                let l = lines[index2];
+                if (headers.length == 0) {
+                    headers = l.split(",");
+                    continue;
+                }
+                let ll = l.split(",");
+                let i = 0;
+                let arra = [];
+                headers.forEach(function(h) {
+                    arra[h] = ll[i];
+                    i++;
+                });
+                for (let stepnumber in tc.steps) {
+                    var step = tc.steps[stepnumber];
+                    if ((path + "/" + tc.name + "/" + step.name).localeCompare(params['path']) != 0) {
+                        continue;
+                    }
+                    if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
+                    var stepcopy = JSON.parse(JSON.stringify(step));
+                    //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
+                    for (let d in arra) {
+                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                    }
+                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
+                    sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
+                }
+            }
+        }
+    }
+}
+
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
     console.log(params);
@@ -452,569 +1015,6 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         }
     }
     sendPlain(req, res, "");
-}
-
-async function parsePOSTRenameElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false, false);
-    if (el != null) {
-        el.obj.name = params['new'];
-    }
-    sendPlain(req, res, "");
-}
-
-async function parsePOSTNewElement(req, params, res, jsonObj2) {
-    if (params['path'] == "") {
-        let newTS = {};
-        newTS.name = params["new"];
-        newTS.testcases = [];
-        jsonObj[params['file']].testsuites.unshift(newTS);
-    } else {
-        el = findElement(jsonObj2, params, false, false);
-        if (el != null) {
-            let elpath = params['path'].split("/");
-            if (elpath.length == 3) {
-                let newStep = {};
-                newStep.name = params["new"];
-                newStep.method = "POST";
-                newStep.headers = "";
-                newStep.body = "";
-                newStep.ignoreWrongSSL = true;
-                newStep.conLen = true;
-                newStep.url = "https://";
-                newStep.headers = "";
-                el.parentarray.splice(el.index, 0, newStep);
-            } else if (elpath.length == 2) {
-                let newTC = {};
-                newTC.name = params["new"];
-                newTC.steps = [];
-                newTC.input = [];
-                el.parentarray.splice(el.index, 0, newTC);
-            } else if (elpath.length == 1) {
-                let newTS = {};
-                newTS.name = params["new"];
-                newTS.testcases = [];
-                el.parentarray.splice(el.index, 0, newTS);
-            }
-        }
-    }
-    sendPlain(req, res, "");
-}
-
-async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false, false);
-    if (el != null) {
-        let elpath = params['path'].split("/");
-        if (elpath.length == 2) {
-            let newStep = {};
-            newStep.name = params["new"];
-            newStep.method = "POST";
-            newStep.headers = "";
-            newStep.body = "";
-            newStep.ignoreWrongSSL = true;
-            newStep.conLen = true;
-            newStep.url = "https://";
-            newStep.headers = "";
-            el.obj.steps.unshift(newStep);
-        } else if (elpath.length == 1) {
-            let newTC = {};
-            newTC.name = params["new"];
-            newTC.steps = [];
-            newTC.input = [];
-            el.obj.testcases.unshift(newTC);
-        }
-    }
-    sendPlain(req, res, "");
-}
-
-async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false, false);
-    if (el != null) {
-        if (el.obj.disabled == true) {
-            delete el.obj.disabled;
-        } else {
-            el.obj.disabled = true;
-        }
-    }
-    sendPlain(req, res, "");
-}
-
-async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
-    //fixme delete from db
-    el = findElement(jsonObj2, params, false, false);
-    if (el != null) {
-        el.parentarray.splice(el.index, 1);
-    }
-    sendPlain(req, res, "");
-}
-
-async function parsePOSTSetData(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false, false);
-    if (el != null) {
-        el.obj.input = params['data'].split("\n");
-    }
-    sendPlain(req, res, "");
-}
-
-function createStepTree(obj) {
-    var stepobj = {}
-    stepobj.name = obj.name;
-    stepobj.type = 'step';
-    stepobj.disabled = obj.disabled && obj.disabled == true ? true : false;
-    return stepobj;
-}
-
-function createTCTree(obj) {
-    var tcobj = {}
-    tcobj.name = obj.name;
-    tcobj.type = 'tc';
-    tcobj.disabled = obj.disabled;
-    tcobj.folders = []
-    tcobj.files = []
-
-    for (let stepnumber in obj.steps) {
-        var step = obj.steps[stepnumber];
-        tcobj.files.push(createStepTree(step));
-    }
-    return tcobj;
-}
-
-function createTSTree(obj) {
-    var tsobj = {}
-    tsobj.name = obj.name;
-    tsobj.type = 'ts';
-    tsobj.disabled = obj.disabled;
-    tsobj.folders = []
-    tsobj.files = []
-
-    for (let tcnumber in obj.testcases) {
-        var tc = obj.testcases[tcnumber];
-        tsobj.folders.push(createTCTree(tc));
-    }
-    return tsobj;
-}
-
-function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
-    el = findElement(jsonObj2, params, deleteDB, deleteOriginal);
-    el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
-    tree = [];
-    if (el != null && el2 != null) {
-        let newObj = JSON.parse(JSON.stringify(el.obj));
-
-        let elpath = params['path'].split("/");
-        let elpath2 = params['newpath'].split("/");
-
-        if (elpath.length != elpath2.length) {
-            if (elpath2.length == 1) {
-                while (true) {
-                    found = false;
-                    for (let tcnumber in el2.obj.testcases) {
-                        var tc = el2.obj.testcases[tcnumber];
-                        if (tc.name === newObj.name) {
-                            newObj.name = newObj.name + "(copy)";
-                            found = true;
-                        }
-                    }
-                    if (!found) break;
-                }
-                el2.obj.testcases.unshift(newObj);
-            } else if (elpath2.length == 2) {
-                while (true) {
-                    found = false;
-                    for (let stepnumber in el2.obj.steps) {
-                        var step = el2.obj.steps[stepnumber];
-                        if (step.name === newObj.name) {
-                            newObj.name = newObj.name + "(copy)";
-                            found = true;
-                        }
-                    }
-                    if (!found) break;
-                }
-
-                el2.obj.steps.unshift(newObj);
-            }
-        } else {
-            while (true) {
-                found = false;
-                for (let xnumber in el2.parentarray) {
-                    var x = el2.parentarray[xnumber];
-                    if (x.name === newObj.name) {
-                        newObj.name = newObj.name + "(copy)";
-                        found = true;
-                    }
-                }
-                if (!found) break;
-            }
-            el2.parentarray.splice(el2.index, 0, newObj);
-        }
-
-        if (el.type == 'suite') {
-            tree.push(createTSTree(newObj));
-        } else if (el.type == 'tc') {
-            tree.push(createTCTree(newObj));
-        } else {
-            tree.push(createStepTree(newObj));
-        }
-    }
-    sendPlain(req, res, JSON.stringify(tree));
-}
-
-async function parsePOSTSaveFile(req, params, res, jsonObj2) {
-    const lastModified = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + params['file']))).mtime;
-
-    fs.rename(
-        path.normalize(__dirname + '/projects/' + params['file']),
-        path.normalize(__dirname + '/projects/' + params['file'] + lastModified),
-        function(err) {
-            //            if (err) console.log('ERROR: ' + err);
-        });
-
-    fs.writeFile(path.normalize(__dirname + '/projects/' + params['file']), JSON.stringify(jsonObj[params['file']], null, 2), function(err) {
-        if (err) {
-            //            return console.log(err);
-        }
-    });
-    sendPlain(req, res, "");
-}
-
-async function parsePOSTNewFile(req, params, res, jsonObj2) {
-
-    fs.writeFile(path.normalize(__dirname + '/projects/' + params['name'] + ".json"),
-        "{ \"format\": \"created by requestor\",\"testsuites\": []}",
-        function(err) {
-            if (err) {
-                //                return console.log(err);
-            }
-        });
-
-    sendPlain(req, res, "");
-}
-
-async function parsePOSTRunStep(req, params, res, jsonObj2) {
-    var sss = "";
-    let arr = jsonObj[params['file']];
-    let times = [];
-    for (let tsnumber in arr.testsuites) {
-        var ts = arr.testsuites[tsnumber];
-        for (let tcnumber in ts.testcases) {
-            var tc = ts.testcases[tcnumber];
-            for (let stepnumber in tc.steps) {
-                var step = tc.steps[stepnumber];
-                if (tc.disabled && tc.disabled == true) {
-                    continue;
-                }
-                if ((ts.name + "/" + tc.name + "/" + step.name).localeCompare(params['runstep']) != 0) {
-                    continue;
-                }
-                step.method = params['method'];
-                step.headers = decodeURIComponent(params['headers']).split("\n");
-                step.body = decodeURIComponent(params['body']);
-                step.ignoreWrongSSL = params['ssl'] == "true";
-                step.conLen = params['conlen'] == "true";
-                step.url = decodeURIComponent(params['url']);
-                let lines = tc.input;
-                if (lines.length == 0) {
-                    sss = await request2(step, res, times, params['file']);
-                    times.push(JSON.parse(sss).datetime);
-                } else {
-                    let headers = []
-                    for (let index2 in lines) {
-                        let l = lines[index2];
-                        if (headers.length == 0) {
-                            headers = l.split(",");
-                            continue;
-                        }
-                        let ll = l.split(",");
-                        let i = 0;
-                        let arra = [];
-                        headers.forEach(function(h) {
-                            arra[h] = ll[i];
-                            i++;
-                        });
-                        var stepcopy = JSON.parse(JSON.stringify(step));
-                        for (let d in arra) {
-                            stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                        }
-                        sss = await request2(stepcopy, res, times, params['file']);
-                        step.dbid = stepcopy.dbid;
-                        times.push(JSON.parse(sss).datetime);
-                        if (stepcopy.url.length == step.url.length) {
-                            break;
-                        }
-                    }
-                }
-
-            }
-        }
-    }
-    sendPlain(req, res, sss);
-}
-
-async function addToRunReport(file, p, answer) {
-    a2 = JSON.parse(answer);
-
-    s = "Step '" + p + "'\nRequest " + a2.datetime + "\n" +
-        a2.method + " " + a2.url + "\n";
-    for (let str in a2.headers) {
-        s += a2.headers[str] + "\n";
-    }
-    s += "\n" + decodeURIComponent(a2.body);
-    s += "\n\n" +
-        (a2.error == "" ? "Response " : "Error ") +
-        a2.datetime_res + "\n" +
-        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res) + "\n") +
-        "HTTP code " + a2.code_res + "\n";
-    for (let str in a2.headers_res) {
-        s += decodeURIComponent(a2.headers_res[str]) + "\n";
-    }
-    s += "\n" + decodeURIComponent(a2.body_res) + "\n";
-    s += "\n\n";
-
-    fs.appendFile(path.normalize(__dirname + '/runlog.txt'), s,
-        function(err) {
-            if (err) {
-                //                return console.log(err);
-            }
-        });
-}
-
-async function addToRunReportHTML(file, p, answer) {
-    a2 = JSON.parse(answer);
-
-    s = "<b>Step '" + p + "'</b><br>Request " + a2.datetime + "<br>" +
-        a2.method + " " + a2.url + "<br><pre>";
-    for (let str in a2.headers) {
-        s += a2.headers[str] + "\n";
-    }
-    s += "\n" + decodeURIComponent(a2.body);
-    s += "</pre><p>" +
-        (a2.error == "" ? "Response " : "Error ") +
-        a2.datetime_res + "<br>" +
-        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res) + "<br>") +
-        "HTTP code " + a2.code_res + "<br><pre>";
-    for (let str in a2.headers_res) {
-        s += decodeURIComponent(a2.headers_res[str]) + "\n";
-    }
-    s += "\n" + decodeURIComponent(a2.body_res) + "</pre>";
-    s += "<p>";
-    fs.appendFile(path.normalize(__dirname + '/runlog.htm'), s,
-        function(err) {
-            if (err) {
-                //                return console.log(err);
-            }
-        });
-}
-
-async function parsePOSTRun(req, params, res, jsonObj2) {
-    var sss = "";
-    let arr = jsonObj[params['file']];
-    let times = [];
-    let p = params['path'].split("/");
-    fs.appendFile(path.normalize(__dirname + '/runlog.txt'),
-        "Run '" + params['path'] + "'\n\n",
-        function(err) {
-            if (err) {
-                //                return console.log(err);
-            }
-        });
-    let runit = false;
-    for (let tsnumber in arr.testsuites) {
-        var ts = arr.testsuites[tsnumber];
-        if (params['path'] == "" || ts.name.localeCompare(p[0]) == 0) {} else {
-            continue;
-        }
-        for (let tcnumber in ts.testcases) {
-            var tc = ts.testcases[tcnumber];
-            if (params['path'] == "" || p.length == 1 || (p.length > 1 && tc.name.localeCompare(p[1]) == 0)) {} else {
-                continue;
-            }
-            for (let stepnumber in tc.steps) {
-                var step = tc.steps[stepnumber];
-                if (tc.disabled && tc.disabled == true) {
-                    continue;
-                }
-                //                console.log(step.name + " vs " + params['runstep']);
-                if (params['path'] == "" || p.length < 3 || (p.length == 3 && tc.name.localeCompare(p[1]) == 0)) {} else {
-                    continue;
-                }
-                let lines = tc.input;
-                if (lines.length == 0) {
-                    sss = await request2(step, res, times, params['file']);
-                    for (let i in callback) {
-                        if (callback[i].file == params['file']) {
-                            callback[i].res.write("event: r\n");
-                            callback[i].res.write("data: " +
-                                "Executing " + ts.name + "/" + tc.name + "/" + step.name + "\n\n");
-                        }
-                    }
-                    times.push(JSON.parse(sss).datetime);
-                } else {
-                    let iteration = 1;
-                    let headers = []
-                    for (let index2 in lines) {
-                        let l = lines[index2];
-                        if (headers.length == 0) {
-                            headers = l.split(",");
-                            continue;
-                        }
-                        let ll = l.split(",");
-                        let i = 0;
-                        let arra = [];
-                        headers.forEach(function(h) {
-                            arra[h] = ll[i];
-                            i++;
-                        });
-                        var stepcopy = JSON.parse(JSON.stringify(step));
-                        for (let d in arra) {
-                            stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                        }
-                        sss = await request2(stepcopy, res, times, params['file']);
-                        for (let i in callback) {
-                            if (callback[i].file == params['file']) {
-                                callback[i].res.write("event: r\n");
-                                callback[i].res.write("data: " +
-                                    "Executing " + ts.name + "/" + tc.name + "/" + step.name + " line " + iteration + "\n\n");
-                            }
-                        }
-                        addToRunReport("", ts.name + "/" + tc.name + "/" + step.name, sss);
-                        addToRunReportHTML("", ts.name + "/" + tc.name + "/" + step.name, sss);
-                        iteration++;
-                        step.dbid = stepcopy.dbid;
-                        times.push(JSON.parse(sss).datetime);
-                        if (stepcopy.url.length == step.url.length) {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    for (let i in callback) {
-        if (callback[i].file == params['file']) {
-            callback[i].res.write("event: r\n");
-            callback[i].res.write("data: \n\n");
-        }
-    }
-    sendPlain(req, res, sss);
-}
-
-function loadDB(name) {
-    if (!dbObj[name]) {
-        dbObj[name] = new sqlite3.Database(path.normalize(__dirname + "/projects/" + name + ".db"), async (err) => {
-            if (err) {
-                console.log("DB error " + err);
-                exit(1);
-            }
-            dbObj[name].exec(`
-    create table requests (
-    dt text not null,
-    dbid text not null,
-    method text not null,
-    url text not null,
-    headers text not null,
-    body text not null,
-    ssl_ignore smallint not null,
-    cert_res text not null,
-    error_res text,
-    headers_res text not null,
-    body_res text not null,
-    code_res SMALLINT not null,
-    dt_res text not null
-    );`, () => {});
-            let v = await db_all(name, "SELECT sqlite_version();");
-            console.log(JSON.stringify(v));
-        });
-    }
-}
-
-function db_all(filename, sql) {
-    return new Promise((resolve, reject) => {
-        const q = [];
-        dbObj[filename].each(sql, (err, row) => {
-                if (err) {
-                    reject(err);
-                }
-                q.push(row);
-            },
-            (err, n) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(q);
-            });
-    });
-}
-
-async function getJSON(dbid, dt, file) {
-    let rows = await db_all(file, "SELECT * from requests where dbid =\"" + dbid + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
-    if (rows == null) {
-        let s = "\"datetime\":\"" + "\",";
-        s += "\"datetime_res\":\"" + "\",";
-        s += "\"errors\":\"" + "\",";
-        s += "\"cert_res\":\"" + "\",";
-        s += "\"ssl_ignore\":\"" + false + "\",";
-        s += "\"code_res\":\"" + "\",";
-        s += "\"url\":\"" + "\",";
-        s += "\"method\":\"GET" + "\",";
-        s += "\"headers\":[\"";
-        s += "\"],\"body\":\"" + "\",";
-        s += "\"headers_res\":[\""
-        s += "\"],\"body_res\":\"" + "\"";
-        return s;
-    }
-
-    let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
-    s += "\"datetime_res\":\"" + decodeURIComponent(rows[0].dt_res) + "\",";
-    s += "\"errors\":\"" + encodeURIComponent(rows[0].error_res) + "\",";
-    s += "\"cert_res\":\"" + encodeURIComponent(rows[0].cert_res) + "\",";
-    s += "\"ssl_ignore\":\"" + rows[0].ssl_ignore + "\",";
-    s += "\"code_res\":\"" + rows[0].code_res + "\",";
-    s += "\"url\":\"" + rows[0].url + "\",";
-    s += "\"method\":\"" + rows[0]["method"] + "\",";
-    s += "\"headers\":[\"" + encodeURIComponent(rows[0]["headers"]);
-    s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
-    s += "\"headers_res\":[\"" + encodeURIComponent(rows[0]["headers_res"]);
-    s += "\"],\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
-    return s;
-}
-
-async function parsePOSTGetStep(req, params, res, jsonObj2) {
-    for (let tsnumber in jsonObj[params['file']].testsuites) {
-        var ts = jsonObj[params['file']].testsuites[tsnumber];
-        let path = ts.name;
-        for (let tcnumber in ts.testcases) {
-            var tc = ts.testcases[tcnumber];
-            let lines = tc.input;
-            let headers = []
-            for (let index2 in lines) {
-                let l = lines[index2];
-                if (headers.length == 0) {
-                    headers = l.split(",");
-                    continue;
-                }
-                let ll = l.split(",");
-                let i = 0;
-                let arra = [];
-                headers.forEach(function(h) {
-                    arra[h] = ll[i];
-                    i++;
-                });
-                for (let stepnumber in tc.steps) {
-                    var step = tc.steps[stepnumber];
-                    if ((path + "/" + tc.name + "/" + step.name).localeCompare(params['path']) != 0) {
-                        continue;
-                    }
-                    if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
-                    var stepcopy = JSON.parse(JSON.stringify(step));
-                    //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
-                    for (let d in arra) {
-                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                    }
-                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
-                    sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
-                }
-            }
-        }
-    }
 }
 
 const onRequestHandler = async (req, res) => {
