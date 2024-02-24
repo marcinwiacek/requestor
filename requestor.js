@@ -15,6 +15,8 @@ const crypto = require('crypto');
 const hostname = '127.0.0.1';
 const port = 3000;
 const maxResultsPerRequest = 500;
+const fileLog = false;
+const consoleLog = true;
 
 let jsonObj = [];
 let dbObj = [];
@@ -375,6 +377,7 @@ function createTSTree(obj) {
 }
 
 async function addToRunReport(file, p, answer) {
+if (!fileLog) return;
     a2 = JSON.parse(answer);
 
     s = "Step '" + p + "'\nRequest " + a2.datetime + "\n" +
@@ -403,6 +406,7 @@ async function addToRunReport(file, p, answer) {
 }
 
 async function addToRunReportHTML(file, p, answer) {
+if (!fileLog) return;
     a2 = JSON.parse(answer);
 
     s = "<b>Step '" + p + "'</b><br>\n"+
@@ -707,6 +711,7 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
     let arr = jsonObj[params['file']];
     let times = [];
     let p = params['path'].split("/");
+if (fileLog) {
     fs.appendFile(path.normalize(__dirname + '/runlog.txt'),
         "Run '" + params['path'] + "'\n\n",
         function(err) {
@@ -714,6 +719,7 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
                 //                return console.log(err);
             }
         });
+}
     let runit = false;
     for (let tsnumber in arr.testsuites) {
         var ts = arr.testsuites[tsnumber];
@@ -902,7 +908,7 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
 
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
-    console.log(params);
+    if (consoleLog) console.log(params);
     if (params["op"] == "newfile") {
         return parsePOSTNewFile(req, params, res, jsonObj);
     }
@@ -1021,7 +1027,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
         const params = url.parse(req.url, true).query;
-        console.log(params);
+if (consoleLog)        console.log(params);
         if (params["sse"]) { // PUSH functionality
             res.writeHead(200, {
                 'Cache-Control': 'no-cache',
