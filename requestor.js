@@ -849,8 +849,16 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
                 let lines = tc.input;
                 if (lines.length == 0) {
                     sss = await request2(step, res, times, params['file']);
+for (let i in callback) {
+    if (callback[i].file == params['file']) {
+        callback[i].res.write("event: r\n");
+        callback[i].res.write("data: "+
+        "Executing "+ts.name + "/" + tc.name + "/" + step.name+"\n\n");
+    }
+}
                     times.push(JSON.parse(sss).datetime);
                 } else {
+let iteration = 1;
                     let headers = []
                     for (let index2 in lines) {
                         let l = lines[index2];
@@ -877,11 +885,12 @@ for (let i in callback) {
     if (callback[i].file == params['file']) {
         callback[i].res.write("event: r\n");
         callback[i].res.write("data: "+
-        "Executing "+ts.name + "/" + tc.name + "/" + step.name+"\n\n");
+        "Executing "+ts.name + "/" + tc.name + "/" + step.name+" line "+iteration+"\n\n");
     }
 }
 
                         addToRunReport("", ts.name + "/" + tc.name + "/" + step.name, sss);
+iteration++;
                         step.dbid = stepcopy.dbid;
                         times.push(JSON.parse(sss).datetime);
                         if (stepcopy.url.length == step.url.length) {
@@ -1062,28 +1071,11 @@ x = [];
 x.file = params['file'];
 x.res = res;
             callback[session] = x;
-            /*    if (!callback[id]) callback[id] = [];
-                // order consistent with CallbackField
-                callback[id][session] = [res];
-            */
             res.on('close', function() {
                 console.log('closing callback ' + callback[session]);
-                //        for (let index in sessions) {
-                /*            sessionEntry = sessions[index];
-                            if (sessionEntry[SessionField.Expiry] < Date.now()) {
-                                if (sessionEntry[SessionField.RefreshCallback] != null) clearTimeout(sessionEntry[SessionField.RefreshCallback]);
-                                sessions.splice(index, 1);
-                                continue;
-                            }
-                            if (sessionEntry[SessionField.SessionToken] == callback[id][session][CallbackField.SessionToken]) {
-                                if (sessionEntry[SessionField.RefreshCallback] != null) clearTimeout(sessionEntry[SessionField.RefreshCallback]);
-                                break;
-                            }*/
-                //        }
                 delete callback[session];
             });
             return;
-            //            parseGETWithSseParam(req, res, userName, cookieSessionToken);
         }
 
         var l = ["/external/split.min.js", "/external/split.min.js.map", "/external/tabulator.min.js", "/external/tabulator.min.js.map", "/external/tabulator_midnight.min.css.map"];
