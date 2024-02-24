@@ -12,6 +12,7 @@ const sqlite3 = require('sqlite3');
 const tls = require('node:tls');
 const crypto = require('crypto');
 
+const version = "20240224";
 const hostname = '127.0.0.1';
 const port = 3000;
 const maxResultsPerRequest = 500;
@@ -627,6 +628,7 @@ async function parsePOSTSaveFile(req, params, res, jsonObj2) {
             //            if (err) console.log('ERROR: ' + err);
         });
 
+jsonObj[params['file']].format = "Created with Requestor "+version+" on "+getDateString(lm);
     fs.writeFile(path.normalize(__dirname + '/projects/' + params['file']), JSON.stringify(jsonObj[params['file']], null, 2), function(err) {
         if (err) {
             //            return console.log(err);
