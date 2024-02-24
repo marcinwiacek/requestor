@@ -151,7 +151,7 @@
         return false;
     }
 
-    function sendNewStep() {
+    function sendRunStep() {
         document.getElementById("run").disabled = true;
         http = createPOST();
         http.onload = function() {
@@ -213,7 +213,7 @@
     }
 </script>
 <!--PATH-->
-<form onsubmit="return sendNewStep()">
+<form onsubmit="return sendRunStep()">
     <table>
         <tr>
             <td valign="bottom">
