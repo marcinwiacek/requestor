@@ -1,4 +1,4 @@
-//formatted with js-beautify -e "\n" ng1.js > x
+//formatted with js-beautify -e "\n" requestor.js > x
 
 const fs = require('fs');
 const http = require('http');
@@ -21,7 +21,7 @@ const consoleLog = true;
 
 let jsonObj = [];
 let dbObj = [];
-callback = [];
+let callback = [];
 
 function readFileContentSync(fileName, callback) {
     //FIXME: checking if path is going out
