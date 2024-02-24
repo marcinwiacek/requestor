@@ -380,7 +380,7 @@ async function addToRunReport(file, p, answer) {
     s = "Step '" + p + "'\nRequest " + a2.datetime + "\n" +
         a2.method + " " + a2.url + "\n";
     for (let str in a2.headers) {
-        s += a2.headers[str] + "\n";
+        s += decodeURIComponent(a2.headers[str]) + "\n";
     }
     s += "\n" + decodeURIComponent(a2.body);
     s += "\n\n" +
@@ -405,22 +405,24 @@ async function addToRunReport(file, p, answer) {
 async function addToRunReportHTML(file, p, answer) {
     a2 = JSON.parse(answer);
 
-    s = "<b>Step '" + p + "'</b><br>Request " + a2.datetime + "<br>" +
-        a2.method + " " + a2.url + "<br><pre>";
+    s = "<b>Step '" + p + "'</b><br>\n"+
+"Request " + a2.datetime + "<br>\n" +
+        a2.method + " " + a2.url + "<br>\n"+
+"<pre>";
     for (let str in a2.headers) {
-        s += a2.headers[str] + "\n";
+        s += decodeURIComponent(a2.headers[str]) + "\n";
     }
     s += "\n" + decodeURIComponent(a2.body);
-    s += "</pre><p>" +
+    s += "</pre>\n<p>" +
         (a2.error == "" ? "Response " : "Error ") +
-        a2.datetime_res + "<br>" +
-        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res) + "<br>") +
-        "HTTP code " + a2.code_res + "<br><pre>";
+        a2.datetime_res + "<br>\n" +
+        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res).replace(/\n/g,"<br>\n") + "<br>\n") +
+        "HTTP code " + a2.code_res + "<br>\n<pre>";
     for (let str in a2.headers_res) {
         s += decodeURIComponent(a2.headers_res[str]) + "\n";
     }
-    s += "\n" + decodeURIComponent(a2.body_res) + "</pre>";
-    s += "<p>";
+    s += "\n" + decodeURIComponent(a2.body_res) + "</pre>\n";
+    s += "<p>\n";
     fs.appendFile(path.normalize(__dirname + '/runlog.htm'), s,
         function(err) {
             if (err) {
@@ -629,7 +631,6 @@ async function parsePOSTSaveFile(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTNewFile(req, params, res, jsonObj2) {
-
     fs.writeFile(path.normalize(__dirname + '/projects/' + params['name'] + ".json"),
         "{ \"format\": \"created by requestor\",\"testsuites\": []}",
         function(err) {
