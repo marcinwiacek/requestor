@@ -389,7 +389,9 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
         let path = suite.name;
         if (elpath.length == 1 && suite.name == elpath[0]) {
-            sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt").replace("<!--NAME-->", suite.name));
+            sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt")
+                    .replace("<!--PATH-->", "<script>path = '" + path + "';</script>")
+.replace("<!--NAME-->", suite.name));
             return;
         }
 
