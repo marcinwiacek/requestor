@@ -338,6 +338,7 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
 
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
+    console.log(params);
     if (params["op"] == "newfile") {
         return parsePOSTNewFile(req, params, res, jsonObj);
     }
@@ -353,9 +354,9 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     } else if (params["op"] == "newelementinside") {
         return parsePOSTNewElementInside(req, params, res, jsonObj);
     } else if (params["op"] == "pasteelement") {
-        return parsePOSTPasteElement(req, params, res, jsonObj);
+        return PasteElement(req, params, res, jsonObj, true, false);
     } else if (params["op"] == "dropelement") {
-        return parsePOSTPasteFromDragElement(req, params, res, jsonObj);
+        return PasteElement(req, params, res, jsonObj, false, true);
     } else if (params["op"] == "renameelement") {
         return parsePOSTRenameElement(req, params, res, jsonObj);
     } else if (params["op"] == "enabledisableelement") {
@@ -590,14 +591,6 @@ function createTSTree(obj) {
         tsobj.folders.push(createTCTree(tc));
     }
     return tsobj;
-}
-
-async function parsePOSTPasteElement(req, params, res, jsonObj2) {
-    PasteElement(req, params, res, jsonObj2, true, false);
-}
-
-async function parsePOSTPasteFromDragElement(req, params, res, jsonObj2) {
-    PasteElement(req, params, res, jsonObj2, false, true);
 }
 
 function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
@@ -1027,7 +1020,7 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
         const params = url.parse(req.url, true).query;
-
+        console.log(params);
         if (params["sse"]) { // PUSH functionality
             res.writeHead(200, {
                 'Cache-Control': 'no-cache',
@@ -1044,7 +1037,6 @@ const onRequestHandler = async (req, res) => {
             });
             return;
         }
-
         var l = ["/external/split.min.js", "/external/split.min.js.map", "/external/tabulator.min.js", "/external/tabulator.min.js.map", "/external/tabulator_midnight.min.css.map"];
         for (u in l) {
             if (req.url == l[u]) {
@@ -1121,8 +1113,9 @@ const onRequestHandler = async (req, res) => {
         files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a><br>";
     }
 
-    sendHTML(req, res, readFileContentSync("/internal/index.txt").replace("<!--FILES-->", files).replace("<!--JSLIB-->",
-        readFileContentSync("/internal/libjs.txt")));
+    sendHTML(req, res, readFileContentSync("/internal/index.txt")
+        .replace("<!--FILES-->", files)
+        .replace("<!--JSLIB-->", readFileContentSync("/internal/libjs.txt")));
 };
 
 http2.createSecureServer({
