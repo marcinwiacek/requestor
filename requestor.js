@@ -58,9 +58,7 @@ function digits(a, b) {
 }
 
 async function executeRequest(req) {
-    console.log("request " + JSON.stringify(req));
     var q = url.parse(req.url, true);
-    console.log("url " + JSON.stringify(q));
     var certinfo = '';
     const options = {
         //	hostname:q.hostname,
@@ -142,8 +140,6 @@ async function executeRequest(req) {
                     resolve(resp);
                 });
             }).on('error', (e) => {
-                console.log("error is " + e.message + " " + e);
-                console.log("error is " + e.errors);
                 var s = e.errors + " ";
                 var resp = {}
                 resp.body = '';
@@ -194,8 +190,6 @@ function getDateString(dt) {
 }
 
 async function request2(req, res, times, filename) {
-    console.log("request " + JSON.stringify(req));
-    console.log("start");
     let dt = new Date();
     let curDT = getDateString(dt);
     var response = await executeRequest(req);
@@ -217,10 +211,7 @@ async function request2(req, res, times, filename) {
     if (!req.dbid) req.dbid = getDateString(dt);
     dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         curDT, req.dbid, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
-        err => {
-            console.log("error " + err)
-        });
-    console.log("end");
+        err => {});
     return "{" + (await getJSON(req.dbid, curDT, filename)) + ",\"oldtimes\":" + JSON.stringify(times) + "}";
 }
 
@@ -347,7 +338,6 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
 
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
-    console.log(params);
     if (params["op"] == "newfile") {
         return parsePOSTNewFile(req, params, res, jsonObj);
     }
@@ -390,8 +380,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         let path = suite.name;
         if (elpath.length == 1 && suite.name == elpath[0]) {
             sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt")
-                    .replace("<!--PATH-->", "<script>path = '" + path + "';</script>")
-.replace("<!--NAME-->", suite.name));
+                .replace("<!--PATH-->", "<script>path = '" + path + "';</script>")
+                .replace("<!--NAME-->", suite.name));
             return;
         }
 
@@ -466,7 +456,6 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 async function parsePOSTRenameElement(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params, false, false);
     if (el != null) {
-        console.log(el);
         el.obj.name = params['new'];
     }
     sendPlain(req, res, "");
@@ -513,9 +502,7 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
 async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params, false, false);
     if (el != null) {
-        console.log("found");
         let elpath = params['path'].split("/");
-        console.log("found " + elpath.length);
         if (elpath.length == 2) {
             let newStep = {};
             newStep.name = params["new"];
@@ -618,7 +605,6 @@ function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
     el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
     tree = [];
     if (el != null && el2 != null) {
-        console.log("el and el2 found");
         let newObj = JSON.parse(JSON.stringify(el.obj));
 
         let elpath = params['path'].split("/");
@@ -686,12 +672,12 @@ async function parsePOSTSaveFile(req, params, res, jsonObj2) {
         path.normalize(__dirname + '/projects/' + params['file']),
         path.normalize(__dirname + '/projects/' + params['file'] + lastModified),
         function(err) {
-            if (err) console.log('ERROR: ' + err);
+            //            if (err) console.log('ERROR: ' + err);
         });
 
     fs.writeFile(path.normalize(__dirname + '/projects/' + params['file']), JSON.stringify(jsonObj[params['file']], null, 2), function(err) {
         if (err) {
-            return console.log(err);
+            //            return console.log(err);
         }
     });
     sendPlain(req, res, "");
@@ -703,7 +689,7 @@ async function parsePOSTNewFile(req, params, res, jsonObj2) {
         "{ \"format\": \"created by requestor\",\"testsuites\": []}",
         function(err) {
             if (err) {
-                return console.log(err);
+                //                return console.log(err);
             }
         });
 
@@ -712,26 +698,20 @@ async function parsePOSTNewFile(req, params, res, jsonObj2) {
 
 async function parsePOSTRunStep(req, params, res, jsonObj2) {
     var sss = "";
-    console.log("fire run step ");
-    console.log(params);
     let arr = jsonObj[params['file']];
     let times = [];
     for (let tsnumber in arr.testsuites) {
         var ts = arr.testsuites[tsnumber];
-        console.log("testsuite name " + ts.name);
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
-            console.log("testcase name " + tc.name);
             for (let stepnumber in tc.steps) {
                 var step = tc.steps[stepnumber];
                 if (tc.disabled && tc.disabled == true) {
                     continue;
                 }
-                console.log(step.name + " vs " + params['runstep']);
                 if ((ts.name + "/" + tc.name + "/" + step.name).localeCompare(params['runstep']) != 0) {
                     continue;
                 }
-                console.log("starting " + step.name + " vs " + params['runstep']);
                 step.method = params['method'];
                 step.headers = decodeURIComponent(params['headers']).split("\n");
                 step.body = decodeURIComponent(params['body']);
@@ -757,10 +737,8 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
                             arra[h] = ll[i];
                             i++;
                         });
-                        console.log(arra);
                         var stepcopy = JSON.parse(JSON.stringify(step));
                         for (let d in arra) {
-                            console.log(arra[d]);
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                         }
                         sss = await request2(stepcopy, res, times, params['file']);
@@ -779,56 +757,80 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
 }
 
 async function addToRunReport(file, p, answer) {
-    console.log(answer);
     a2 = JSON.parse(answer);
 
-s =         "Step '" + p + "'\nRequest " + a2.datetime+"\n"+
-	a2.method + " " + a2.url ;
-for (let str in a2.headers) {
-    s+=a2.headers[str]+"\n";
-}
-s+="\n\n"+
-(a2.error==""?"Response":"Error")+
-     a2.datetime_res + "\n"+
-(a2.cert_res==""?"":decodeURIComponent(a2.cert_res)+"\n")+
-"HTTP code "+a2.code_res+"\n"+
-"\n\n";
+    s = "Step '" + p + "'\nRequest " + a2.datetime + "\n" +
+        a2.method + " " + a2.url + "\n";
+    for (let str in a2.headers) {
+        s += a2.headers[str] + "\n";
+    }
+    s += "\n" + decodeURIComponent(a2.body);
+    s += "\n\n" +
+        (a2.error == "" ? "Response " : "Error ") +
+        a2.datetime_res + "\n" +
+        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res) + "\n") +
+        "HTTP code " + a2.code_res + "\n";
+    for (let str in a2.headers_res) {
+        s += decodeURIComponent(a2.headers_res[str]) + "\n";
+    }
+    s += "\n" + decodeURIComponent(a2.body_res) + "\n";
+    s += "\n\n";
 
-    fs.appendFile(path.normalize(__dirname + '/runlog.txt'),s,
+    fs.appendFile(path.normalize(__dirname + '/runlog.txt'), s,
         function(err) {
             if (err) {
-                return console.log(err);
+                //                return console.log(err);
+            }
+        });
+}
+
+async function addToRunReportHTML(file, p, answer) {
+    a2 = JSON.parse(answer);
+
+    s = "<b>Step '" + p + "'</b><br>Request " + a2.datetime + "<br>" +
+        a2.method + " " + a2.url + "<br><pre>";
+    for (let str in a2.headers) {
+        s += a2.headers[str] + "\n";
+    }
+    s += "\n" + decodeURIComponent(a2.body);
+    s += "</pre><p>" +
+        (a2.error == "" ? "Response " : "Error ") +
+        a2.datetime_res + "<br>" +
+        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res) + "<br>") +
+        "HTTP code " + a2.code_res + "<br><pre>";
+    for (let str in a2.headers_res) {
+        s += decodeURIComponent(a2.headers_res[str]) + "\n";
+    }
+    s += "\n" + decodeURIComponent(a2.body_res) + "</pre>";
+    s += "<p>";
+    fs.appendFile(path.normalize(__dirname + '/runlog.htm'), s,
+        function(err) {
+            if (err) {
+                //                return console.log(err);
             }
         });
 }
 
 async function parsePOSTRun(req, params, res, jsonObj2) {
     var sss = "";
-    console.log("fire run step ");
-    console.log(params);
     let arr = jsonObj[params['file']];
     let times = [];
     let p = params['path'].split("/");
-    console.log("p is " + p);
     fs.appendFile(path.normalize(__dirname + '/runlog.txt'),
         "Run '" + params['path'] + "'\n\n",
         function(err) {
             if (err) {
-                return console.log(err);
+                //                return console.log(err);
             }
         });
     let runit = false;
     for (let tsnumber in arr.testsuites) {
         var ts = arr.testsuites[tsnumber];
-        //        console.log("testsuite name " + ts.name);
         if (params['path'] == "" || ts.name.localeCompare(p[0]) == 0) {} else {
             continue;
         }
-        //        if ((ts.name + "/" + tc.name + "/" + step.name).localeCompare(params['runstep']) != 0) {
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
-            //            console.log("testcase name " + tc.name);
-
             if (params['path'] == "" || p.length == 1 || (p.length > 1 && tc.name.localeCompare(p[1]) == 0)) {} else {
                 continue;
             }
@@ -841,26 +843,19 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
                 if (params['path'] == "" || p.length < 3 || (p.length == 3 && tc.name.localeCompare(p[1]) == 0)) {} else {
                     continue;
                 }
-                console.log("starting " + step.name + " vs " + params['path']);
-                /*                step.method = params['method'];
-                                step.headers = decodeURIComponent(params['headers']).split("\n");
-                                step.body = decodeURIComponent(params['body']);
-                                step.ignoreWrongSSL = params['ssl'] == "true";
-                                step.conLen = params['conlen'] == "true";
-                                step.url = decodeURIComponent(params['url']);*/
                 let lines = tc.input;
                 if (lines.length == 0) {
                     sss = await request2(step, res, times, params['file']);
-for (let i in callback) {
-    if (callback[i].file == params['file']) {
-        callback[i].res.write("event: r\n");
-        callback[i].res.write("data: "+
-        "Executing "+ts.name + "/" + tc.name + "/" + step.name+"\n\n");
-    }
-}
+                    for (let i in callback) {
+                        if (callback[i].file == params['file']) {
+                            callback[i].res.write("event: r\n");
+                            callback[i].res.write("data: " +
+                                "Executing " + ts.name + "/" + tc.name + "/" + step.name + "\n\n");
+                        }
+                    }
                     times.push(JSON.parse(sss).datetime);
                 } else {
-let iteration = 1;
+                    let iteration = 1;
                     let headers = []
                     for (let index2 in lines) {
                         let l = lines[index2];
@@ -875,24 +870,21 @@ let iteration = 1;
                             arra[h] = ll[i];
                             i++;
                         });
-                        console.log(arra);
                         var stepcopy = JSON.parse(JSON.stringify(step));
                         for (let d in arra) {
-                            console.log(arra[d]);
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                         }
                         sss = await request2(stepcopy, res, times, params['file']);
-
-for (let i in callback) {
-    if (callback[i].file == params['file']) {
-        callback[i].res.write("event: r\n");
-        callback[i].res.write("data: "+
-        "Executing "+ts.name + "/" + tc.name + "/" + step.name+" line "+iteration+"\n\n");
-    }
-}
-
+                        for (let i in callback) {
+                            if (callback[i].file == params['file']) {
+                                callback[i].res.write("event: r\n");
+                                callback[i].res.write("data: " +
+                                    "Executing " + ts.name + "/" + tc.name + "/" + step.name + " line " + iteration + "\n\n");
+                            }
+                        }
                         addToRunReport("", ts.name + "/" + tc.name + "/" + step.name, sss);
-iteration++;
+                        addToRunReportHTML("", ts.name + "/" + tc.name + "/" + step.name, sss);
+                        iteration++;
                         step.dbid = stepcopy.dbid;
                         times.push(JSON.parse(sss).datetime);
                         if (stepcopy.url.length == step.url.length) {
@@ -900,16 +892,15 @@ iteration++;
                         }
                     }
                 }
-
             }
         }
     }
-for (let i in callback) {
-    if (callback[i].file == params['file']) {
-        callback[i].res.write("event: r\n");
-        callback[i].res.write("data: \n\n");
+    for (let i in callback) {
+        if (callback[i].file == params['file']) {
+            callback[i].res.write("event: r\n");
+            callback[i].res.write("data: \n\n");
+        }
     }
-}
     sendPlain(req, res, sss);
 }
 
@@ -994,15 +985,11 @@ async function getJSON(dbid, dt, file) {
 }
 
 async function parsePOSTGetStep(req, params, res, jsonObj2) {
-    console.log(jsonObj);
-    console.log(params['path']);
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var ts = jsonObj[params['file']].testsuites[tsnumber];
         let path = ts.name;
-        console.log("testsuite name " + ts.name);
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
-            console.log("testcase name " + tc.name);
             let lines = tc.input;
             let headers = []
             for (let index2 in lines) {
@@ -1027,13 +1014,9 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
                     var stepcopy = JSON.parse(JSON.stringify(step));
                     //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
                     for (let d in arra) {
-                        console.log(d);
-                        console.log(arra[d]);
                         stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                     }
-                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {
-                        console.log(match)
-                    }
+                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
                     sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
                 }
             }
@@ -1041,26 +1024,9 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
     }
 }
 
-function parseGETWithSseParam(req, res, userName, token) {
-    //check field format
-    //            console.log(req.headers);
-    //fixme - we need checking URL beginning
-    let id = req.headers['referer'].match(/.*chat\/pokaz\/([0-9]+)$/);
-    if (id && fs.existsSync(__dirname + "//chat//" + id[1] + ".txt")) {
-        return addToCallback(req, res, id[1], callbackChat, userName, false, token);
-    }
-    id = req.headers['referer'].match(/.*([a-ząż]+)\/pokaz\/([0-9]+)(\/ver{1,1}[0-9]*)?$/);
-    if (id && fs.existsSync(__dirname + "//texts//" + id[2] + ".txt")) {
-        return addToCallback(req, res, id[2], callbackText, userName, false, token);
-    }
-    const params = url.parse(req.headers['referer'], true).query;
-    addToCallback(req, res, params["q"] ? params["q"] : "", callbackOther, userName, true, token);
-}
-
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
         const params = url.parse(req.url, true).query;
-        console.log(params);
 
         if (params["sse"]) { // PUSH functionality
             res.writeHead(200, {
@@ -1069,12 +1035,11 @@ const onRequestHandler = async (req, res) => {
                 'Connection': 'keep-alive'
             });
             const session = crypto.randomBytes(32).toString('base64');
-x = [];
-x.file = params['file'];
-x.res = res;
+            x = [];
+            x.file = params['file'];
+            x.res = res;
             callback[session] = x;
             res.on('close', function() {
-                console.log('closing callback ' + callback[session]);
                 delete callback[session];
             });
             return;
@@ -1108,7 +1073,6 @@ x.res = res;
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
                 tree.push(createTSTree(ts));
             }
-            console.log(JSON.stringify(tree));
 
             if (deletefromdb) {
                 let alldbid = "'abc'";
@@ -1124,11 +1088,9 @@ x.res = res;
                         }
                     }
                 }
-                console.log(`delete from requests where dbid not in (` + alldbid + `)`);
-
                 dbObj[params['file']].run(`delete from requests where dbid not in (` + alldbid + `)`,
                     err => {
-                        console.log("error " + err)
+                        //                        console.log("error " + err)
                     });
             }
             sendHTML(req, res, readFileContentSync("/internal/proj.txt")
@@ -1147,7 +1109,6 @@ x.res = res;
             if (body.length > 1e6 * 6) req.connection.destroy(); // 6 MB 
         });
         req.on('end', function() {
-            console.log(body);
             parsePOSTforms(req, url.parse("/?" + body, true).query, res, jsonObj);
         });
         return;
