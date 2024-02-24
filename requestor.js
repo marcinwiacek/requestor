@@ -617,11 +617,12 @@ async function parsePOSTSetData(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTSaveFile(req, params, res, jsonObj2) {
-    const lastModified = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + params['file']))).mtime;
+    const lm = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + params['file']))).mtime;
 
     fs.rename(
         path.normalize(__dirname + '/projects/' + params['file']),
-        path.normalize(__dirname + '/projects/' + params['file'] + lastModified),
+        path.normalize(__dirname + '/projects/' + params['file'] + 
+	    getDateString(lm).replaceAll("-","").replaceAll(":","").replaceAll(" ","")),
         function(err) {
             //            if (err) console.log('ERROR: ' + err);
         });
