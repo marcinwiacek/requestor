@@ -779,9 +779,20 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
 async function addToRunReport(file, p, answer) {
     console.log(answer);
     a2 = JSON.parse(answer);
-    fs.appendFile(path.normalize(__dirname + '/runlog.txt'),
-        "Path " + p + "\nRequest\n" + a2.method + " " + a2.url + "\n" + a2.datetime +
-        "\n\nResponse\n" + a2.datetime_res + "\n\n",
+
+s =         "Step '" + p + "'\nRequest " + a2.datetime+"\n"+
+	a2.method + " " + a2.url ;
+for (let str in a2.headers) {
+    s+=a2.headers[str]+"\n";
+}
+s+="\n\n"+
+(a2.error==""?"Response":"Error")+
+     a2.datetime_res + "\n"+
+(a2.cert_res==""?"":decodeURIComponent(a2.cert_res)+"\n")+
+"HTTP code "+a2.code_res+"\n"+
+"\n\n";
+
+    fs.appendFile(path.normalize(__dirname + '/runlog.txt'),s,
         function(err) {
             if (err) {
                 return console.log(err);
@@ -798,7 +809,7 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
     let p = params['path'].split("/");
     console.log("p is " + p);
     fs.appendFile(path.normalize(__dirname + '/runlog.txt'),
-        "Run\nPath '" + params['path'] + "'\n\n",
+        "Run '" + params['path'] + "'\n\n",
         function(err) {
             if (err) {
                 return console.log(err);
@@ -861,6 +872,15 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                         }
                         sss = await request2(stepcopy, res, times, params['file']);
+
+for (let i in callback) {
+    if (callback[i].file == params['file']) {
+        callback[i].res.write("event: r\n");
+        callback[i].res.write("data: "+
+        "Executing "+ts.name + "/" + tc.name + "/" + step.name+"\n\n");
+    }
+}
+
                         addToRunReport("", ts.name + "/" + tc.name + "/" + step.name, sss);
                         step.dbid = stepcopy.dbid;
                         times.push(JSON.parse(sss).datetime);
@@ -873,6 +893,12 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
             }
         }
     }
+for (let i in callback) {
+    if (callback[i].file == params['file']) {
+        callback[i].res.write("event: r\n");
+        callback[i].res.write("data: \n\n");
+    }
+}
     sendPlain(req, res, sss);
 }
 
@@ -1032,7 +1058,10 @@ const onRequestHandler = async (req, res) => {
                 'Connection': 'keep-alive'
             });
             const session = crypto.randomBytes(32).toString('base64');
-            callback[session] = res;
+x = [];
+x.file = params['file'];
+x.res = res;
+            callback[session] = x;
             /*    if (!callback[id]) callback[id] = [];
                 // order consistent with CallbackField
                 callback[id][session] = [res];

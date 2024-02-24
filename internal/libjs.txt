@@ -35,7 +35,8 @@
 
     function setupSSE() {
         if (source != null && source.readyState != 2) return;
-        source = new EventSource("?sse=1");
+        params = new URLSearchParams(window.location.search);
+        source = new EventSource("?sse=1&file="+params.get('file'));
         console.log('sse setup');
         source.onopen = function(e) {
             console.log("SSE open");
@@ -52,8 +53,9 @@
             }, 5000); /* 5 seconds */
         };
         source.addEventListener("r", function(event) {
-            console.log('reload on sse');
-            window.location.reload();
+            document.getElementById('runner').innerHTML=event.data;
+console.log(event);
+//            window.location.reload();
         });
     }
     setupSSE();

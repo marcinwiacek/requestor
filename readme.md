@@ -12,7 +12,6 @@ Ready API, Postman, JMeter, curl and other similar tools.
 * providing support for modern elements like HTTP/2
 
 # TODO
-run for the whole suite / tc
 junit results
 runner
 
