@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Requestor</title>
+    <title>Requestor <!--VERSION--></title>
     <!--JSLIB-->
 </head>
 

@@ -1096,6 +1096,7 @@ if (consoleLog)        console.log(params);
                     });
             }
             sendHTML(req, res, readFileContentSync("/internal/proj.txt")
+    		.replace("<!--VERSION-->", version)
                 .replace("<!--JSLIB-->",
                     readFileContentSync("/internal/libjs.txt"))
                 .replace("<!--FOLDERS_MENU-->",
@@ -1124,6 +1125,7 @@ if (consoleLog)        console.log(params);
     }
 
     sendHTML(req, res, readFileContentSync("/internal/index.txt")
+        .replace("<!--VERSION-->", version)
         .replace("<!--FILES-->", files)
         .replace("<!--JSLIB-->", readFileContentSync("/internal/libjs.txt")));
 };
