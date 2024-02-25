@@ -12,14 +12,16 @@ Ready API, Postman, JMeter, curl and other similar tools.
 * providing support for modern elements like HTTP/2
 
 # TODO
-junit results
-runner
+Work in progress, some important points:
 
-own ssl cert
-params between steps
-zmiana parameterow w body, headers
-
-redirect http to https
+* junit results
+* runner
+* support for own ssl certificates
+* running shell scripts before request
+* params between steps
+* changing params inside body & headers
+* redirect http to https
+* support for YAML or other formats describing service formats
 
 # Why another app?
 Because many existing apps were written years ago, are obsolete and sometimes have horrible GUI.
@@ -38,7 +40,7 @@ will be / can be better.
 Do you feel better with these knowledge?
 
 I strongly believe, that normally you start from something horrible / small
-& improve it as long as required (Android 1.0, Windows 1.0 or even iOS 1.0 
+& improve it as long as required (Android 1.0, Windows 1.0 or even iOS 1.0
 were not excellent, but without them we would not see current versions).
 During this process you get experience, users and maybe also time and sponsors.
 It accelerates things till we moment, when we see snowball effect.
@@ -49,7 +51,7 @@ Wait or see previous points. Theoretically, if we don't have technical limits in
 nodeJS, it could be added.
 
 # Known issues
-* When SSL certificate on the server side has got problems (is expired, etc.), Requestor
+* When SSL certificate on the server side has got problems (is expired, etc.), **Requestor**
 doesn't show it - currently (Node 20.11) it's Node limit.
 
 # Support
