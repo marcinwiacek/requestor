@@ -7,7 +7,6 @@
     <button onclick="table.clearData();dataUpdated();return false;">Clear data</button>
     <button onclick="table.addRow({});dataUpdated();return false;">Add row</button>
     <button onclick="addColumn();return false;">Add column</button>
-    <button onclick='table.deleteColumn("name");dataUpdated();return false;'>Delete column</button>
     <button onclick="table.selectRow();return false;">Select all</button>
     <button onclick='table.deselectRow();return false;'>Deselect all</button>
     <button onclick='table.import("csv",".csv");dataUpdated();return false;'>Load from CSV file</button>
@@ -23,9 +22,10 @@
 
     <script>
         var headerContextMenu = [{
-            label: "Hide Column",
+            label: "Delete column",
             action: function(e, column) {
-                column.hide();
+                column.delete();
+                dataUpdated();
             }
         }, ]
 

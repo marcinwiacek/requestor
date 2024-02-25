@@ -16,7 +16,7 @@ const version = "20240224";
 const hostname = '127.0.0.1';
 const port = 3000;
 const maxResultsPerRequest = 500;
-const fileLog = false;
+const fileLog = true;
 const consoleLog = true;
 
 let jsonObj = [];
@@ -398,7 +398,7 @@ if (!fileLog) return;
     s += "\n" + decodeURIComponent(a2.body_res) + "\n";
     s += "\n\n";
 
-    fs.appendFile(path.normalize(__dirname + '/runlog.txt'), s,
+    fs.appendFile(path.normalize(__dirname + '/reports/'+file+'.txt'), s,
         function(err) {
             if (err) {
                 //                return console.log(err);
@@ -428,7 +428,7 @@ if (!fileLog) return;
     }
     s += "\n" + decodeURIComponent(a2.body_res) + "</pre>\n";
     s += "<p>\n";
-    fs.appendFile(path.normalize(__dirname + '/runlog.htm'), s,
+    fs.appendFile(path.normalize(__dirname + '/reports/'+file+'.htm'), s,
         function(err) {
             if (err) {
                 //                return console.log(err);
@@ -714,8 +714,10 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
     let arr = jsonObj[params['file']];
     let times = [];
     let p = params['path'].split("/");
+    let dt = new Date();
+    
 if (fileLog) {
-    fs.appendFile(path.normalize(__dirname + '/runlog.txt'),
+    fs.appendFile(path.normalize(__dirname + '/reports/'+params['file']+getDateString(dt).replaceAll("-","").replaceAll(":","").replaceAll(" ","")+'.txt'),
         "Run '" + params['path'] + "'\n\n",
         function(err) {
             if (err) {
@@ -782,8 +784,8 @@ if (fileLog) {
                                     "Executing " + ts.name + "/" + tc.name + "/" + step.name + " line " + iteration + "\n\n");
                             }
                         }
-                        addToRunReport("", ts.name + "/" + tc.name + "/" + step.name, sss);
-                        addToRunReportHTML("", ts.name + "/" + tc.name + "/" + step.name, sss);
+                        addToRunReport(params['file']+getDateString(dt).replaceAll("-","").replaceAll(":","").replaceAll(" ",""), ts.name + "/" + tc.name + "/" + step.name, sss);
+                        addToRunReportHTML(params['file']+getDateString(dt).replaceAll("-","").replaceAll(":","").replaceAll(" ",""), ts.name + "/" + tc.name + "/" + step.name, sss);
                         iteration++;
                         step.dbid = stepcopy.dbid;
                         times.push(JSON.parse(sss).datetime);
@@ -1124,9 +1126,17 @@ if (consoleLog)        console.log(params);
         files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a><br>";
     }
 
+let files2 = "";
+    let all_files2 = fs.readdirSync(path.normalize(__dirname + "/reports/"));
+    for (filenumber in all_files2) {
+        if (!all_files2[filenumber].endsWith('.htm') && !all_files2[filenumber].endsWith('.txt')) continue;
+        files2 += "<a href=?file=" + all_files2[filenumber] + ">" + all_files2[filenumber] + "</a><br>";
+    }
+    
     sendHTML(req, res, readFileContentSync("/internal/index.txt")
         .replace("<!--VERSION-->", version)
         .replace("<!--FILES-->", files)
+        .replace("<!--EXEC-->", files2)
         .replace("<!--JSLIB-->", readFileContentSync("/internal/libjs.txt")));
 };
 
