@@ -63,19 +63,11 @@
         }
 
         function savefile() {
-            http = createPOST();
-            http.onload = function() {
-                if (http.status != 200) {
-                    alert(http.response);
-                } else {}
-            };
-
-            http.onerror = function() {
-                alert("request error");
-            };
-
             const params = new URLSearchParams(window.location.search);
-            http.send("file=" + params.get("file") + "&op=savefile");
+executePOST("file=" + params.get("file") + "&op=savefile",
+                        function(...args) {
+                        }
+                    );
         }
     </script>
 </head>
