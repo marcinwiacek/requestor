@@ -90,8 +90,6 @@
     }
 
     function setupLast(obj) {
-        console.log(http.response);
-
         document.getElementById("lastrequesttype").value = obj.method.toUpperCase();
         document.getElementById("lastrequesturl").value = obj.url;
         document.getElementById("lastrequestheaders").value = "";
@@ -133,33 +131,40 @@
     function selectLastDate() {
         if (document.getElementById("whenlast").value == "") return;
 
-        http = createPOST();
-        http.onload = function() {
-            if (http.status != 200) {
-                alert(http.response);
-            } else {
-                setupLast(JSON.parse(http.response));
-            }
-        };
-
-        http.onerror = function() {
-            alert("request error");
-        };
-
-        const params = new URLSearchParams(window.location.search);
-        http.send("file=" + params.get("file") + "&op=getstep&path=" + path + "&dt=" + encodeURIComponent(document.getElementById("whenlast").value));
-        return false;
+const params = new URLSearchParams(window.location.search);
+executePOST("file=" + params.get("file") + "&op=getstep&path=" + path + "&dt=" + encodeURIComponent(document.getElementById("whenlast").value),
+                        function(...args) {
+                         setupLast(JSON.parse(args[0]));
+                        }
+                    );
+                     return false;
     }
 
     function sendRunStep() {
         document.getElementById("run").disabled = true;
-        http = createPOST();
-        http.onload = function() {
-            document.getElementById("run").disabled = false;
-            if (http.status != 200) {
-                alert(http.response);
-            } else {
-                var obj = JSON.parse(http.response);
+        
+         var method = "";
+        var selObj = document.getElementById("type");
+        for (var i = 0; i < selObj.options.length; i++) {
+            if (selObj.options[i].selected) {
+                method = selObj.options[i].value;
+                break;
+            }
+        }
+
+        const params = new URLSearchParams(window.location.search);
+executePOST("file=" + params.get("file") +
+            "&runstep=" + document.getElementById("id").value +
+            "&headers=" + encodeURIComponent(document.getElementById("header").value) +
+            "&body=" + encodeURIComponent(document.getElementById("body").value) +
+            "&url=" + encodeURIComponent(document.getElementById("url").value) +
+            "&ssl=" + document.getElementById("ignorewrongssl").checked +
+            "&conlen=" + document.getElementById("addcontentlength").checked +
+            "&method=" + method,
+                        function(...args) {
+                                document.getElementById("run").disabled = false;
+                                
+                         var obj = JSON.parse(args[0]);
 
                 for (var i = 0; i < obj.oldtimes.length; i++) {
                     var option1 = document.createElement("option");
@@ -183,31 +188,8 @@
                 }
 
                 setupLast(obj);
-            }
-        };
-
-        http.onerror = function() {
-            alert("request error");
-        };
-
-        var method = "";
-        var selObj = document.getElementById("type");
-        for (var i = 0; i < selObj.options.length; i++) {
-            if (selObj.options[i].selected) {
-                method = selObj.options[i].value;
-                break;
-            }
-        }
-
-        const params = new URLSearchParams(window.location.search);
-        http.send("file=" + params.get("file") +
-            "&runstep=" + document.getElementById("id").value +
-            "&headers=" + encodeURIComponent(document.getElementById("header").value) +
-            "&body=" + encodeURIComponent(document.getElementById("body").value) +
-            "&url=" + encodeURIComponent(document.getElementById("url").value) +
-            "&ssl=" + document.getElementById("ignorewrongssl").checked +
-            "&conlen=" + document.getElementById("addcontentlength").checked +
-            "&method=" + method);
+                        }
+                    );
 
         return false;
     }

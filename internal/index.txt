@@ -23,8 +23,7 @@
                     executePOST("op=newfile&" + "name=" + x,
                         function(...args) {
                             window.location.href = '/';
-                        },
-                        x,
+                        }
                     );
                     break;
                 }
