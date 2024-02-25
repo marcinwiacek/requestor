@@ -47,7 +47,6 @@
                 }, true, x);
 
                 var csvData2 = csvGen("-");
-                console.log("brum" + csvData2);
                 table.setData(csvData2);
 
                 dataUpdated();
@@ -83,8 +82,7 @@
         function csvGen(newColumn) {
             var data = table.getData();
             var csvData = "";
-            //        console.log(data);
-            first = true;
+    first = true;
             for (columnNum in table.getColumnDefinitions()) {
                 if (!first) csvData += ",";
                 first = false;

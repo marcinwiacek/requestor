@@ -1060,6 +1060,17 @@ if (consoleLog)        console.log(params);
             sendCSS(req, res, readFileContentSync("/external/tabulator_midnight.min.css"));
             return;
         }
+         if (params['report'] && fs.existsSync(
+                path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.htm')) {
+                 sendHTML(req, res, readFileContentSync("/reports/"+params['report']));
+            return;
+                }
+                  if (params['report'] && fs.existsSync(
+                path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.txt')) {
+                 sendPlain(req, res, readFileContentSync("/reports/"+params['report']));
+            return;
+                }
+                
         let deletefromdb = false;
         if (params['file'] && fs.existsSync(
                 path.normalize(__dirname + "/projects/" + params['file']))) {
@@ -1119,18 +1130,37 @@ if (consoleLog)        console.log(params);
         return;
     }
 
-    let files = "";
     let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
+    let all_files_arr = [];
     for (filenumber in all_files) {
         if (!all_files[filenumber].endsWith('.json')) continue;
-        files += "<a href=?file=" + all_files[filenumber] + ">" + all_files[filenumber] + "</a><br>";
+            const lm = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + all_files[filenumber]))).mtime;
+       let x = [];
+        x.fname = all_files[filenumber]+ " ("+getDateString(lm)+")";
+        x.mtime = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + all_files[filenumber]))).mtime;
+        all_files_arr.push(x);
+    }
+    all_files_arr.sort(filesort());
+
+    let files = "";
+    for (filenumber in all_files_arr) {
+        files += "<a href=?file=" + all_files_arr[filenumber].fname + ">" + all_files_arr[filenumber].fname + "</a><br>";
     }
 
-let files2 = "";
     let all_files2 = fs.readdirSync(path.normalize(__dirname + "/reports/"));
+     let all_files_arr2 = [];
     for (filenumber in all_files2) {
         if (!all_files2[filenumber].endsWith('.htm') && !all_files2[filenumber].endsWith('.txt')) continue;
-        files2 += "<a href=?file=" + all_files2[filenumber] + ">" + all_files2[filenumber] + "</a><br>";
+             const lm = (await fs.promises.stat(path.normalize(__dirname + '/reports/' + all_files2[filenumber]))).mtime;
+       let x = [];
+        x.fname = all_files2[filenumber];
+        x.mtime = (await fs.promises.stat(path.normalize(__dirname + '/reports/' + all_files2[filenumber]))).mtime;
+        all_files_arr2.push(x);
+        }
+    all_files_arr2.sort(filesort());
+let files2 = "";
+    for (filenumber in all_files_arr2) {    
+        files2 += "<a href=?report=" + all_files_arr2[filenumber].fname + ">" + all_files_arr2[filenumber].fname + "</a><br>";
     }
     
     sendHTML(req, res, readFileContentSync("/internal/index.txt")
@@ -1139,6 +1169,14 @@ let files2 = "";
         .replace("<!--EXEC-->", files2)
         .replace("<!--JSLIB-->", readFileContentSync("/internal/libjs.txt")));
 };
+
+function filesort() {
+	return function(a,b) {
+		if (a.mtime>b.mtime) return -1;
+		if (a.mtime<b.mtime) return 1;
+		return 0;
+	}
+}
 
 http2.createSecureServer({
     key: fs.readFileSync(__dirname + '//internal//localhost-privkey.pem'),

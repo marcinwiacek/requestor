@@ -55,7 +55,6 @@
         source.addEventListener("r", function(event) {
             document.getElementById('runner').innerHTML=event.data;
 console.log(event);
-//            window.location.reload();
         });
     }
     setupSSE();
