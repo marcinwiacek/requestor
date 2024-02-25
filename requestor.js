@@ -709,6 +709,15 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
     sendPlain(req, res, sss);
 }
 
+async function sendCallback(file,type, msg) {
+                    for (let i in callback) {
+                        if (callback[i].file == file) {
+                            callback[i].res.write("event: "+type+"\n");
+                            callback[i].res.write("data: " +msg+ "\n\n");
+                        }
+                    }
+}
+
 async function parsePOSTRun(req, params, res, jsonObj2) {
     var sss = "";
     let arr = jsonObj[params['file']];
@@ -748,13 +757,7 @@ if (fileLog) {
                 let lines = tc.input;
                 if (lines.length == 0) {
                     sss = await request2(step, res, times, params['file']);
-                    for (let i in callback) {
-                        if (callback[i].file == params['file']) {
-                            callback[i].res.write("event: r\n");
-                            callback[i].res.write("data: " +
-                                "Executing " + ts.name + "/" + tc.name + "/" + step.name + "\n\n");
-                        }
-                    }
+sendCallback(params['file'],                                "r", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
                     times.push(JSON.parse(sss).datetime);
                 } else {
                     let iteration = 1;
@@ -777,13 +780,7 @@ if (fileLog) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                         }
                         sss = await request2(stepcopy, res, times, params['file']);
-                        for (let i in callback) {
-                            if (callback[i].file == params['file']) {
-                                callback[i].res.write("event: r\n");
-                                callback[i].res.write("data: " +
-                                    "Executing " + ts.name + "/" + tc.name + "/" + step.name + " line " + iteration + "\n\n");
-                            }
-                        }
+sendCallback(params['file'],                                "r", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
                         addToRunReport(params['file']+getDateString(dt).replaceAll("-","").replaceAll(":","").replaceAll(" ",""), ts.name + "/" + tc.name + "/" + step.name, sss);
                         addToRunReportHTML(params['file']+getDateString(dt).replaceAll("-","").replaceAll(":","").replaceAll(" ",""), ts.name + "/" + tc.name + "/" + step.name, sss);
                         iteration++;
@@ -797,12 +794,7 @@ if (fileLog) {
             }
         }
     }
-    for (let i in callback) {
-        if (callback[i].file == params['file']) {
-            callback[i].res.write("event: r\n");
-            callback[i].res.write("data: \n\n");
-        }
-    }
+sendCallback(params['file'],                                "r", "");
     sendPlain(req, res, sss);
 }
 
