@@ -104,29 +104,16 @@
         }
 
         function dataUpdated() {
-            csvData = csvGen("");
-
-            http = createPOST();
-            http.onload = function() {
-                if (http.status != 200) {
-                    //                alert(http.response);
-                }
-            };
-
-            http.onerror = function() {
-                alert("request error");
-            };
-
             const params = new URLSearchParams(window.location.search);
-            console.log(params);
-            http.send(
-                "file=" +
+executePOST("file=" +
                 params.get("file") +
                 "&op=setdata" +
                 "&path=" + path +
                 "&data=" +
-                encodeURIComponent(csvData),
-            );
+                encodeURIComponent(csvGen("")),
+                        function(...args) {
+                        }
+                    );
         }
 
         table.on("dataChanged", function(data) {
@@ -153,7 +140,6 @@
                     }
                     table.setColumns(newColumns);
                     dataUpdated();
-
                 };
                 newColumns.push(aColumns[i]._column.definition);
             }
