@@ -41,14 +41,12 @@
                     }
                 }
                 if (x == "") continue;
-                table.addColumn({
+/*                table.addColumn({
                     title: x,
                     field: x
-                }, true, x);
-
-                var csvData2 = csvGen("-");
-                table.setData(csvData2);
-
+                }, true, x);*/
+                var csvData2 = csvGen(true);
+                table.setData(x+","+csvData2);
                 dataUpdated();
                 break;
             }
@@ -79,7 +77,8 @@
             element.appendChild(div);
         });
 
-        function csvGen(newColumn) {
+        function csvGen(newColumn2) {
+console.log(newColumn2);
             var data = table.getData();
             var csvData = "";
     first = true;
@@ -91,13 +90,14 @@
             for (var key in data) {
                 first = true;
                 csvData += "\n";
-                if (newColumn != "") csvData += ",";
+                if (newColumn2) csvData += ",";
                 for (var key2 in data[key]) {
                     if (!first) csvData += ",";
                     first = false;
                     csvData += data[key][key2];
                 }
             }
+console.log(csvData);
             return csvData;
         }
 
@@ -108,7 +108,7 @@ executePOST("file=" +
                 "&op=setdata" +
                 "&path=" + path +
                 "&data=" +
-                encodeURIComponent(csvGen("")),
+                encodeURIComponent(csvGen(false)),
                         function(...args) {
                         }
                     );
