@@ -34,16 +34,14 @@ your requests to the project member(s) will have lower priority (in other words:
 what we can, but will have to pay bills and do some other things too)
 
 # Code is horrible, all should go to the trash, bla, bla, bla
-Yes. It's. Month ago it was worse, year ago worse than month ago and tomorrow
-will be / can be better.
+Yes. It's. Month ago it was worse, year ago even worse than month ago and tomorrow will be better.
 
-Do you feel better with these knowledge?
+Do you feel better with these statement and knowledge?
 
-I strongly believe, that normally you start from something horrible / small
+I strongly believe, that normally you start from something horrible/small
 & improve it as long as required (Android 1.0, Windows 1.0 or even iOS 1.0
 were not excellent, but without them we would not see current versions).
-During this process you get experience, users and maybe also time and sponsors.
-It accelerates things till we moment, when we see snowball effect.
+During this process you get experience, users and maybe also time and sponsors. It accelerates doing things and in some moment you can see snowball effect.
 If you're not patient, write & propose something better or shut up and allow big boys to work.
 
 # I want this and this function
@@ -79,10 +77,10 @@ In my life I have used many languages, for example:
 * Sharp languages (C#, etc.) made wrong first impressions (I remember, how wrong they were in first versions)
 
 JavaScript itself is not very good language (more honestly, it's ugly language), but in combination
-with nodeJS allowed me for creating [very nice Sobieski+ concept](https://mwiacek.com/www/?q=node/401)
-with full file CMS solution with chats, Google integration, multiuser work and many other features.
+with nodeJS allowed me for creating [very nice successfull Sobieski+ technical concept](https://mwiacek.com/www/?q=node/401)
+with full CMS file-based solution with chats, Google integration, multiuser work and other features.
 I see speed, source code availability, no problems with onboarding in some companies,
-support for all important features, etc (I believe, that this combination has got future for next years).
+support for all important features, etc. (and I believe, that this combination has got future for next years).
 
 It doesn't mean of course, that in the future I will not use [Carbon](https://github.com/carbon-language/carbon-lang)
 or something else.
