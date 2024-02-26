@@ -133,11 +133,11 @@
 
             while (true) {
                 var newName = prompt("Please enter unique name", oldName);
-                oldName = newName;
-
-                if (newName == null) {
+                 if (newName == null) {
                     break;
                 }
+                oldName = newName;
+               
                 elpath[elpath.length - 1] = newName;
                 newElementPath = getPath(elpath);
 
@@ -158,11 +158,11 @@
 
             while (true) {
                 var newName = prompt("Please enter unique name", oldName);
-                oldName = newName;
-
                 if (newName == null) {
                     break;
                 }
+                
+                oldName = newName;
                 newElementPath = getPath(elpath) + "/" + newName;
 
                 if (document.getElementById(newElementPath) == null) {
@@ -344,14 +344,11 @@
 
                 if (name == "folder") {
                     p = e.target.id.split("/");
-                    if (p.length == 1) {
-                        document.getElementById(name + "menunew").innerHTML = "New testsuite";
-                        document.getElementById(name + "menunewinside").innerHTML = "New testcase";
-                    } else {
-                        document.getElementById(name + "menunew").innerHTML = "New testcase";
-                        document.getElementById(name + "menunewinside").innerHTML = "New step";
-                    }
-                }
+                    
+                        document.getElementById(name + "menunew").innerHTML = p.length == 1?"New testsuite":"New testcase";
+                        document.getElementById(name + "menunewinside").innerHTML = p.length == 1?"New testcase":"New step";
+                   
+                                    }
                 document.getElementById(name + "menu").classList.toggle("show");
                 e.preventDefault();
             });
