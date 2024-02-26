@@ -1,16 +1,16 @@
 //formatted with js-beautify -e "\n" requestor.js > x
 
+const child_process = require('child_process');
+const crypto = require('crypto');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const http2 = require('http2');
 const path = require('path');
-const url = require('url');
-const zlib = require('zlib');
-const child_process = require('child_process');
 const sqlite3 = require('sqlite3');
 const tls = require('node:tls');
-const crypto = require('crypto');
+const url = require('url');
+const zlib = require('zlib');
 
 const version = "20240224";
 const hostname = '127.0.0.1';
@@ -262,6 +262,15 @@ function sendJS(req, res, text) {
 function sendCSS(req, res, text) {
     res.setHeader('Content-Type', 'text/css; charset=UTF-8');
     sendBody(req, res, text);
+}
+
+async function sendCallback(file,type, msg) {
+                    for (let i in callback) {
+                        if (callback[i].file == file) {
+                            callback[i].res.write("event: "+type+"\n");
+                            callback[i].res.write("data: " +msg+ "\n\n");
+                        }
+                    }
 }
 
 function findElement(jsonObj, params, deleteDBID, deleteOriginal) {
@@ -520,6 +529,7 @@ async function parsePOSTRenameElement(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         el.obj.name = params['new'];
+        sendCallback(params['file'],                                "renameelement", JSON.stringify(params));
     }
     sendPlain(req, res, "");
 }
@@ -596,6 +606,7 @@ async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
         } else {
             el.obj.disabled = true;
         }
+              sendCallback(params['file'],                                "enabledisableelement", JSON.stringify(params));
     }
     sendPlain(req, res, "");
 }
@@ -605,6 +616,7 @@ async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         el.parentarray.splice(el.index, 1);
+            sendCallback(params['file'],                                "deleteelement", JSON.stringify(params));
     }
     sendPlain(req, res, "");
 }
@@ -706,16 +718,8 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
             }
         }
     }
-    sendPlain(req, res, sss);
-}
-
-async function sendCallback(file,type, msg) {
-                    for (let i in callback) {
-                        if (callback[i].file == file) {
-                            callback[i].res.write("event: "+type+"\n");
-                            callback[i].res.write("data: " +msg+ "\n\n");
-                        }
-                    }
+sendCallback(params['file'],                                "runstep", sss);
+    sendPlain(req, res, "");
 }
 
 async function parsePOSTRun(req, params, res, jsonObj2) {
@@ -757,7 +761,7 @@ if (fileLog) {
                 let lines = tc.input;
                 if (lines.length == 0) {
                     sss = await request2(step, res, times, params['file']);
-sendCallback(params['file'],                                "r", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
+sendCallback(params['file'],                                "runner", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
                     times.push(JSON.parse(sss).datetime);
                 } else {
                     let iteration = 1;
@@ -780,7 +784,7 @@ sendCallback(params['file'],                                "r", "Executing " + 
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                         }
                         sss = await request2(stepcopy, res, times, params['file']);
-sendCallback(params['file'],                                "r", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
+sendCallback(params['file'],                                "runner", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
                         addToRunReport(params['file']+getDateString(dt).replaceAll("-","").replaceAll(":","").replaceAll(" ",""), ts.name + "/" + tc.name + "/" + step.name, sss);
                         addToRunReportHTML(params['file']+getDateString(dt).replaceAll("-","").replaceAll(":","").replaceAll(" ",""), ts.name + "/" + tc.name + "/" + step.name, sss);
                         iteration++;
@@ -794,7 +798,8 @@ sendCallback(params['file'],                                "r", "Executing " + 
             }
         }
     }
-sendCallback(params['file'],                                "r", "");
+sendCallback(params['file'],                                "runner", "");
+sendCallback("null",                                "mainrunner", "");
     sendPlain(req, res, sss);
 }
 
@@ -1035,7 +1040,8 @@ if (consoleLog)        console.log(params);
             x = [];
             x.file = params['file'];
             x.res = res;
-            callback[session] = x;
+console.log("registering "+x);            
+callback[session] = x;
             res.on('close', function() {
                 delete callback[session];
             });

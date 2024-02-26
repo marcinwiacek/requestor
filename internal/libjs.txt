@@ -22,7 +22,7 @@
             if (http.status != 200) {
                 alert(http.response);
             } else {
-                OKhandler(http.response, ...args);
+                if (OKhandler!=null) OKhandler(http.response, ...args);
             }
         };
         http.onerror = function() {
@@ -52,9 +52,72 @@
                 setupSSE();
             }, 5000); /* 5 seconds */
         };
-        source.addEventListener("r", function(event) {
+        source.addEventListener("runner", function(event) {
             document.getElementById('runner').innerHTML=event.data;
 console.log(event);
+        });
+        source.addEventListener("mainrunner", function(event) {
+        params = new URLSearchParams(window.location.search);
+        if (!params.get('file')) {
+            window.location.reload();
+}
+        });
+        
+        source.addEventListener("renameelement", function(event) {
+        var obj = JSON.parse(event.data);
+                  el = document.getElementById(obj.path);
+                            el.text = obj.new;
+                            var toggler = document.getElementsByClassName("tcts");
+                            for (var i = 0; i < toggler.length; i++) {
+                                if (toggler[i].id && toggler[i].id === popupMenuID) {
+                                    toggler[i].id = toggler[i].id.replace(obj.path, obj.newpath);
+                                }
+                            }
+                            var toggler = document.getElementsByClassName("step");
+                            for (var i = 0; i < toggler.length; i++) {
+                                if (toggler[i].id && toggler[i].id === popupMenuID) {
+                                    toggler[i].id = toggler[i].id.replace(obj.path, obj.newpath);
+                                }
+                            }
+        });
+        
+        source.addEventListener("enabledisableelement", function(event) {
+        var obj = JSON.parse(event.data);
+                document.getElementById(obj.path).classList.toggle("disabled");
+        });
+        
+          source.addEventListener("deleteelement", function(event) {
+        var obj = JSON.parse(event.data);
+                    el = document.getElementById(obj.path);
+                    el.parentNode.remove();
+        });
+        
+         source.addEventListener("runstep", function(event) {
+                var obj = JSON.parse(event.data);
+console.log(obj);
+
+                for (var i = 0; i < obj.oldtimes.length; i++) {
+                    var option1 = document.createElement("option");
+                    option1.value = obj.oldtimes[i];
+                    option1.text = obj.oldtimes[i];
+                    var selObj1 = document.getElementById("whenlast");
+                    selObj1.prepend(option1);
+                }
+
+                var option = document.createElement("option");
+                option.value = obj.datetime;
+                option.text = obj.datetime;
+                var selObj = document.getElementById("whenlast");
+                selObj.prepend(option);
+
+                for (var i = 0; i < selObj.options.length; i++) {
+                    if (selObj.options[i].text == obj.datetime) {
+                        selObj.options[i].selected = true;
+                        break;
+                    }
+                }
+
+                setupLast(obj);
         });
     }
     setupSSE();

@@ -163,32 +163,7 @@ executePOST("file=" + params.get("file") +
             "&method=" + method,
                         function(...args) {
                                 document.getElementById("run").disabled = false;
-                                
-                         var obj = JSON.parse(args[0]);
-console.log(obj);
-
-                for (var i = 0; i < obj.oldtimes.length; i++) {
-                    var option1 = document.createElement("option");
-                    option1.value = obj.oldtimes[i];
-                    option1.text = obj.oldtimes[i];
-                    var selObj1 = document.getElementById("whenlast");
-                    selObj1.prepend(option1);
-                }
-
-                var option = document.createElement("option");
-                option.value = obj.datetime;
-                option.text = obj.datetime;
-                var selObj = document.getElementById("whenlast");
-                selObj.prepend(option);
-
-                for (var i = 0; i < selObj.options.length; i++) {
-                    if (selObj.options[i].text == obj.datetime) {
-                        selObj.options[i].selected = true;
-                        break;
-                    }
-                }
-
-                setupLast(obj);
+                  //processed with sse
                         }
                     );
 

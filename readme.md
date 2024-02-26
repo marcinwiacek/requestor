@@ -11,6 +11,20 @@ Ready API, Postman, JMeter, curl and other similar tools.
 (user should be focused on this, what could be/should be done, not on the tool)
 * providing support for modern elements like HTTP/2
 
+# Features
+* Sending requests (although this point will be mix of 
+different things, it's worth to mention, that this can be POST, GET, XML, JSON, REST, SOAP and other)
+* Preparing requests tests using GUI in web browser (tested in desktop Chromium, Firefox and Safari)
+* Concurrent work (when one user is doing something, other see updates)
+* Generating reports from run
+
+# Installation
+You need NodeJS with SQLite3, for example in Ubuntu it's enough to make three commands:
+
+1. ```sudo snap install node --classic --channel=20```
+2. ```sudo npm install sqlite3```
+3. ```node requestor.js```
+
 # TODO
 Work in progress, some important points:
 
@@ -20,7 +34,7 @@ Work in progress, some important points:
 * running shell scripts before request
 * params between steps
 * changing params inside body & headers
-* redirect http to https
+* redirect http to https (currently, when you use http URL for GUI, it doesn't do anything)
 * support for YAML or other formats describing service formats
 
 # Why another app?
@@ -99,7 +113,3 @@ or something else.
 4. ```html-beautify -e "\n" project.html > x```
 5. ```sudo apt install retext```
 
-# Installation
-1. ```sudo snap install node --classic --channel=20```
-2. ```sudo npm install sqlite3```
-3. ```node requestor.js```

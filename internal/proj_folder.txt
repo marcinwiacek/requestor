@@ -111,26 +111,8 @@
 
                 if (document.getElementById(newElementPath) == null) {
                     params = new URLSearchParams(window.location.search);
-                    executePOST("file=" + params.get("file") + "&" + "op=renameelement&" + "path=" + popupMenuID + "&" + "new=" + newName + "&newpath=" + newElementPath,
-                        function(...args) {
-                            el = document.getElementById(args[1]);
-                            el.text = args[2];
-                            var toggler = document.getElementsByClassName("tcts");
-                            for (var i = 0; i < toggler.length; i++) {
-                                if (toggler[i].id && toggler[i].id === popupMenuID) {
-                                    toggler[i].id = toggler[i].id.replace(args[1], args[3]);
-                                }
-                            }
-                            var toggler = document.getElementsByClassName("step");
-                            for (var i = 0; i < toggler.length; i++) {
-                                if (toggler[i].id && toggler[i].id === popupMenuID) {
-                                    toggler[i].id = toggler[i].id.replace(args[1], args[3]);
-                                }
-                            }
-                        },
-                        popupMenuID, newName, newElementPath,
-                    );
-                    break;
+                    executePOST("file=" + params.get("file") + "&" + "op=renameelement&" + "path=" + popupMenuID + "&" + "new=" + newName + "&newpath=" + newElementPath      );
+                    break;                   
                 }
             }
         }
@@ -139,11 +121,7 @@
             document.getElementById(popupMenuName).classList.toggle("show");
 
             params = new URLSearchParams(window.location.search);
-            executePOST("file=" + params.get("file") + "&op=enabledisableelement&path=" + popupMenuID,
-                function(...args) {
-                    document.getElementById(args[1]).classList.toggle("disabled");
-                }, popupMenuID
-            );
+            executePOST("file=" + params.get("file") + "&op=enabledisableelement&path=" + popupMenuID);
         }
 
         function elementNew(empty) {
@@ -237,14 +215,7 @@
             document.getElementById(popupMenuName).classList.toggle("show");
 
             params = new URLSearchParams(window.location.search);
-            executePOST(
-                "file=" + params.get("file") + "&op=deleteelement&path=" + popupMenuID,
-                function(...args) {
-                    el = document.getElementById(popupMenuID);
-                    el.parentNode.remove();
-                },
-                null,
-            );
+            executePOST(                "file=" + params.get("file") + "&op=deleteelement&path=" + popupMenuID              );
         }
 
         function elementCopy() {
