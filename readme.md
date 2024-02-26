@@ -90,7 +90,7 @@ In my life I have used many languages, for example:
 * PHP/Basic/Visual Basic limited and prepared for some scenarios only
 * Sharp languages (C#, etc.) made wrong first impressions (I remember, how wrong they were in first versions)
 
-JavaScript itself is not very good language (more honestly, it's ugly language, and see for example [Programming’s Greatest Mistakes from Mark Rendle](https://www.youtube.com/watch?v=qC_ioJQpv4E) or some other materials), but in combination
+JavaScript itself is not very good language (more honestly, it's ugly language, and see for example [Programming’s Greatest Mistakes from Mark Rendle](https://www.youtube.com/watch?v=qC_ioJQpv4E) or [The Post JavaScript Apocalypse from Douglas Crockford](https://www.youtube.com/watch?v=99Zacm7SsWQ) or some other materials), but in combination
 with nodeJS allowed me for creating [very nice successfull Sobieski+ technical concept](https://mwiacek.com/www/?q=node/401)
 with full CMS file-based solution with chats, Google integration, multiuser work and other features.
 I see speed, source code availability, no problems with onboarding in some companies,
