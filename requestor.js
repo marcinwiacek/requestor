@@ -540,6 +540,7 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
         newTS.name = params["new"];
         newTS.testcases = [];
         jsonObj[params['file']].testsuites.unshift(newTS);
+        sendCallback(params['file'],                                "newelement", JSON.stringify(params));
     } else {
         el = findElement(jsonObj2, params, false, false);
         if (el != null) {
@@ -567,6 +568,7 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
                 newTS.testcases = [];
                 el.parentarray.splice(el.index, 0, newTS);
             }
+            sendCallback(params['file'],                                "newelement", JSON.stringify(params));
         }
     }
     sendPlain(req, res, "");

@@ -80,6 +80,23 @@ console.log(event);
                                 }
                             }
         });
+         source.addEventListener("newelement", function(event) {
+        var obj = JSON.parse(event.data);
+         newEl = obj.elplen == 3 ? getFileElement(obj.new, false, obj.newElementPath) :
+                                getFolderElement(obj.new, false, obj.newElementPath, obj.elplen == 1 ? "ts" : "tc");
+
+                            if (obj.path == "") {
+                                document.getElementById("menu").firstChild.appendChild(newEl, obj.new);
+                            } else {
+                                el = document.getElementById(obj.path);
+                                liparent = el.parentNode;
+                                liparent.parentNode.insertBefore(newEl, liparent);
+                            }
+
+                            if (obj.elplen != 3) {
+                                updateFolder(newEl);
+                            }                          
+        });
         
         source.addEventListener("pastedrop", function(event) {
         var obj = JSON.parse(event.data);
