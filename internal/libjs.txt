@@ -1,19 +1,19 @@
 <script>
-    function runPath(path) {
-        executePOST("op=run&path=" + path);
+    function runPath(emptypath) {
+        executePOST("op=run&path=" + (emptypath==true?"":document.getElementById('id').value));
+	return false;
     }
 
     function createPOST() {
         var http = new XMLHttpRequest();
-        var url =
-            window.location.protocol + "//" + window.location.hostname + ":" +
-            window.location.port + window.location.pathname;
-        http.open("POST", url, true);
+        http.open("POST", window.location.protocol + "//" + window.location.hostname + ":" +
+            window.location.port + window.location.pathname, true);
         http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         return http;
     }
 
     function executePOST(URL, OKhandler, ...args) {
+console.log("execute post with param "+URL);
         http = createPOST();
         http.onload = function() {
             if (http.status != 200) {

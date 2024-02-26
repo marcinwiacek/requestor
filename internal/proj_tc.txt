@@ -3,7 +3,6 @@
 </form>
 
 <div>
-    <!--PATH-->
     <button onclick="table.clearData();dataUpdated();return false;">Clear data</button>
     <button onclick="table.addRow({});dataUpdated();return false;">Add row</button>
     <button onclick="addColumn();return false;">Add column</button>
@@ -18,7 +17,7 @@
 <div id="data-table"></div>
 <!--DATA-->
 
-<p><button onclick='runPath(path);return false;'>Run testcase</button>
+<p><button onclick='return runPath(false);'>Run testcase</button>
 
     <script>
         var headerContextMenu = [{

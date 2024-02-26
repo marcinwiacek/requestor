@@ -957,7 +957,6 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         let path = suite.name;
         if (elpath.length == 1 && suite.name == elpath[0]) {
             sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt")
-                .replace("<!--PATH-->", "<script>path = '" + path + "';</script>")
                 .replace("<!--NAME-->", suite.name));
             return;
         }
@@ -972,9 +971,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 }
                 path += "/" + tc.name;
                 xxxx += "`;</script>";
-                sendPlain(req, res, obiekt
-                    .replace("<!--PATH-->", "<script>path = '" + path + "';</script>")
-                    .replace("<!--DATA-->", xxxx));
+                sendPlain(req, res, obiekt.replace("<!--DATA-->", xxxx));
                 return;
             }
             for (let stepnumber in tc.steps) {
@@ -1001,8 +998,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 obiekt = obiekt.replace("<!--BODY-->", xxxx)
                     .replace("<!--SSLIGNORE-->", stepcopy.ignoreWrongSSL ? "checked" : "")
                     .replace("<!--CONLENGTH-->", stepcopy.conLen ? "checked" : "")
-                    .replace("<!--METHOD-->", stepcopy.method)
-                    .replace("<!--PATH-->", "<script>path = '" + path + "';</script>");
+                    .replace("<!--METHOD-->", stepcopy.method);
                 var xxxx = "";
                 if (stepcopy.dbid) {
                     let rows = await db_all(params['file'], "SELECT dt from requests where dbid =\"" + stepcopy.dbid + "\" order by dt desc");

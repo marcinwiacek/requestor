@@ -47,6 +47,7 @@
     </style>
     <script>
         function loadRightPart(url) {
+	    document.getElementById("id").value = this.id;
             executePOST(url, function(response, ...args) {
                 var tmp = document.createElement("div");
                 tmp.innerHTML = response;
@@ -71,7 +72,7 @@
     <div>
         <button title='Return to index' onclick="window.location.href='/';">&lt;</button>
         &nbsp;&nbsp;&nbsp;<button title='Saves changes to file (with backup)' onclick="executePOST("op=savefile");">Save</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;<button onclick='runPath("");return false;' title='Run everything from file'>Run all</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;<button onclick='return runPath(true);' title='Run everything from file'>Run all</button>
         &nbsp;&nbsp;&nbsp;&nbsp;<span id='runner'></span>
     </div>
 

@@ -268,7 +268,6 @@
             alel.setAttribute("id", id);
             alel.setAttribute("class", "step" + (disabled ? " disabled" : ""));
             alel.onclick = function() {
-                document.getElementById("id").value = this.id;
                 loadRightPart("&path=" + this.id);
             };
             alel.setAttribute("draggable", true);
