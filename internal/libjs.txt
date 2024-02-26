@@ -98,6 +98,20 @@ console.log(event);
                             }                          
         });
         
+          source.addEventListener("newelementinside", function(event) {
+        var obj = JSON.parse(event.data);
+                      newEl = obj.elplen == 2 ? getFileElement(obj.new, false, obj.newElementPath) :
+                                getFolderElement(obj.new, false, obj.newElementPath, obj.elplen == 1 ? "ts" : "tc");
+
+                            el = document.getElementById(obj.path);
+                            el.parentNode.children[2].prepend(newEl);
+
+                            if (obj.elplen != 2) {
+                                updateFolder(newEl);
+                            }
+                                 
+        });
+        
         source.addEventListener("pastedrop", function(event) {
         var obj = JSON.parse(event.data);
                 if (obj.elp1len == obj.elp2len) {

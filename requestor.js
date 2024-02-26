@@ -596,6 +596,7 @@ async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
             newTC.input = [];
             el.obj.testcases.unshift(newTC);
         }
+          sendCallback(params['file'],                                "newelementinside", JSON.stringify(params));
     }
     sendPlain(req, res, "");
 }

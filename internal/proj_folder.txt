@@ -167,23 +167,8 @@
 
                 if (document.getElementById(newElementPath) == null) {
                     params = new URLSearchParams(window.location.search);
-                    executePOST("file=" + params.get("file") + "&" + "op=newelementinside&" + "path=" + popupMenuID + "&" + "new=" + newName,
-                        function(...args) {
-                            newEl = args[4] == 2 ? getFileElement(args[2], false, args[3]) :
-                                getFolderElement(args[2], false, args[3], args[4] == 1 ? "ts" : "tc");
-
-                            el = document.getElementById(args[1]);
-                            el.parentNode.children[2].prepend(newEl);
-
-                            if (args[4] != 2) {
-                                updateFolder(newEl);
-                            }
-                        },
-                        popupMenuID,
-                        newName,
-                        newElementPath,
-                        elpath.length,
-                    );
+                      executePOST("file=" + params.get("file") + "&op=newelementinside&path=" + popupMenuID + "&new=" + newName+
+                    "&newElementPath="+  newElementPath+"&elplen="+elpath.length );
                     break;
                 }
             }
