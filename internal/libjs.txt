@@ -1,9 +1,6 @@
 <script>
     function runPath(path) {
-        params = new URLSearchParams(window.location.search);
-        executePOST("file=" + params.get("file") + "&" + "op=run&" + "path=" + path,
-            function(...args) {}
-        );
+        executePOST("op=run&path=" + path);
     }
 
     function createPOST() {
@@ -22,13 +19,14 @@
             if (http.status != 200) {
                 alert(http.response);
             } else {
-                if (OKhandler!=null) OKhandler(http.response, ...args);
+                if (OKhandler != null) OKhandler(http.response, ...args);
             }
         };
         http.onerror = function() {
             alert("request error");
         };
-        http.send(URL);
+        params = new URLSearchParams(window.location.search);
+        http.send(params.get("file") ? URL + "&file=" + params.get("file") : URL);
     }
 
     var source = null;
@@ -36,7 +34,7 @@
     function setupSSE() {
         if (source != null && source.readyState != 2) return;
         params = new URLSearchParams(window.location.search);
-        source = new EventSource("?sse=1&file="+params.get('file'));
+        source = new EventSource("?sse=1&file=" + params.get('file'));
         console.log('sse setup');
         source.onopen = function(e) {
             console.log("SSE open");
@@ -53,118 +51,107 @@
             }, 5000); /* 5 seconds */
         };
         source.addEventListener("runner", function(event) {
-            document.getElementById('runner').innerHTML=event.data;
-console.log(event);
+            document.getElementById('runner').innerHTML = event.data;
         });
         source.addEventListener("mainrunner", function(event) {
-        params = new URLSearchParams(window.location.search);
-        if (!params.get('file')) {
-            window.location.reload();
-}
+            params = new URLSearchParams(window.location.search);
+            if (!params.get('file')) {
+                window.location.reload();
+            }
         });
-        
         source.addEventListener("renameelement", function(event) {
-        var obj = JSON.parse(event.data);
-                  el = document.getElementById(obj.path);
-                            el.text = obj.new;
-                            var toggler = document.getElementsByClassName("tcts");
-                            for (var i = 0; i < toggler.length; i++) {
-                                if (toggler[i].id && toggler[i].id === popupMenuID) {
-                                    toggler[i].id = toggler[i].id.replace(obj.path, obj.newpath);
-                                }
-                            }
-                            var toggler = document.getElementsByClassName("step");
-                            for (var i = 0; i < toggler.length; i++) {
-                                if (toggler[i].id && toggler[i].id === popupMenuID) {
-                                    toggler[i].id = toggler[i].id.replace(obj.path, obj.newpath);
-                                }
-                            }
+            var obj = JSON.parse(event.data);
+            el = document.getElementById(obj.path);
+            el.text = obj.new;
+            var toggler = document.getElementsByClassName("tcts");
+            for (var i = 0; i < toggler.length; i++) {
+                if (toggler[i].id && toggler[i].id === popupMenuID) {
+                    toggler[i].id = toggler[i].id.replace(obj.path, obj.newpath);
+                }
+            }
+            var toggler = document.getElementsByClassName("step");
+            for (var i = 0; i < toggler.length; i++) {
+                if (toggler[i].id && toggler[i].id === popupMenuID) {
+                    toggler[i].id = toggler[i].id.replace(obj.path, obj.newpath);
+                }
+            }
         });
-         source.addEventListener("newelement", function(event) {
-        var obj = JSON.parse(event.data);
-         newEl = obj.elplen == 3 ? getFileElement(obj.new, false, obj.newElementPath) :
-                                getFolderElement(obj.new, false, obj.newElementPath, obj.elplen == 1 ? "ts" : "tc");
+        source.addEventListener("newelement", function(event) {
+            var obj = JSON.parse(event.data);
+            newEl = obj.elplen == 3 ? getFileElement(obj.new, false, obj.newElementPath) :
+                getFolderElement(obj.new, false, obj.newElementPath, obj.elplen == 1 ? "ts" : "tc");
 
-                            if (obj.path == "") {
-                                document.getElementById("menu").firstChild.appendChild(newEl, obj.new);
-                            } else {
-                                el = document.getElementById(obj.path);
-                                liparent = el.parentNode;
-                                liparent.parentNode.insertBefore(newEl, liparent);
-                            }
+            if (obj.path == "") {
+                document.getElementById("menu").firstChild.appendChild(newEl, obj.new);
+            } else {
+                el = document.getElementById(obj.path);
+                liparent = el.parentNode;
+                liparent.parentNode.insertBefore(newEl, liparent);
+            }
 
-                            if (obj.elplen != 3) {
-                                updateFolder(newEl);
-                            }                          
+            if (obj.elplen != 3) {
+                updateFolder(newEl);
+            }
+	    document.getElementById("emptymenu").style.display = 'none';
         });
-        
-          source.addEventListener("newelementinside", function(event) {
-        var obj = JSON.parse(event.data);
-                      newEl = obj.elplen == 2 ? getFileElement(obj.new, false, obj.newElementPath) :
-                                getFolderElement(obj.new, false, obj.newElementPath, obj.elplen == 1 ? "ts" : "tc");
+        source.addEventListener("newelementinside", function(event) {
+            var obj = JSON.parse(event.data);
+            newEl = obj.elplen == 2 ? getFileElement(obj.new, false, obj.newElementPath) :
+                getFolderElement(obj.new, false, obj.newElementPath, obj.elplen == 1 ? "ts" : "tc");
 
-                            el = document.getElementById(obj.path);
-                            el.parentNode.children[2].prepend(newEl);
+            el = document.getElementById(obj.path);
+            el.parentNode.children[2].prepend(newEl);
 
-                            if (obj.elplen != 2) {
-                                updateFolder(newEl);
-                            }
-                                 
+            if (obj.elplen != 2) {
+                updateFolder(newEl);
+            }
         });
-        
         source.addEventListener("pastedrop", function(event) {
-        var obj = JSON.parse(event.data);
-                if (obj.elp1len == obj.elp2len) {
-                        el = document.getElementById(obj.newpath).parentNode;
-                        JSON.parse(obj.struct).forEach(function(folder, index) {
-                            el.parentNode.insertBefore(addFilesFolders(folder, obj.newElementPath), el);
-                        });
-                    } else {
-                        el = document.getElementById(obj.newpath);
-                        JSON.parse(obj.struct).forEach(function(folder, index) {
-                            el.parentNode.children[2].prepend(addFilesFolders(folder, obj.newElementPath));
-                        });
-                    }
-                    updateAllFolders();
+            var obj = JSON.parse(event.data);
+            if (obj.elp1len == obj.elp2len) {
+                el = document.getElementById(obj.newpath).parentNode;
+                JSON.parse(obj.struct).forEach(function(folder, index) {
+                    el.parentNode.insertBefore(addFilesFolders(folder, obj.newElementPath), el);
+                });
+            } else {
+                el = document.getElementById(obj.newpath);
+                JSON.parse(obj.struct).forEach(function(folder, index) {
+                    el.parentNode.children[2].prepend(addFilesFolders(folder, obj.newElementPath));
+                });
+            }
+            updateAllFolders();
         });
-        
         source.addEventListener("enabledisableelement", function(event) {
-        var obj = JSON.parse(event.data);
-                document.getElementById(obj.path).classList.toggle("disabled");
+            document.getElementById(JSON.parse(event.data).path).classList.toggle("disabled");
         });
-        
-          source.addEventListener("deleteelement", function(event) {
-        var obj = JSON.parse(event.data);
-                    el = document.getElementById(obj.path);
-                    el.parentNode.remove();
+        source.addEventListener("deleteelement", function(event) {
+            document.getElementById(JSON.parse(event.data).path).parentNode.remove();
         });
-        
-         source.addEventListener("runstep", function(event) {
-                var obj = JSON.parse(event.data);
-console.log(obj);
+        source.addEventListener("runstep", function(event) {
+            var obj = JSON.parse(event.data);
 
-                for (var i = 0; i < obj.oldtimes.length; i++) {
-                    var option1 = document.createElement("option");
-                    option1.value = obj.oldtimes[i];
-                    option1.text = obj.oldtimes[i];
-                    var selObj1 = document.getElementById("whenlast");
-                    selObj1.prepend(option1);
+            for (var i = 0; i < obj.oldtimes.length; i++) {
+                var option1 = document.createElement("option");
+                option1.value = obj.oldtimes[i];
+                option1.text = obj.oldtimes[i];
+                var selObj1 = document.getElementById("whenlast");
+                selObj1.prepend(option1);
+            }
+
+            var option = document.createElement("option");
+            option.value = obj.datetime;
+            option.text = obj.datetime;
+            var selObj = document.getElementById("whenlast");
+            selObj.prepend(option);
+
+            for (var i = 0; i < selObj.options.length; i++) {
+                if (selObj.options[i].text == obj.datetime) {
+                    selObj.options[i].selected = true;
+                    break;
                 }
+            }
 
-                var option = document.createElement("option");
-                option.value = obj.datetime;
-                option.text = obj.datetime;
-                var selObj = document.getElementById("whenlast");
-                selObj.prepend(option);
-
-                for (var i = 0; i < selObj.options.length; i++) {
-                    if (selObj.options[i].text == obj.datetime) {
-                        selObj.options[i].selected = true;
-                        break;
-                    }
-                }
-
-                setupLast(obj);
+            setupLast(obj);
         });
     }
     setupSSE();

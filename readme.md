@@ -6,20 +6,20 @@ Ready API, Postman, JMeter, curl and other similar tools.
 
 # Goals
 * creating simple & powerfull app, which will provide all important technical elements
-* for fast starting and making testing for requests (without bla, bla, bla)
+* fast starting and making testing for requests (without bla, bla, bla)
 * avoiding stupid, annoying elements visible in similar software
 (user should be focused on this, what could be/should be done, not on the tool)
 * providing support for modern elements like HTTP/2
 
 # Features
-* Sending requests (although this point will be mix of 
-different things, it's worth to mention, that this can be POST, GET, XML, JSON, REST, SOAP and other)
+* Sending requests (although this point will mix different things, it's worth to mention,
+that this can be POST, GET, XML, JSON, REST, SOAP and others)
 * Preparing requests tests using GUI in web browser (tested in desktop Chromium, Firefox and Safari)
 * Concurrent work (when one user is doing something, other see updates)
-* Generating reports from run
+* Generating execution reports
 
 # Installation
-You need NodeJS with SQLite3, for example in Ubuntu it's enough to make three commands:
+You need NodeJS with SQLite3, for example in Ubuntu it's enough to execute just three commands:
 
 1. ```sudo snap install node --classic --channel=20```
 2. ```sudo npm install sqlite3```

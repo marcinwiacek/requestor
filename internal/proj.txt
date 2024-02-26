@@ -6,7 +6,10 @@
     <link href="../external/tabulator_midnight.min.css" rel="stylesheet" />
     <script type="text/javascript" src="../external/tabulator.min.js"></script>
     <!--JSLIB-->
-    <title><!--NAME--> - Requestor <!--VERSION--></title>
+    <title>
+        <!--NAME--> - Requestor
+        <!--VERSION-->
+    </title>
 
     <style>
         .flex {
@@ -61,21 +64,13 @@
             });
             return false;
         }
-
-        function savefile() {
-            const params = new URLSearchParams(window.location.search);
-executePOST("file=" + params.get("file") + "&op=savefile",
-                        function(...args) {
-                        }
-                    );
-        }
     </script>
 </head>
 
 <body>
     <div>
         <button title='Return to index' onclick="window.location.href='/';">&lt;</button>
-        &nbsp;&nbsp;&nbsp;<button title='Saves changes to file (with backup)' onclick="savefile();">Save</button>
+        &nbsp;&nbsp;&nbsp;<button title='Saves changes to file (with backup)' onclick="executePOST("op=savefile");">Save</button>
         &nbsp;&nbsp;&nbsp;&nbsp;<button onclick='runPath("");return false;' title='Run everything from file'>Run all</button>
         &nbsp;&nbsp;&nbsp;&nbsp;<span id='runner'></span>
     </div>

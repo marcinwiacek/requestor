@@ -41,12 +41,12 @@
                     }
                 }
                 if (x == "") continue;
-/*                table.addColumn({
-                    title: x,
-                    field: x
-                }, true, x);*/
+                /*                table.addColumn({
+                                    title: x,
+                                    field: x
+                                }, true, x);*/
                 var csvData2 = csvGen(true);
-                table.setData(x+","+csvData2);
+                table.setData(x + "," + csvData2);
                 dataUpdated();
                 break;
             }
@@ -78,10 +78,10 @@
         });
 
         function csvGen(newColumn2) {
-console.log(newColumn2);
+            console.log(newColumn2);
             var data = table.getData();
             var csvData = "";
-    first = true;
+            first = true;
             for (columnNum in table.getColumnDefinitions()) {
                 if (!first) csvData += ",";
                 first = false;
@@ -97,21 +97,12 @@ console.log(newColumn2);
                     csvData += data[key][key2];
                 }
             }
-console.log(csvData);
+            console.log(csvData);
             return csvData;
         }
 
         function dataUpdated() {
-            const params = new URLSearchParams(window.location.search);
-executePOST("file=" +
-                params.get("file") +
-                "&op=setdata" +
-                "&path=" + path +
-                "&data=" +
-                encodeURIComponent(csvGen(false)),
-                        function(...args) {
-                        }
-                    );
+            executePOST("op=setdata&path=" + path + "&data=" + encodeURIComponent(csvGen(false)));
         }
 
         table.on("dataChanged", function(data) {

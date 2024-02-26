@@ -110,18 +110,15 @@
                 newElementPath = getPath(elpath);
 
                 if (document.getElementById(newElementPath) == null) {
-                    params = new URLSearchParams(window.location.search);
-                    executePOST("file=" + params.get("file") + "&" + "op=renameelement&" + "path=" + popupMenuID + "&" + "new=" + newName + "&newpath=" + newElementPath      );
-                    break;                   
+                    executePOST("op=renameelement&" + "path=" + popupMenuID + "&new=" + newName + "&newpath=" + newElementPath);
+                    break;
                 }
             }
         }
 
         function elementEnableDisable() {
             document.getElementById(popupMenuName).classList.toggle("show");
-
-            params = new URLSearchParams(window.location.search);
-            executePOST("file=" + params.get("file") + "&op=enabledisableelement&path=" + popupMenuID);
+            executePOST("op=enabledisableelement&path=" + popupMenuID);
         }
 
         function elementNew(empty) {
@@ -133,18 +130,17 @@
 
             while (true) {
                 var newName = prompt("Please enter unique name", oldName);
-                 if (newName == null) {
+                if (newName == null) {
                     break;
                 }
                 oldName = newName;
-               
+
                 elpath[elpath.length - 1] = newName;
                 newElementPath = getPath(elpath);
 
                 if (document.getElementById(newElementPath) == null) {
-                    params = new URLSearchParams(window.location.search);
-                    executePOST("file=" + params.get("file") + "&op=newelement&path=" + popupMenuID + "&new=" + newName+
-                    "&newElementPath="+  newElementPath+"&elplen="+elpath.length );
+                    executePOST("op=newelement&path=" + popupMenuID + "&new=" + newName +
+                        "&newElementPath=" + newElementPath + "&elplen=" + elpath.length);
                     break;
                 }
             }
@@ -161,14 +157,13 @@
                 if (newName == null) {
                     break;
                 }
-                
+
                 oldName = newName;
                 newElementPath = getPath(elpath) + "/" + newName;
 
                 if (document.getElementById(newElementPath) == null) {
-                    params = new URLSearchParams(window.location.search);
-                      executePOST("file=" + params.get("file") + "&op=newelementinside&path=" + popupMenuID + "&new=" + newName+
-                    "&newElementPath="+  newElementPath+"&elplen="+elpath.length );
+                    executePOST("op=newelementinside&path=" + popupMenuID + "&new=" + newName +
+                        "&newElementPath=" + newElementPath + "&elplen=" + elpath.length);
                     break;
                 }
             }
@@ -176,9 +171,7 @@
 
         function elementDelete() {
             document.getElementById(popupMenuName).classList.toggle("show");
-
-            params = new URLSearchParams(window.location.search);
-            executePOST(                "file=" + params.get("file") + "&op=deleteelement&path=" + popupMenuID              );
+            executePOST("op=deleteelement&path=" + popupMenuID);
         }
 
         function elementCopy() {
@@ -210,7 +203,7 @@
 
             let isFolder1 = document.getElementById(copyID).classList.contains("tcts");
             let isFolder2 = document.getElementById(popupMenuID).classList.contains("tcts");
-    //        console.log("file/folder drop " + copyID + " " + popupMenuID + " " + isFolder1 + " " + isFolder2);
+            //        console.log("file/folder drop " + copyID + " " + popupMenuID + " " + isFolder1 + " " + isFolder2);
 
             if (PasteDrop("drop")) {
                 el = document.getElementById(copyID);
@@ -223,7 +216,7 @@
             let elpath1 = copyID.split("/");
             let elpath2 = popupMenuID.split("/");
             if (elpath2.length > elpath1.length || Math.abs(elpath2.length - elpath1.length) == 2) {
-        //        console.log("not possible");
+                //        console.log("not possible");
                 return false;
             }
 
@@ -237,23 +230,20 @@
             if (newElementPath == "/") newElementPath = "";
             elpath2 = popupMenuID.split("/");
 
-            params = new URLSearchParams(window.location.search);
             executePOST(
-                "file=" + params.get("file") + "&op=" + name + "element&path=" + copyID + "&newpath=" + popupMenuID+
-                 "&newElementPath="+newElementPath+"&elp1len="+elpath1.length+"&elp2len="+elpath2.length
+                "op=" + name + "element&path=" + copyID + "&newpath=" + popupMenuID +
+                "&newElementPath=" + newElementPath + "&elp1len=" + elpath1.length + "&elp2len=" + elpath2.length
             );
             return true;
         }
 
         function getFolderElement(name, disabled, id, type) {
-            const params = new URLSearchParams(window.location.search);
-
             let alel = document.createElement("a");
             alel.text = name;
             alel.setAttribute("id", id);
             alel.setAttribute("class", "tcts" + (disabled ? " disabled" : "") + " " + type);
             alel.onclick = function() {
-                loadRightPart("file=" + params.get("file") + "&path=" + this.id);
+                loadRightPart("&path=" + this.id);
             };
             alel.setAttribute("draggable", true);
             alel.addEventListener("dragstart", dragStart);
@@ -273,15 +263,13 @@
         }
 
         function getFileElement(name, disabled, id) {
-            const params = new URLSearchParams(window.location.search);
-
             let alel = document.createElement("a");
             alel.text = name;
             alel.setAttribute("id", id);
             alel.setAttribute("class", "step" + (disabled ? " disabled" : ""));
             alel.onclick = function() {
                 document.getElementById("id").value = this.id;
-                loadRightPart("file=" + params.get("file") + "&path=" + this.id);
+                loadRightPart("&path=" + this.id);
             };
             alel.setAttribute("draggable", true);
             alel.addEventListener("dragstart", dragStart);
@@ -341,14 +329,11 @@
             toggler.addEventListener("contextmenu", (e) => {
                 popupMenuID = e.target.id;
                 popupMenuName = name + "menu";
-
                 if (name == "folder") {
                     p = e.target.id.split("/");
-                    
-                        document.getElementById(name + "menunew").innerHTML = p.length == 1?"New testsuite":"New testcase";
-                        document.getElementById(name + "menunewinside").innerHTML = p.length == 1?"New testcase":"New step";
-                   
-                                    }
+                    document.getElementById(name + "menunew").innerHTML = p.length == 1 ? "New testsuite" : "New testcase";
+                    document.getElementById(name + "menunewinside").innerHTML = p.length == 1 ? "New testcase" : "New step";
+                }
                 document.getElementById(name + "menu").classList.toggle("show");
                 e.preventDefault();
             });
