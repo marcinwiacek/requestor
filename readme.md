@@ -52,10 +52,10 @@ Yes. It's. Month ago it was worse, year ago even worse than month ago and tomorr
 
 Do you feel better with these statement and knowledge?
 
-I strongly believe, that normally you start from something horrible/small
-& improve it as long as required (Android 1.0, Windows 1.0 or even iOS 1.0
-were not excellent, but without them we would not see current versions).
+First of all we're using language, which is not the best (see one of sections below). Additionally I strongly believe, that normally you start from something horrible/small & improve it as long as required (Android 1.0, Windows 1.0 or even iOS 1.0
+were NOT excellent, but without them we would not see current versions).
 During this process you get experience, users and maybe also time and sponsors. It accelerates doing things and in some moment you can see snowball effect.
+
 If you're not patient, write & propose something better or shut up and allow big boys to work.
 
 # I want this and this function
@@ -90,7 +90,7 @@ In my life I have used many languages, for example:
 * PHP/Basic/Visual Basic limited and prepared for some scenarios only
 * Sharp languages (C#, etc.) made wrong first impressions (I remember, how wrong they were in first versions)
 
-JavaScript itself is not very good language (more honestly, it's ugly language), but in combination
+JavaScript itself is not very good language (more honestly, it's ugly language, and see for example [Programming’s Greatest Mistakes from Mark Rendle](https://www.youtube.com/watch?v=qC_ioJQpv4E) or some other materials), but in combination
 with nodeJS allowed me for creating [very nice successfull Sobieski+ technical concept](https://mwiacek.com/www/?q=node/401)
 with full CMS file-based solution with chats, Google integration, multiuser work and other features.
 I see speed, source code availability, no problems with onboarding in some companies,
