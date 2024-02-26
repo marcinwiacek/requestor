@@ -71,13 +71,13 @@ async function executeRequest(req) {
     var q = url.parse(req.url, true);
     var certinfo = '';
     const options = {
-        //	hostname:q.hostname,
-        //	port:443,
-        //	path:q.path,
-        //        method:req.method
-        //        req.headers
-        //key:
-        //cert:
+        // hostname:q.hostname,
+        // port:443,
+        // path:q.path,
+        // method:req.method
+        // req.headers
+        // key:
+        // cert:
         agent: false
     };
 
@@ -264,13 +264,13 @@ function sendCSS(req, res, text) {
     sendBody(req, res, text);
 }
 
-async function sendCallback(file,type, msg) {
-                    for (let i in callback) {
-                        if (callback[i].file == file) {
-                            callback[i].res.write("event: "+type+"\n");
-                            callback[i].res.write("data: " +msg+ "\n\n");
-                        }
-                    }
+async function sendCallback(file, type, msg) {
+    for (let i in callback) {
+        if (callback[i].file == file) {
+            callback[i].res.write("event: " + type + "\n");
+            callback[i].res.write("data: " + msg + "\n\n");
+        }
+    }
 }
 
 function findElement(jsonObj, params, deleteDBID, deleteOriginal) {
@@ -387,7 +387,7 @@ function createTSTree(obj) {
 }
 
 async function addToRunReport(file, p, answer) {
-if (!fileLog) return;
+    if (!fileLog) return;
     a2 = JSON.parse(answer);
 
     s = "Step '" + p + "'\nRequest " + a2.datetime + "\n" +
@@ -407,7 +407,7 @@ if (!fileLog) return;
     s += "\n" + decodeURIComponent(a2.body_res) + "\n";
     s += "\n\n";
 
-    fs.appendFile(path.normalize(__dirname + '/reports/'+file+'.txt'), s,
+    fs.appendFile(path.normalize(__dirname + '/reports/' + file + '.txt'), s,
         function(err) {
             if (err) {
                 //                return console.log(err);
@@ -416,13 +416,13 @@ if (!fileLog) return;
 }
 
 async function addToRunReportHTML(file, p, answer) {
-if (!fileLog) return;
+    if (!fileLog) return;
     a2 = JSON.parse(answer);
 
-    s = "<b>Step '" + p + "'</b><br>\n"+
-"Request " + a2.datetime + "<br>\n" +
-        a2.method + " " + a2.url + "<br>\n"+
-"<pre>";
+    s = "<b>Step '" + p + "'</b><br>\n" +
+        "Request " + a2.datetime + "<br>\n" +
+        a2.method + " " + a2.url + "<br>\n" +
+        "<pre>";
     for (let str in a2.headers) {
         s += decodeURIComponent(a2.headers[str]) + "\n";
     }
@@ -430,14 +430,14 @@ if (!fileLog) return;
     s += "</pre>\n<p>" +
         (a2.error == "" ? "Response " : "Error ") +
         a2.datetime_res + "<br>\n" +
-        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res).replace(/\n/g,"<br>\n") + "<br>\n") +
+        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res).replace(/\n/g, "<br>\n") + "<br>\n") +
         "HTTP code " + a2.code_res + "<br>\n<pre>";
     for (let str in a2.headers_res) {
         s += decodeURIComponent(a2.headers_res[str]) + "\n";
     }
     s += "\n" + decodeURIComponent(a2.body_res) + "</pre>\n";
     s += "<p>\n";
-    fs.appendFile(path.normalize(__dirname + '/reports/'+file+'.htm'), s,
+    fs.appendFile(path.normalize(__dirname + '/reports/' + file + '.htm'), s,
         function(err) {
             if (err) {
                 //                return console.log(err);
@@ -529,7 +529,7 @@ async function parsePOSTRenameElement(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         el.obj.name = params['new'];
-        sendCallback(params['file'],                                "renameelement", JSON.stringify(params));
+        sendCallback(params['file'], "renameelement", JSON.stringify(params));
     }
     sendPlain(req, res, "");
 }
@@ -540,7 +540,7 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
         newTS.name = params["new"];
         newTS.testcases = [];
         jsonObj[params['file']].testsuites.unshift(newTS);
-        sendCallback(params['file'],                                "newelement", JSON.stringify(params));
+        sendCallback(params['file'], "newelement", JSON.stringify(params));
     } else {
         el = findElement(jsonObj2, params, false, false);
         if (el != null) {
@@ -568,7 +568,7 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
                 newTS.testcases = [];
                 el.parentarray.splice(el.index, 0, newTS);
             }
-            sendCallback(params['file'],                                "newelement", JSON.stringify(params));
+            sendCallback(params['file'], "newelement", JSON.stringify(params));
         }
     }
     sendPlain(req, res, "");
@@ -596,7 +596,7 @@ async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
             newTC.input = [];
             el.obj.testcases.unshift(newTC);
         }
-          sendCallback(params['file'],                                "newelementinside", JSON.stringify(params));
+        sendCallback(params['file'], "newelementinside", JSON.stringify(params));
     }
     sendPlain(req, res, "");
 }
@@ -609,7 +609,7 @@ async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
         } else {
             el.obj.disabled = true;
         }
-              sendCallback(params['file'],                                "enabledisableelement", JSON.stringify(params));
+        sendCallback(params['file'], "enabledisableelement", JSON.stringify(params));
     }
     sendPlain(req, res, "");
 }
@@ -619,7 +619,7 @@ async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
     el = findElement(jsonObj2, params, false, false);
     if (el != null) {
         el.parentarray.splice(el.index, 1);
-            sendCallback(params['file'],                                "deleteelement", JSON.stringify(params));
+        sendCallback(params['file'], "deleteelement", JSON.stringify(params));
     }
     sendPlain(req, res, "");
 }
@@ -637,13 +637,13 @@ async function parsePOSTSaveFile(req, params, res, jsonObj2) {
 
     fs.rename(
         path.normalize(__dirname + '/projects/' + params['file']),
-        path.normalize(__dirname + '/projects/' + params['file'] + 
-	    getDateString(lm).replaceAll("-","").replaceAll(":","").replaceAll(" ","")),
+        path.normalize(__dirname + '/projects/' + params['file'] +
+            getDateString(lm).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "")),
         function(err) {
             //            if (err) console.log('ERROR: ' + err);
         });
 
-jsonObj[params['file']].format = "Created with Requestor "+version+" on "+getDateString(lm);
+    jsonObj[params['file']].format = "Created with Requestor " + version + " on " + getDateString(lm);
     fs.writeFile(path.normalize(__dirname + '/projects/' + params['file']), JSON.stringify(jsonObj[params['file']], null, 2), function(err) {
         if (err) {
             //            return console.log(err);
@@ -721,7 +721,7 @@ async function parsePOSTRunStep(req, params, res, jsonObj2) {
             }
         }
     }
-sendCallback(params['file'],                                "runstep", sss);
+    sendCallback(params['file'], "runstep", sss);
     sendPlain(req, res, "");
 }
 
@@ -731,16 +731,16 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
     let times = [];
     let p = params['path'].split("/");
     let dt = new Date();
-    
-if (fileLog) {
-    fs.appendFile(path.normalize(__dirname + '/reports/'+params['file']+getDateString(dt).replaceAll("-","").replaceAll(":","").replaceAll(" ","")+'.txt'),
-        "Run '" + params['path'] + "'\n\n",
-        function(err) {
-            if (err) {
-                //                return console.log(err);
-            }
-        });
-}
+
+    if (fileLog) {
+        fs.appendFile(path.normalize(__dirname + '/reports/' + params['file'] + getDateString(dt).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "") + '.txt'),
+            "Run '" + params['path'] + "'\n\n",
+            function(err) {
+                if (err) {
+                    //                return console.log(err);
+                }
+            });
+    }
     let runit = false;
     for (let tsnumber in arr.testsuites) {
         var ts = arr.testsuites[tsnumber];
@@ -764,7 +764,7 @@ if (fileLog) {
                 let lines = tc.input;
                 if (lines.length == 0) {
                     sss = await request2(step, res, times, params['file']);
-sendCallback(params['file'],                                "runner", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
+                    sendCallback(params['file'], "runner", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
                     times.push(JSON.parse(sss).datetime);
                 } else {
                     let iteration = 1;
@@ -787,9 +787,9 @@ sendCallback(params['file'],                                "runner", "Executing
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                         }
                         sss = await request2(stepcopy, res, times, params['file']);
-sendCallback(params['file'],                                "runner", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
-                        addToRunReport(params['file']+getDateString(dt).replaceAll("-","").replaceAll(":","").replaceAll(" ",""), ts.name + "/" + tc.name + "/" + step.name, sss);
-                        addToRunReportHTML(params['file']+getDateString(dt).replaceAll("-","").replaceAll(":","").replaceAll(" ",""), ts.name + "/" + tc.name + "/" + step.name, sss);
+                        sendCallback(params['file'], "runner", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
+                        addToRunReport(params['file'] + getDateString(dt).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", ""), ts.name + "/" + tc.name + "/" + step.name, sss);
+                        addToRunReportHTML(params['file'] + getDateString(dt).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", ""), ts.name + "/" + tc.name + "/" + step.name, sss);
                         iteration++;
                         step.dbid = stepcopy.dbid;
                         times.push(JSON.parse(sss).datetime);
@@ -801,8 +801,8 @@ sendCallback(params['file'],                                "runner", "Executing
             }
         }
     }
-sendCallback(params['file'],                                "runner", "");
-sendCallback("null",                                "mainrunner", "");
+    sendCallback(params['file'], "runner", "");
+    sendCallback("null", "mainrunner", "");
     sendPlain(req, res, sss);
 }
 
@@ -859,7 +859,6 @@ function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
             }
             el2.parentarray.splice(el2.index, 0, newObj);
         }
-
         if (el.type == 'suite') {
             tree.push(createTSTree(newObj));
         } else if (el.type == 'tc') {
@@ -868,7 +867,7 @@ function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
             tree.push(createStepTree(newObj));
         }
         params['struct'] = JSON.stringify(tree);
-        sendCallback(params['file'],                                "pastedrop", JSON.stringify(params));
+        sendCallback(params['file'], "pastedrop", JSON.stringify(params));
     }
     sendPlain(req, res, "");
 }
@@ -1034,7 +1033,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
         const params = url.parse(req.url, true).query;
-if (consoleLog)        console.log(params);
+        if (consoleLog) console.log(params);
         if (params["sse"]) { // PUSH functionality
             res.writeHead(200, {
                 'Cache-Control': 'no-cache',
@@ -1045,8 +1044,8 @@ if (consoleLog)        console.log(params);
             x = [];
             x.file = params['file'];
             x.res = res;
-console.log("registering "+x);            
-callback[session] = x;
+            console.log("registering " + x);
+            callback[session] = x;
             res.on('close', function() {
                 delete callback[session];
             });
@@ -1063,17 +1062,17 @@ callback[session] = x;
             sendCSS(req, res, readFileContentSync("/external/tabulator_midnight.min.css"));
             return;
         }
-         if (params['report'] && fs.existsSync(
+        if (params['report'] && fs.existsSync(
                 path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.htm')) {
-                 sendHTML(req, res, readFileContentSync("/reports/"+params['report']));
+            sendHTML(req, res, readFileContentSync("/reports/" + params['report']));
             return;
-                }
-                  if (params['report'] && fs.existsSync(
+        }
+        if (params['report'] && fs.existsSync(
                 path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.txt')) {
-                 sendPlain(req, res, readFileContentSync("/reports/"+params['report']));
+            sendPlain(req, res, readFileContentSync("/reports/" + params['report']));
             return;
-                }
-                
+        }
+
         let deletefromdb = false;
         if (params['file'] && fs.existsSync(
                 path.normalize(__dirname + "/projects/" + params['file']))) {
@@ -1112,7 +1111,7 @@ callback[session] = x;
                     });
             }
             sendHTML(req, res, readFileContentSync("/internal/proj.txt")
-    		.replace("<!--VERSION-->", version)
+                .replace("<!--VERSION-->", version)
                 .replace("<!--JSLIB-->",
                     readFileContentSync("/internal/libjs.txt"))
                 .replace("<!--FOLDERS_MENU-->",
@@ -1137,9 +1136,9 @@ callback[session] = x;
     let all_files_arr = [];
     for (filenumber in all_files) {
         if (!all_files[filenumber].endsWith('.json')) continue;
-            const lm = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + all_files[filenumber]))).mtime;
-       let x = [];
-        x.fname = all_files[filenumber]+ " ("+getDateString(lm)+")";
+        const lm = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + all_files[filenumber]))).mtime;
+        let x = [];
+        x.fname = all_files[filenumber] + " (" + getDateString(lm) + ")";
         x.mtime = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + all_files[filenumber]))).mtime;
         all_files_arr.push(x);
     }
@@ -1151,21 +1150,21 @@ callback[session] = x;
     }
 
     let all_files2 = fs.readdirSync(path.normalize(__dirname + "/reports/"));
-     let all_files_arr2 = [];
+    let all_files_arr2 = [];
     for (filenumber in all_files2) {
         if (!all_files2[filenumber].endsWith('.htm') && !all_files2[filenumber].endsWith('.txt')) continue;
-             const lm = (await fs.promises.stat(path.normalize(__dirname + '/reports/' + all_files2[filenumber]))).mtime;
-       let x = [];
+        const lm = (await fs.promises.stat(path.normalize(__dirname + '/reports/' + all_files2[filenumber]))).mtime;
+        let x = [];
         x.fname = all_files2[filenumber];
         x.mtime = (await fs.promises.stat(path.normalize(__dirname + '/reports/' + all_files2[filenumber]))).mtime;
         all_files_arr2.push(x);
-        }
+    }
     all_files_arr2.sort(filesort());
-let files2 = "";
-    for (filenumber in all_files_arr2) {    
+    let files2 = "";
+    for (filenumber in all_files_arr2) {
         files2 += "<a href=?report=" + all_files_arr2[filenumber].fname + ">" + all_files_arr2[filenumber].fname + "</a><br>";
     }
-    
+
     sendHTML(req, res, readFileContentSync("/internal/index.txt")
         .replace("<!--VERSION-->", version)
         .replace("<!--FILES-->", files)
@@ -1174,11 +1173,11 @@ let files2 = "";
 };
 
 function filesort() {
-	return function(a,b) {
-		if (a.mtime>b.mtime) return -1;
-		if (a.mtime<b.mtime) return 1;
-		return 0;
-	}
+    return function(a, b) {
+        if (a.mtime > b.mtime) return -1;
+        if (a.mtime < b.mtime) return 1;
+        return 0;
+    }
 }
 
 http2.createSecureServer({
