@@ -130,7 +130,8 @@
 
     function selectLastDate() {
         if (document.getElementById("whenlast").value == "") return;
-        executePOST("op=getstep&path=" + path + "&dt=" + encodeURIComponent(document.getElementById("whenlast").value),
+        executePOST("op=getstep&path=" + document.getElementById("id").value + 
+"&dt=" + encodeURIComponent(document.getElementById("whenlast").value),
             function(...args) {
                 setupLast(JSON.parse(args[0]));
             });

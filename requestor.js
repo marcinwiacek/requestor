@@ -494,7 +494,7 @@ function db_all(filename, sql) {
 
 async function getJSON(dbid, dt, file) {
     let rows = await db_all(file, "SELECT * from requests where dbid =\"" + dbid + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
-    if (rows == null) {
+    if (rows == null || rows[0]===undefined) {
         let s = "\"datetime\":\"" + "\",";
         s += "\"datetime_res\":\"" + "\",";
         s += "\"errors\":\"" + "\",";
