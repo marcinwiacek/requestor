@@ -1,5 +1,7 @@
 <script>
     function runPath(emptypath) {
+console.log(document.getElementById("id").value);
+console.log(document.getElementById("id"));
         executePOST("op=run&path=" + (emptypath==true?"":document.getElementById('id').value));
 	return false;
     }

@@ -510,6 +510,7 @@ async function getJSON(dbid, dt, file) {
         return s;
     }
 
+console.log(rows[0]);
     let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
     s += "\"datetime_res\":\"" + decodeURIComponent(rows[0].dt_res) + "\",";
     s += "\"errors\":\"" + encodeURIComponent(rows[0].error_res) + "\",";

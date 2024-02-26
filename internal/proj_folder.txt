@@ -243,7 +243,7 @@
             alel.setAttribute("id", id);
             alel.setAttribute("class", "tcts" + (disabled ? " disabled" : "") + " " + type);
             alel.onclick = function() {
-                loadRightPart("&path=" + this.id);
+                loadRightPart(this.id);
             };
             alel.setAttribute("draggable", true);
             alel.addEventListener("dragstart", dragStart);
@@ -268,7 +268,7 @@
             alel.setAttribute("id", id);
             alel.setAttribute("class", "step" + (disabled ? " disabled" : ""));
             alel.onclick = function() {
-                loadRightPart("&path=" + this.id);
+                loadRightPart(this.id);
             };
             alel.setAttribute("draggable", true);
             alel.addEventListener("dragstart", dragStart);
