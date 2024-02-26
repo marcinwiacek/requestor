@@ -276,22 +276,8 @@
 
             params = new URLSearchParams(window.location.search);
             executePOST(
-                "file=" + params.get("file") + "&op=" + name + "element&path=" + copyID + "&newpath=" + popupMenuID,
-                function(...args) {
-                    if (args[3] == args[4]) {
-                        el = document.getElementById(popupMenuID).parentNode;
-                        JSON.parse(args[0]).forEach(function(folder, index) {
-                            el.parentNode.insertBefore(addFilesFolders(folder, args[1]), el);
-                        });
-                    } else {
-                        el = document.getElementById(popupMenuID);
-                        JSON.parse(args[0]).forEach(function(folder, index) {
-                            el.parentNode.children[2].prepend(addFilesFolders(folder, args[1]));
-                        });
-                    }
-                    updateAllFolders();
-                },
-                newElementPath, copyID, elpath1.length, elpath2.length
+                "file=" + params.get("file") + "&op=" + name + "element&path=" + copyID + "&newpath=" + popupMenuID+
+                 "&newElementPath="+newElementPath+"&elp1len="+elpath1.length+"&elp2len="+elpath2.length
             );
             return true;
         }

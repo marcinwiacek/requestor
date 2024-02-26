@@ -864,8 +864,10 @@ function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
         } else {
             tree.push(createStepTree(newObj));
         }
+        params['struct'] = JSON.stringify(tree);
+        sendCallback(params['file'],                                "pastedrop", JSON.stringify(params));
     }
-    sendPlain(req, res, JSON.stringify(tree));
+    sendPlain(req, res, "");
 }
 
 async function parsePOSTGetStep(req, params, res, jsonObj2) {

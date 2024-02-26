@@ -81,6 +81,22 @@ console.log(event);
                             }
         });
         
+        source.addEventListener("pastedrop", function(event) {
+        var obj = JSON.parse(event.data);
+                if (obj.elp1len == obj.elp2len) {
+                        el = document.getElementById(obj.newpath).parentNode;
+                        JSON.parse(obj.struct).forEach(function(folder, index) {
+                            el.parentNode.insertBefore(addFilesFolders(folder, obj.newElementPath), el);
+                        });
+                    } else {
+                        el = document.getElementById(obj.newpath);
+                        JSON.parse(obj.struct).forEach(function(folder, index) {
+                            el.parentNode.children[2].prepend(addFilesFolders(folder, obj.newElementPath));
+                        });
+                    }
+                    updateAllFolders();
+        });
+        
         source.addEventListener("enabledisableelement", function(event) {
         var obj = JSON.parse(event.data);
                 document.getElementById(obj.path).classList.toggle("disabled");
