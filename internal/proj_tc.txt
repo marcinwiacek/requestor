@@ -77,7 +77,7 @@
         });
 
         function csvGen(newColumn2) {
-            console.log(newColumn2);
+            if (debug) console.log(newColumn2);
             var data = table.getData();
             var csvData = "";
             first = true;
@@ -96,7 +96,7 @@
                     csvData += data[key][key2];
                 }
             }
-            console.log(csvData);
+            if (debug) console.log(csvData);
             return csvData;
         }
 

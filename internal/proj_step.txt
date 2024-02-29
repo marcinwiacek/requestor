@@ -150,7 +150,7 @@
             }
         }
 
-        executePOST("runstep=" + document.getElementById("id").value + "&headers=" + encodeURIComponent(document.getElementById("header").value) +
+        executePOST("op=run&path=" + document.getElementById("id").value + "&headers=" + encodeURIComponent(document.getElementById("header").value) +
             "&body=" + encodeURIComponent(document.getElementById("body").value) + "&url=" + encodeURIComponent(document.getElementById("url").value) +
             "&ssl=" + document.getElementById("ignorewrongssl").checked + "&conlen=" + document.getElementById("addcontentlength").checked +
             "&method=" + method,

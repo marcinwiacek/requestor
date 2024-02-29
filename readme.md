@@ -8,7 +8,7 @@ Ready API, Postman, JMeter, curl and other similar tools.
 * creating simple & powerfull app, which will provide all important technical elements
 * fast starting and making testing for requests (without bla, bla, bla)
 * avoiding stupid, annoying elements visible in similar software
-(user should be focused on this, what could be/should be done, not on the tool)
+(user should be focused on task, which could be/should be done, not on the tool)
 * providing support for modern elements like HTTP/2
 
 # Features
@@ -19,7 +19,8 @@ that this can be POST, GET, XML, JSON, REST, SOAP and others)
 * Generating execution reports
 
 # Installation
-You need NodeJS with SQLite3, for example in Ubuntu it's enough to execute just three commands:
+You need NodeJS with SQLite3, for example in Ubuntu it's enough to execute just two commands for installing
+and one for start:
 
 1. ```sudo snap install node --classic --channel=20```
 2. ```sudo npm install sqlite3```
@@ -27,6 +28,8 @@ You need NodeJS with SQLite3, for example in Ubuntu it's enough to execute just 
 
 # TODO
 Work in progress, some important points:
+
+* headers / body add new lines
 
 * junit results
 * runner
@@ -83,17 +86,21 @@ have the most important things and working state
 In my life I have used many languages, for example:
 
 * assembler was powerfull (but required too much effort)
-* C nice (but not very welcome in business environments)
+* C nice (but not very welcome in business environments because of memory leaks and problems especially with code created by
+junior developers)
 * C++ and Rust overcomplicated
-* Java boring (which gave me the chance to pay bills)
-* Pascal/Delphi perfect solution for creating powerfull GUI apps without big errors (but unfortunatelly dropped in market)
-* PHP/Basic/Visual Basic limited and prepared for some scenarios only
-* Sharp languages (C#, etc.) made wrong first impressions (I remember, how wrong they were in first versions)
+* Java boring (which gave me some chance to pay my bills)
+* Pascal/Delphi perfect solution for creating powerfull GUI apps without big errors (but unfortunatelly dropped by market)
+* PHP/Basic/Visual Basic limited and prepared for some scenarios only [visual basic worst language ever]
+* Sharp languages (C#, etc.) made first impressions wrong (I remember, how slow they were in first versions)
 
-JavaScript itself is not very good language (more honestly, it's ugly language, and see for example [Programming’s Greatest Mistakes from Mark Rendle](https://www.youtube.com/watch?v=qC_ioJQpv4E) or [The Post JavaScript Apocalypse from Douglas Crockford](https://www.youtube.com/watch?v=99Zacm7SsWQ) or some other materials), but in combination
-with nodeJS allowed me for creating [very nice successfull Sobieski+ technical concept](https://mwiacek.com/www/?q=node/401)
-with full CMS file-based solution with chats, Google integration, multiuser work and other features.
-I see speed, source code availability, no problems with onboarding in some companies,
+JavaScript itself is not very good language (more honestly, it's ugly language, and see for example
+[Programming’s Greatest Mistakes from Mark Rendle](https://www.youtube.com/watch?v=qC_ioJQpv4E) or
+[The Post JavaScript Apocalypse from Douglas Crockford](https://www.youtube.com/watch?v=99Zacm7SsWQ)
+or some other materials), but in combination with nodeJS allowed me for creating
+[very nice technically successfull Sobieski+ concept](https://mwiacek.com/www/?q=node/401)
+with full CMS file-based with chats, Google integration, multiuser work and other features.
+I see speed, source code availability, lack of problems with onboarding in some companies,
 support for all important features, etc. (and I believe, that this combination has got future for next years).
 
 It doesn't mean of course, that in the future I will not use [Carbon](https://github.com/carbon-language/carbon-lang)
