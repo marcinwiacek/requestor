@@ -709,11 +709,11 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                     sss.path = runpath;
                     sss = JSON.stringify(sss);
                     sendCallback(params['file'], "runstep", sss);
-s = {};
-s['file']=params['file'];
-s['info'] = "Executing " + runpath;
-console.log(s);
-console.log(JSON.stringify(s));
+                    s = {};
+                    s['file'] = params['file'];
+                    s['info'] = "Executing " + runpath;
+                    console.log(s);
+                    console.log(JSON.stringify(s));
                     sendCallback(params['file'], "runner", JSON.stringify(s));
                     addToRunReport(params['file'] + dt, runpath, sss);
                     addToRunReportHTML(params['file'] + dt, runpath, sss);
@@ -743,12 +743,12 @@ console.log(JSON.stringify(s));
                         sss.path = runpath;
                         sss = JSON.stringify(sss);
                         sendCallback(params['file'], "runstep", sss);
-s = {};
-s['file']=params['file'];
-s['info'] = "Executing " + runpath;
-console.log(s);
-console.log(JSON.stringify(s));
-                    sendCallback(params['file'], "runner", JSON.stringify(s));
+                        s = {};
+                        s['file'] = params['file'];
+                        s['info'] = "Executing " + runpath;
+                        console.log(s);
+                        console.log(JSON.stringify(s));
+                        sendCallback(params['file'], "runner", JSON.stringify(s));
                         addToRunReport(params['file'] + dt, runpath, sss);
                         addToRunReportHTML(params['file'] + dt, runpath, sss);
                         iteration++;
@@ -762,12 +762,12 @@ console.log(JSON.stringify(s));
             }
         }
     }
-s = {};
-s['file']=params['file'];
-s['info'] = "";
-                    sendCallback(params['file'], "runner", JSON.stringify(s));
+    s = {};
+    s['file'] = params['file'];
+    s['info'] = "";
+    sendCallback(params['file'], "runner", JSON.stringify(s));
     sendCallback("null", "mainrunner", "");
-    if (req!=null) sendPlain(req, res, sss);
+    if (req != null) sendPlain(req, res, sss);
 }
 
 function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
@@ -1180,9 +1180,9 @@ if (process.argv.length === 3 || process.argv.length === 4) {
     }
     loadFile(process.argv[2]);
     loadDB(process.argv[2]);
-    params=[]
+    params = []
     params['file'] = process.argv[2];
-    params['path'] = process.argv.length===4?process.argv[3]:"";
+    params['path'] = process.argv.length === 4 ? process.argv[3] : "";
     parsePOSTRun(null, params, null, jsonObj[process.argv[2]]);
 } else if (process.argv.length === 2) {
     http2.createSecureServer({

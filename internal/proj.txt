@@ -47,8 +47,8 @@
     </style>
     <script>
         function loadRightPart(url) {
-	    document.getElementById("id").value = url;
-            executePOST("nodebugpath="+url, function(response, ...args) {
+            document.getElementById("id").value = url;
+            executePOST("nodebugpath=" + url, function(response, ...args) {
                 var tmp = document.createElement("div");
                 tmp.innerHTML = response;
                 const scriptElements = tmp.querySelectorAll("script");

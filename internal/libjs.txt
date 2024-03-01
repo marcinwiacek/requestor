@@ -1,9 +1,9 @@
 <script>
-    const debug=true;
+    const debug = true;
 
     function runPath(emptypath) {
-        executePOST("op=run&path=" + (emptypath==true?"":document.getElementById('id').value));
-	return false;
+        executePOST("op=run&path=" + (emptypath == true ? "" : document.getElementById('id').value));
+        return false;
     }
 
     function createPOST() {
@@ -16,18 +16,18 @@
 
     function executePOST(par, OKhandler, ...args) {
         params = new URLSearchParams(window.location.search);
-	URL =  params.get("file") ? par + "&file=" + params.get("file") : par;
-	if (URL.startsWith("nodebug")) URL = URL.replace("nodebug","");
-	if (debug) console.log("execute post with param "+ URL);
+        URL = params.get("file") ? par + "&file=" + params.get("file") : par;
+        if (URL.startsWith("nodebug")) URL = URL.replace("nodebug", "");
+        if (debug) console.log("execute post with param " + URL);
         http = createPOST();
         http.onload = function() {
             if (http.status != 200) {
                 alert(http.response);
             } else {
-		if (debug && !par.startsWith("nodebug")) console.log(http.response);
+                if (debug && !par.startsWith("nodebug")) console.log(http.response);
                 if (OKhandler != null) {
-		    OKhandler(http.response, ...args);
-		}
+                    OKhandler(http.response, ...args);
+                }
             }
         };
         http.onerror = function() {
@@ -42,17 +42,17 @@
         if (source != null && source.readyState != 2) return;
         params = new URLSearchParams(window.location.search);
         source = new EventSource("?sse=1&file=" + params.get('file'));
-//        console.log('sse setup with sse=1&file=' + params.get('file'));
+        //        console.log('sse setup with sse=1&file=' + params.get('file'));
         source.onopen = function(e) {
-    	      if (debug) console.log('SSE open with sse=1&file=' + params.get('file'));
-//            console.log("SSE open");
+            if (debug) console.log('SSE open with sse=1&file=' + params.get('file'));
+            //            console.log("SSE open");
         }
         source.onerror = function(e) {
-//            if (source.readyState == EventSource.CLOSED) {
-//                console.log("SSE closed");
-//            } else {
-//                console.log("SSE error");
-//            }
+            //            if (source.readyState == EventSource.CLOSED) {
+            //                console.log("SSE closed");
+            //            } else {
+            //                console.log("SSE error");
+            //            }
             source.close();
             setTimeout(function() {
                 setupSSE();
@@ -61,23 +61,23 @@
         source.addEventListener("mainrunner", function(event) {
             params = new URLSearchParams(window.location.search);
             if (!params.get('file')) {
-		if (debug) console.log("SSE mainrunner with "+event.data);
+                if (debug) console.log("SSE mainrunner with " + event.data);
                 window.location.reload();
             }
         });
         source.addEventListener("runner", function(event) {
             var obj = JSON.parse(event.data);
             params = new URLSearchParams(window.location.search);
-            if (!params.get('file') || params.get('file').localeCompare(obj.file)!=0) return;
-	    if (debug) console.log("SSE runner with "+event.data);
+            if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
+            if (debug) console.log("SSE runner with " + event.data);
             document.getElementById('runner').innerHTML = obj.info;
         });
         source.addEventListener("runstep", function(event) {
             var obj = JSON.parse(event.data);
             params = new URLSearchParams(window.location.search);
-            if (!params.get('file') || params.get('file').localeCompare(obj.file)!=0) return;
-	    if (obj.path.localeCompare(document.getElementById('id').value)!=0) return;
-	    if (debug) console.log("SSE runstep with "+event.data);
+            if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
+            if (obj.path.localeCompare(document.getElementById('id').value) != 0) return;
+            if (debug) console.log("SSE runstep with " + event.data);
 
             for (var i = 0; i < obj.oldtimes.length; i++) {
                 var option1 = document.createElement("option");
@@ -105,8 +105,8 @@
         source.addEventListener("renameelement", function(event) {
             var obj = JSON.parse(event.data);
             params = new URLSearchParams(window.location.search);
-            if (!params.get('file') || params.get('file').localeCompare(obj.file)!=0) return;
-	    if (debug) console.log("SSE renameelement with "+event.data);
+            if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
+            if (debug) console.log("SSE renameelement with " + event.data);
             el = document.getElementById(obj.path);
             el.text = obj.new;
             var toggler = document.getElementsByClassName("tcts");
@@ -125,8 +125,8 @@
         source.addEventListener("newelement", function(event) {
             var obj = JSON.parse(event.data);
             params = new URLSearchParams(window.location.search);
-            if (!params.get('file') || params.get('file').localeCompare(obj.file)!=0) return;
-	    if (debug) console.log("SSE newelement with "+event.data);
+            if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
+            if (debug) console.log("SSE newelement with " + event.data);
             newEl = obj.elplen == 3 ? getFileElement(obj.new, false, obj.newElementPath) :
                 getFolderElement(obj.new, false, obj.newElementPath, obj.elplen == 1 ? "ts" : "tc");
             if (obj.path == "") {
@@ -139,13 +139,13 @@
             if (obj.elplen != 3) {
                 updateFolder(newEl);
             }
-	    document.getElementById("emptymenu").style.display = 'none';
+            document.getElementById("emptymenu").style.display = 'none';
         });
         source.addEventListener("newelementinside", function(event) {
             var obj = JSON.parse(event.data);
             params = new URLSearchParams(window.location.search);
-            if (!params.get('file') || params.get('file').localeCompare(obj.file)!=0) return;
-	    if (debug) console.log("SSE newelementinside with "+event.data);
+            if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
+            if (debug) console.log("SSE newelementinside with " + event.data);
             newEl = obj.elplen == 2 ? getFileElement(obj.new, false, obj.newElementPath) :
                 getFolderElement(obj.new, false, obj.newElementPath, obj.elplen == 1 ? "ts" : "tc");
             el = document.getElementById(obj.path);
@@ -157,8 +157,8 @@
         source.addEventListener("pastedrop", function(event) {
             var obj = JSON.parse(event.data);
             params = new URLSearchParams(window.location.search);
-            if (!params.get('file') || params.get('file').localeCompare(obj.file)!=0) return;
-	    if (debug) console.log("SSE pastedrop with "+event.data);
+            if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
+            if (debug) console.log("SSE pastedrop with " + event.data);
             if (obj.elp1len == obj.elp2len) {
                 el = document.getElementById(obj.newpath).parentNode;
                 JSON.parse(obj.struct).forEach(function(folder, index) {
@@ -175,15 +175,15 @@
         source.addEventListener("enabledisableelement", function(event) {
             var obj = JSON.parse(event.data);
             params = new URLSearchParams(window.location.search);
-            if (!params.get('file') || params.get('file').localeCompare(obj.file)!=0) return;
-	    if (debug) console.log("SSE enabledisableelement with "+event.data);
+            if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
+            if (debug) console.log("SSE enabledisableelement with " + event.data);
             document.getElementById(JSON.parse(event.data).path).classList.toggle("disabled");
         });
         source.addEventListener("deleteelement", function(event) {
             var obj = JSON.parse(event.data);
             params = new URLSearchParams(window.location.search);
-            if (!params.get('file') || params.get('file').localeCompare(obj.file)!=0) return;
-	    if (debug) console.log("SSE deleteelement with "+event.data);
+            if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
+            if (debug) console.log("SSE deleteelement with " + event.data);
             document.getElementById(JSON.parse(event.data).path).parentNode.remove();
         });
     }
