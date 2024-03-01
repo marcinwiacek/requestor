@@ -325,10 +325,10 @@ async function sendCallback(file, type, msg) {
     }
 }
 
-function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
+function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
     let elpath = pathString.split("/");
-    for (let tsnumber in jsonObj[params['file']].testsuites) {
-        var suite = jsonObj[params['file']].testsuites[tsnumber];
+    for (let tsnumber in jsonObj.testsuites) {
+        var suite = jsonObj.testsuites[tsnumber];
         if (elpath.length == 1 && suite.name == elpath[0]) {
             retVal = [];
             retVal.type = 'suite';
@@ -342,12 +342,12 @@ function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                 }
             } else if (deleteOriginal) {
                 retVal.obj = JSON.parse(JSON.stringify(suite));
-                jsonObj[params['file']].testsuites.splice(tsnumber, 1);
+                jsonObj.testsuites.splice(tsnumber, 1);
             } else {
                 retVal.obj = suite;
             }
             retVal.index = tsnumber;
-            retVal.parentarray = jsonObj[params['file']].testsuites;
+            retVal.parentarray = jsonObj.testsuites;
             return retVal;
         }
         for (let tcnumber in suite.testcases) {
@@ -515,24 +515,23 @@ async function getJSON(dbid, dt, file) {
     return s;
 }
 
-async function parsePOSTRenameElement(req, params, res, jsonObj2) {
-    el = findElement2(jsonObj2, params, params['path'], false, false);
+async function parsePOSTRenameElement(params, jsonObj) {
+    el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
         el.obj.name = params['new'];
         sendCallback(params['file'], "renameelement", JSON.stringify(params));
     }
-    sendPlain(req, res, "");
 }
 
-async function parsePOSTNewElement(req, params, res, jsonObj2) {
+async function parsePOSTNewElement(params, jsonObj) {
     if (params['path'] == "") {
         let newTS = {};
         newTS.name = params["new"];
         newTS.testcases = [];
-        jsonObj[params['file']].testsuites.unshift(newTS);
+        jsonObj.testsuites.unshift(newTS);
         sendCallback(params['file'], "newelement", JSON.stringify(params));
     } else {
-        el = findElement2(jsonObj2, params, params['path'], false, false);
+        el = findElement(jsonObj, params, params['path'], false, false);
         if (el != null) {
             let elpath = params['path'].split("/");
             if (elpath.length == 3) {
@@ -561,11 +560,10 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
             sendCallback(params['file'], "newelement", JSON.stringify(params));
         }
     }
-    sendPlain(req, res, "");
 }
 
-async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
-    el = findElement2(jsonObj2, params, params['path'], false, false);
+async function parsePOSTNewElementInside(params, jsonObj) {
+    el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
         let elpath = params['path'].split("/");
         if (elpath.length == 2) {
@@ -588,11 +586,10 @@ async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
         }
         sendCallback(params['file'], "newelementinside", JSON.stringify(params));
     }
-    sendPlain(req, res, "");
 }
 
-async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
-    el = findElement2(jsonObj2, params, params['path'], false, false);
+async function parsePOSTEnableDisableElement(params, jsonObj) {
+    el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
         if (el.obj.disabled == true) {
             delete el.obj.disabled;
@@ -601,48 +598,46 @@ async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
         }
         sendCallback(params['file'], "enabledisableelement", JSON.stringify(params));
     }
-    sendPlain(req, res, "");
 }
 
-async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
+async function parsePOSTDeleteElement(params, jsonObj) {
     //fixme delete from db
-    el = findElement2(jsonObj2, params, params['path'], false, false);
+    el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
         el.parentarray.splice(el.index, 1);
         sendCallback(params['file'], "deleteelement", JSON.stringify(params));
     }
-    sendPlain(req, res, "");
 }
 
-async function parsePOSTSetData(req, params, res, jsonObj2) {
-    el = findElement2(jsonObj2, params, params['path'], false, false);
+async function parsePOSTSetData(params, jsonObj) {
+    el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
         el.obj.input = params['data'].split("\n");
     }
-    sendPlain(req, res, "");
 }
 
-async function parsePOSTSaveFile(req, params, res, jsonObj2) {
-    const lm = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + params['file']))).mtime;
+async function parsePOSTSaveFile(filename, jsonObj) {
+    const lm = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + filename))).mtime;
 
     fs.rename(
-        path.normalize(__dirname + '/projects/' + params['file']),
-        path.normalize(__dirname + '/projects/' + params['file'] +
+        path.normalize(__dirname + '/projects/' + filename),
+        path.normalize(__dirname + '/projects/' + filename +
             getDateString(lm).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "")),
         function(err) {
             //            if (err) console.log('ERROR: ' + err);
         });
 
-    jsonObj[params['file']].format = "Created with Requestor " + version + " on " + getDateString(lm);
-    fs.writeFile(path.normalize(__dirname + '/projects/' + params['file']), JSON.stringify(jsonObj[params['file']], null, 2), function(err) {
-        if (err) {
-            //            return console.log(err);
-        }
-    });
-    sendPlain(req, res, "");
+    jsonObj.format = "Created with Requestor " + version + " on " + getDateString(lm);
+    fs.writeFile(path.normalize(__dirname + '/projects/' + filename),
+        JSON.stringify(jsonObj, null, 2),
+        function(err) {
+            if (err) {
+                //            return console.log(err);
+            }
+        });
 }
 
-async function parsePOSTNewFile(req, params, res, jsonObj2) {
+async function parsePOSTNewFile(params) {
     fs.writeFile(path.normalize(__dirname + '/projects/' + params['name'] + ".json"),
         "{ \"format\": \"created by requestor\",\"testsuites\": []}",
         function(err) {
@@ -650,13 +645,11 @@ async function parsePOSTNewFile(req, params, res, jsonObj2) {
                 //                return console.log(err);
             }
         });
-
     sendPlain(req, res, "");
 }
 
-async function parsePOSTRun(req, params, res, jsonObj2) {
+async function parsePOSTRun(req, params, res, jsonObj) {
     var sss = "";
-    let arr = jsonObj[params['file']];
     let times = [];
     let p = params['path'].split("/");
     let dt = getDateString(new Date()).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "");
@@ -681,8 +674,8 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
             });
     }
     let runit = false;
-    for (let tsnumber in arr.testsuites) {
-        var ts = arr.testsuites[tsnumber];
+    for (let tsnumber in jsonObj.testsuites) {
+        var ts = jsonObj.testsuites[tsnumber];
         if (params['path'] == "" || ts.name.localeCompare(p[0]) == 0) {} else {
             continue;
         }
@@ -764,9 +757,9 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
     sendPlain(req, res, sss);
 }
 
-function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
-    el = findElement2(jsonObj2, params, params['path'], deleteDB, deleteOriginal);
-    el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
+function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
+    el = findElement(jsonObj, params, params['path'], deleteDB, deleteOriginal);
+    el2 = findElement(jsonObj, params, params['newpath'], false, false);
     tree = [];
     if (el != null && el2 != null) {
         let newObj = JSON.parse(JSON.stringify(el.obj));
@@ -800,7 +793,6 @@ function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
                     }
                     if (!found) break;
                 }
-
                 el2.obj.steps.unshift(newObj);
             }
         } else {
@@ -827,12 +819,11 @@ function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
         params['struct'] = JSON.stringify(tree);
         sendCallback(params['file'], "pastedrop", JSON.stringify(params));
     }
-    sendPlain(req, res, "");
 }
 
-async function parsePOSTGetStep(req, params, res, jsonObj2) {
-    for (let tsnumber in jsonObj[params['file']].testsuites) {
-        var ts = jsonObj[params['file']].testsuites[tsnumber];
+async function parsePOSTGetStep(req, params, res, jsonObj) {
+    for (let tsnumber in jsonObj.testsuites) {
+        var ts = jsonObj.testsuites[tsnumber];
         let path = ts.name;
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
@@ -874,44 +865,51 @@ async function parsePOSTGetStep(req, params, res, jsonObj2) {
 async function parsePOSTforms(req, params, res, jsonObj) {
     if (consoleLog) console.log(params);
     if (params["op"] == "newfile") {
-        return parsePOSTNewFile(req, params, res, jsonObj);
+        return parsePOSTNewFile(params['name']);
     }
     loadDB(params['file']);
     if (!(params['file'] && fs.existsSync(
             path.normalize(__dirname + "/projects/" + params['file'])))) {
+        sendPlain(req, res, "");
         return;
     }
     if (!jsonObj[params['file']]) {
         loadFile(params['file']);
     }
+    executed = true;
     if (params["op"] == "run") {
-        return parsePOSTRun(req, params, res, jsonObj);
+        return parsePOSTRun(req, params, res, jsonObj[params['file']]);
     } else if (params["op"] == "savefile") {
-        return parsePOSTSaveFile(req, params, res, jsonObj);
+        parsePOSTSaveFile(params['file'], jsonObj[params['file']]);
     } else if (params["op"] == "newelement") {
-        return parsePOSTNewElement(req, params, res, jsonObj);
+        parsePOSTNewElement(params, jsonObj[params['file']]);
     } else if (params["op"] == "newelementinside") {
-        return parsePOSTNewElementInside(req, params, res, jsonObj);
+        parsePOSTNewElementInside(params, jsonObj[params['file']]);
     } else if (params["op"] == "pasteelement") {
-        return PasteElement(req, params, res, jsonObj, true, false);
+        PasteElement(params, jsonObj[params['file']], true, false);
     } else if (params["op"] == "dropelement") {
-        return PasteElement(req, params, res, jsonObj, false, true);
+        PasteElement(params, jsonObj[params['file']], false, true);
     } else if (params["op"] == "renameelement") {
-        return parsePOSTRenameElement(req, params, res, jsonObj);
+        parsePOSTRenameElement(params, jsonObj[params['file']]);
     } else if (params["op"] == "enabledisableelement") {
-        return parsePOSTEnableDisableElement(req, params, res, jsonObj);
+        parsePOSTEnableDisableElement(params, jsonObj[params['file']]);
     } else if (params["op"] == "deleteelement") {
-        return parsePOSTDeleteElement(req, params, res, jsonObj);
+        parsePOSTDeleteElement(params, jsonObj[params['file']]);
     } else if (params["op"] == "setdata" && params["data"]) {
-        return parsePOSTSetData(req, params, res, jsonObj);
+        parsePOSTSetData(params, jsonObj[params['file']]);
     } else if (params["op"] == "getstep" && params["dt"]) {
-        return parsePOSTGetStep(req, params, res, jsonObj);
+        return parsePOSTGetStep(req, params, res, jsonObj[params['file']]);
+    } else {
+        executed = false;
+    }
+    if (executed) {
+        sendPlain(req, res, "");
+        return;
     }
 
+    // return internal/proj_ts.txt or proj_tc.txt or proj_step.txt
     let elpath = params['path'].split("/");
-
     var obiekt = "";
-
     for (let tsnumber in jsonObj[params['file']].testsuites) {
         var suite = jsonObj[params['file']].testsuites[tsnumber];
         let path = suite.name;
