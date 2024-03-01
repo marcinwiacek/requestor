@@ -709,7 +709,12 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                     sss.path = runpath;
                     sss = JSON.stringify(sss);
                     sendCallback(params['file'], "runstep", sss);
-                    sendCallback(params['file'], "runner", "Executing " + runpath);
+s = {};
+s['file']=params['file'];
+s['info'] = "Executing " + runpath;
+console.log(s);
+console.log(JSON.stringify(s));
+                    sendCallback(params['file'], "runner", JSON.stringify(s));
                     addToRunReport(params['file'] + dt, runpath, sss);
                     addToRunReportHTML(params['file'] + dt, runpath, sss);
                     times.push(JSON.parse(sss).datetime);
@@ -738,7 +743,12 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                         sss.path = runpath;
                         sss = JSON.stringify(sss);
                         sendCallback(params['file'], "runstep", sss);
-                        sendCallback(params['file'], "runner", "Executing " + runpath);
+s = {};
+s['file']=params['file'];
+s['info'] = "Executing " + runpath;
+console.log(s);
+console.log(JSON.stringify(s));
+                    sendCallback(params['file'], "runner", JSON.stringify(s));
                         addToRunReport(params['file'] + dt, runpath, sss);
                         addToRunReportHTML(params['file'] + dt, runpath, sss);
                         iteration++;
@@ -752,7 +762,10 @@ async function parsePOSTRun(req, params, res, jsonObj) {
             }
         }
     }
-    sendCallback(params['file'], "runner", "");
+s = {};
+s['file']=params['file'];
+s['info'] = "";
+                    sendCallback(params['file'], "runner", JSON.stringify(s));
     sendCallback("null", "mainrunner", "");
     if (req!=null) sendPlain(req, res, sss);
 }
