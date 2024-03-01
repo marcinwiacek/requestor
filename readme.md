@@ -36,14 +36,13 @@ for example:
 
 # TODO
 Work in progress, some important points:
-* junit results
-* runner
-* support for own ssl certificates
-* running shell scripts before request
-* params between steps
 * changing params inside body & headers
-* redirect http to https (currently, when you use http URL for GUI, it doesn't do anything)
+* params between steps
+* running shell scripts before request
+* junit results
+* support for own ssl certificates
 * support for YAML or other formats describing service formats
+* redirect http to https (currently, when you use http URL for GUI, it doesn't do anything)
 
 # Why another app?
 Because many existing apps were written years ago, are obsolete and sometimes have horrible GUI.

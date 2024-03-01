@@ -288,8 +288,6 @@ async function addToRunReport(file, p, answer) {
 async function addToRunReportHTML(file, p, answer) {
     if (!fileLog) return;
     a2 = JSON.parse(answer);
-
-    console.log(a2);
     s = "<b>Step '" + p + "'</b><br>\n" +
         "Request " + a2.datetime + "<br>\n" + a2.method.toUpperCase() + " <a href='" + a2.url + "'>" + a2.url + "</a><br>\n";
     if (a2.headers.length != 0 || a2.body.length != 0) s += "<pre>";
@@ -756,7 +754,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
     }
     sendCallback(params['file'], "runner", "");
     sendCallback("null", "mainrunner", "");
-    sendPlain(req, res, sss);
+    if (req!=null) sendPlain(req, res, sss);
 }
 
 function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
@@ -1163,12 +1161,16 @@ function showbox(arr, pagenum, prefix) {
 console.log(process.argv);
 if (process.argv.length === 3 || process.argv.length === 4) {
     if (!fs.existsSync(
-            path.normalize(__dirname + "/projects/" + process.argv[3]))) {
+            path.normalize(__dirname + "/projects/" + process.argv[2]))) {
         console.log("File '" + process.argv[3] + "' does not exist");
         return;
     }
-    loadFile(process.argv[3]);
-    loadDB(process.argv[3]);
+    loadFile(process.argv[2]);
+    loadDB(process.argv[2]);
+    params=[]
+    params['file'] = process.argv[2];
+    params['path'] = process.argv.length===4?process.argv[3]:"";
+    parsePOSTRun(null, params, null, jsonObj[process.argv[2]]);
 } else if (process.argv.length === 2) {
     http2.createSecureServer({
         key: fs.readFileSync(__dirname + '//internal//localhost-privkey.pem'),
