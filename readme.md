@@ -18,7 +18,7 @@ that this can be POST, GET, XML, JSON, REST, SOAP and others)
 * Concurrent work (when one user is doing something, other see updates)
 * Generating execution reports
 
-# Installation
+# Installation and running
 You need NodeJS with SQLite3, for example in Ubuntu it's enough to execute just two commands for installing
 and one for start:
 
@@ -26,11 +26,16 @@ and one for start:
 2. ```sudo npm install sqlite3```
 3. ```node requestor.js```
 
+Command line runner:
+
+```node requestor.js file [path]```
+
+for example:
+
+```node requestor.js file /TS1```
+
 # TODO
 Work in progress, some important points:
-
-* headers / body add new lines
-
 * junit results
 * runner
 * support for own ssl certificates

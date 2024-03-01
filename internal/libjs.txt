@@ -16,19 +16,24 @@
 
     function executePOST(par, OKhandler, ...args) {
         params = new URLSearchParams(window.location.search);
-	if (debug) console.log("execute post with param "+ (params.get("file") ? par + "&file=" + params.get("file") : par));
+	URL =  params.get("file") ? par + "&file=" + params.get("file") : par;
+	if (URL.startsWith("nodebug")) URL = URL.replace("nodebug","");
+	if (debug) console.log("execute post with param "+ URL);
         http = createPOST();
         http.onload = function() {
             if (http.status != 200) {
                 alert(http.response);
             } else {
-                if (OKhandler != null) OKhandler(http.response, ...args);
+		if (debug && !par.startsWith("nodebug")) console.log(http.response);
+                if (OKhandler != null) {
+		    OKhandler(http.response, ...args);
+		}
             }
         };
         http.onerror = function() {
             alert("request error");
         };
-        http.send(params.get("file") ? par + "&file=" + params.get("file") : par);
+        http.send(URL);
     }
 
     var source = null;

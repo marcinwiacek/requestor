@@ -158,7 +158,7 @@ async function executeRequest(req) {
                 if (resperror) {
                     resperror += "\n";
                 }
-        	resperror += (s == 'undefined '? e.message:s);
+                resperror += (s == 'undefined ' ? e.message : s);
                 resp.error = resperror;
                 resp.certinfo = certinfo;
                 resolve(resp);
@@ -176,7 +176,7 @@ async function executeRequest(req) {
             if (resperror) {
                 resperror += "\n";
             }
-            resperror += (s == 'undefined '? e.message:s);
+            resperror += (s == 'undefined ' ? e.message : s);
             resp.error = resperror;
             resp.certinfo = "";
             resolve(resp);
@@ -291,23 +291,23 @@ async function addToRunReportHTML(file, p, answer) {
 
     s = "<b>Step '" + p + "'</b><br>\n" +
         "Request " + a2.datetime + "<br>\n" +
-        a2.method + " " + a2.url + "<br>\n" +
+        a2.method + " <a href='" + a2.url + "'>" + a2.url + "</a><br>\n" +
         "<pre>";
     for (let str in a2.headers) {
         s += decodeURIComponent(a2.headers[str]) + "\n";
     }
-    s += "\n" + decodeURIComponent(a2.body);
-    s += "</pre>\n<p>" +
+    s += decodeURIComponent(a2.body);
+    s += "</pre>\n<br>" +
         (a2.error == "" ? "Response " : "Error ") +
         a2.datetime_res + "<br>\n" +
-        (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res).replace(/\n/g, "<br>\n") + "<br>\n") +
-        "HTTP code " + a2.code_res + "<br>\n<pre>";
+        (a2.cert_res == "" ? "" : "<pre>" +
+            decodeURIComponent(a2.cert_res) + "</pre>\n") +
+        "Reponse HTTP code " + a2.code_res + "<br>\n<pre>";
     for (let str in a2.headers_res) {
         s += decodeURIComponent(a2.headers_res[str]) + "\n";
     }
-    s += "\n</pre><a download='response.htm' href='data:text/html:base64," + btoa(decodeURIComponent(a2.body_res)) +"'>\n";
-//    s += "\n" + decodeURIComponent(a2.body_res) + "</pre>\n";
-    s += "<p>\n";
+    s += "\n</pre><a download='response.htm' href='data:text/html;base64," + btoa(decodeURIComponent(a2.body_res)) + "'>Response</a>\n";
+    s += "<hr>\n";
     fs.appendFile(path.normalize(__dirname + '/reports/' + file + '.htm'), s,
         function(err) {
             if (err) {
@@ -323,10 +323,6 @@ async function sendCallback(file, type, msg) {
             callback[i].res.write("data: " + msg + "\n\n");
         }
     }
-}
-
-function findElement(jsonObj, params, deleteDBID, deleteOriginal) {
-    return findElement2(jsonObj, params, params['path'], deleteDBID, deleteOriginal);
 }
 
 function findElement2(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
@@ -503,7 +499,7 @@ async function getJSON(dbid, dt, file) {
         return s;
     }
 
-//    console.log(rows[0]);
+    //    console.log(rows[0]);
     let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
     s += "\"datetime_res\":\"" + decodeURIComponent(rows[0].dt_res) + "\",";
     s += "\"errors\":\"" + encodeURIComponent(rows[0].error_res) + "\",";
@@ -520,7 +516,7 @@ async function getJSON(dbid, dt, file) {
 }
 
 async function parsePOSTRenameElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false, false);
+    el = findElement2(jsonObj2, params, params['path'], false, false);
     if (el != null) {
         el.obj.name = params['new'];
         sendCallback(params['file'], "renameelement", JSON.stringify(params));
@@ -536,7 +532,7 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
         jsonObj[params['file']].testsuites.unshift(newTS);
         sendCallback(params['file'], "newelement", JSON.stringify(params));
     } else {
-        el = findElement(jsonObj2, params, false, false);
+        el = findElement2(jsonObj2, params, params['path'], false, false);
         if (el != null) {
             let elpath = params['path'].split("/");
             if (elpath.length == 3) {
@@ -569,7 +565,7 @@ async function parsePOSTNewElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false, false);
+    el = findElement2(jsonObj2, params, params['path'], false, false);
     if (el != null) {
         let elpath = params['path'].split("/");
         if (elpath.length == 2) {
@@ -596,7 +592,7 @@ async function parsePOSTNewElementInside(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false, false);
+    el = findElement2(jsonObj2, params, params['path'], false, false);
     if (el != null) {
         if (el.obj.disabled == true) {
             delete el.obj.disabled;
@@ -610,7 +606,7 @@ async function parsePOSTEnableDisableElement(req, params, res, jsonObj2) {
 
 async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
     //fixme delete from db
-    el = findElement(jsonObj2, params, false, false);
+    el = findElement2(jsonObj2, params, params['path'], false, false);
     if (el != null) {
         el.parentarray.splice(el.index, 1);
         sendCallback(params['file'], "deleteelement", JSON.stringify(params));
@@ -619,7 +615,7 @@ async function parsePOSTDeleteElement(req, params, res, jsonObj2) {
 }
 
 async function parsePOSTSetData(req, params, res, jsonObj2) {
-    el = findElement(jsonObj2, params, false, false);
+    el = findElement2(jsonObj2, params, params['path'], false, false);
     if (el != null) {
         el.obj.input = params['data'].split("\n");
     }
@@ -663,11 +659,21 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
     let arr = jsonObj[params['file']];
     let times = [];
     let p = params['path'].split("/");
-    let dt = new Date();
+    let dt = getDateString(new Date()).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "");
 
     if (fileLog) {
-        fs.appendFile(path.normalize(__dirname + '/reports/' + params['file'] + getDateString(dt).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "") + '.txt'),
+        fs.appendFile(path.normalize(__dirname + '/reports/' + params['file'] + dt + '.txt'),
             "Run '" + params['path'] + "'\n\n",
+            function(err) {
+                if (err) {
+                    //                return console.log(err);
+                }
+            });
+        fs.appendFile(path.normalize(__dirname + '/reports/' + params['file'] + dt + '.htm'),
+            "<b>Run '" + params['path'] + "'</b><hr>" +
+            "<input type=\"checkbox\">Show certificate info" +
+            "<input type=\"checkbox\">Show request info" +
+            "<input type=\"checkbox\">Show response info<hr>",
             function(err) {
                 if (err) {
                     //                return console.log(err);
@@ -690,7 +696,6 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
                 if (tc.disabled && tc.disabled == true) {
                     continue;
                 }
-                //                console.log(step.name + " vs " + params['runstep']);
                 if (params['path'] == "" || p.length < 3 || (p.length == 3 && step.name.localeCompare(p[2]) == 0)) {} else {
                     continue;
                 }
@@ -703,15 +708,17 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
                     step.conLen = params['conlen'] == "true";
                     step.url = decodeURIComponent(params['url']);
                 }
+                runpath = ts.name + "/" + tc.name + "/" + step.name;
+
                 if (lines.length == 0) {
                     sss = await request2(step, res, times, params['file']);
                     sss = JSON.parse(sss);
-                    sss.path = ts.name + "/" + tc.name + "/" + step.name;
+                    sss.path = runpath;
                     sss = JSON.stringify(sss);
                     sendCallback(params['file'], "runstep", sss);
-                    sendCallback(params['file'], "runner", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
-                    addToRunReport(params['file'] + getDateString(dt).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", ""), ts.name + "/" + tc.name + "/" + step.name, sss);
-                    addToRunReportHTML(params['file'] + getDateString(dt).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", ""), ts.name + "/" + tc.name + "/" + step.name, sss);
+                    sendCallback(params['file'], "runner", "Executing " + runpath);
+                    addToRunReport(params['file'] + dt, runpath, sss);
+                    addToRunReportHTML(params['file'] + dt, runpath, sss);
                     times.push(JSON.parse(sss).datetime);
                 } else {
                     let iteration = 1;
@@ -735,12 +742,12 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
                         }
                         sss = await request2(stepcopy, res, times, params['file']);
                         sss = JSON.parse(sss);
-                        sss.path = ts.name + "/" + tc.name + "/" + step.name;
+                        sss.path = runpath;
                         sss = JSON.stringify(sss);
                         sendCallback(params['file'], "runstep", sss);
-                        sendCallback(params['file'], "runner", "Executing " + ts.name + "/" + tc.name + "/" + step.name);
-                        addToRunReport(params['file'] + getDateString(dt).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", ""), ts.name + "/" + tc.name + "/" + step.name, sss);
-                        addToRunReportHTML(params['file'] + getDateString(dt).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", ""), ts.name + "/" + tc.name + "/" + step.name, sss);
+                        sendCallback(params['file'], "runner", "Executing " + runpath);
+                        addToRunReport(params['file'] + dt, runpath, sss);
+                        addToRunReportHTML(params['file'] + dt, runpath, sss);
                         iteration++;
                         step.dbid = stepcopy.dbid;
                         times.push(JSON.parse(sss).datetime);
@@ -758,7 +765,7 @@ async function parsePOSTRun(req, params, res, jsonObj2) {
 }
 
 function PasteElement(req, params, res, jsonObj2, deleteDB, deleteOriginal) {
-    el = findElement(jsonObj2, params, deleteDB, deleteOriginal);
+    el = findElement2(jsonObj2, params, params['path'], deleteDB, deleteOriginal);
     el2 = findElement2(jsonObj2, params, params['newpath'], false, false);
     tree = [];
     if (el != null && el2 != null) {
@@ -872,10 +879,10 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     loadDB(params['file']);
     if (!(params['file'] && fs.existsSync(
             path.normalize(__dirname + "/projects/" + params['file'])))) {
-	return;
+        return;
     }
     if (!jsonObj[params['file']]) {
-            loadFile(params['file']);
+        loadFile(params['file']);
     }
     if (params["op"] == "run") {
         return parsePOSTRun(req, params, res, jsonObj);
@@ -993,7 +1000,7 @@ const onRequestHandler = async (req, res) => {
             x = [];
             x.file = params['file'];
             x.res = res;
-//            console.log("registering SSE " + x);
+            //            console.log("registering SSE " + x);
             callback[session] = x;
             res.on('close', function() {
                 delete callback[session];
@@ -1109,10 +1116,11 @@ const onRequestHandler = async (req, res) => {
         all_files_arr2.push(x);
     }
     all_files_arr2.sort(filesort());
-    let files2 = "";
-    for (filenumber in all_files_arr2) {
-        files2 += "<a href=?report=" + all_files_arr2[filenumber].fname + ">" + all_files_arr2[filenumber].fname + "</a><br>";
-    }
+    //    let files2 = "";
+    //    for (filenumber in all_files_arr2) {
+    //        files2 += "<a href=?report=" + all_files_arr2[filenumber].fname + ">" + all_files_arr2[filenumber].fname + "</a><br>";
+    //    }
+    files2 = showbox(all_files_arr2, 0, "report");
 
     sendHTML(req, res, readFileContentSync("/internal/index.txt")
         .replace("<!--VERSION-->", version)
@@ -1129,9 +1137,40 @@ function filesort() {
     }
 }
 
-http2.createSecureServer({
-    key: fs.readFileSync(__dirname + '//internal//localhost-privkey.pem'),
-    cert: fs.readFileSync(__dirname + '//internal//localhost-cert.pem')
-}, onRequestHandler).listen(port, hostname, async () => {
-    console.log(`Server running at https://${hostname}:${port}/, Node.js ` + process.version);
-});
+function showbox(arr, pagenum, prefix) {
+    number = arr.length / 10;
+    out = "<div>";
+    i = 0;
+    if (pagenum <= number) {
+        for (arrnumber in arr) {
+            i++;
+            if (i < pagenum * 10) continue;
+            out += "<a href=?" + prefix + "=" + arr[arrnumber].fname + ">" +
+                arr[arrnumber].fname + "</a><br>";
+            if (i > pagenum * 10 + 9) break;
+        }
+        out + "</div><br>";
+        for (j = 0; j < number; j++) {
+            out += "<a href=?" + prefix + "page=" + j + ">" + j + "</a> ";
+        }
+    }
+    return out;
+}
+
+console.log(process.argv);
+if (process.argv.length === 3 || process.argv.length === 4) {
+    if (!fs.existsSync(
+            path.normalize(__dirname + "/projects/" + process.argv[3]))) {
+        console.log("File '" + process.argv[3] + "' does not exist");
+        return;
+    }
+    loadFile(process.argv[3]);
+    loadDB(process.argv[3]);
+} else if (process.argv.length === 2) {
+    http2.createSecureServer({
+        key: fs.readFileSync(__dirname + '//internal//localhost-privkey.pem'),
+        cert: fs.readFileSync(__dirname + '//internal//localhost-cert.pem')
+    }, onRequestHandler).listen(port, hostname, async () => {
+        console.log(`Server running at https://${hostname}:${port}/, Node.js ` + process.version);
+    });
+}
