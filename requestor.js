@@ -289,24 +289,26 @@ async function addToRunReportHTML(file, p, answer) {
     if (!fileLog) return;
     a2 = JSON.parse(answer);
 
+    console.log(a2);
     s = "<b>Step '" + p + "'</b><br>\n" +
-        "Request " + a2.datetime + "<br>\n" +
-        a2.method + " <a href='" + a2.url + "'>" + a2.url + "</a><br>\n" +
-        "<pre>";
+        "Request " + a2.datetime + "<br>\n" + a2.method.toUpperCase() + " <a href='" + a2.url + "'>" + a2.url + "</a><br>\n";
+    if (a2.headers.length != 0 || a2.body.length != 0) s += "<pre>";
     for (let str in a2.headers) {
         s += decodeURIComponent(a2.headers[str]) + "\n";
     }
     s += decodeURIComponent(a2.body);
-    s += "</pre>\n<br>" +
-        (a2.error == "" ? "Response " : "Error ") +
-        a2.datetime_res + "<br>\n" +
-        (a2.cert_res == "" ? "" : "<pre>" +
-            decodeURIComponent(a2.cert_res) + "</pre>\n") +
-        "Reponse HTTP code " + a2.code_res + "<br>\n<pre>";
+    if (a2.headers.length != 0 || a2.body.length != 0) s += "</pre>";
+    s += "\n<br>Response " + a2.datetime_res + " with HTTP code " + a2.code_res + "<br>\n";
+    s += (a2.errors === "" ? "" : "<pre>" + a2.errors + "</pre><br>");
+    s += (a2.cert_res == "" ? "" : "<pre>" +
+        decodeURIComponent(a2.cert_res) + "</pre>\n");
+    if (a2.headers_res.length != 0) s += "<pre>";
     for (let str in a2.headers_res) {
         s += decodeURIComponent(a2.headers_res[str]) + "\n";
     }
-    s += "\n</pre><a download='response.htm' href='data:text/html;base64," + btoa(decodeURIComponent(a2.body_res)) + "'>Response</a>\n";
+    if (a2.headers_res.length != 0) s += "</pre>";
+    s += "\n<a download='response.htm' href='data:text/html;base64," +
+        Buffer.from(decodeURIComponent(a2.body_res)).toString('base64') + "'>Response</a>\n";
     s += "<hr>\n";
     fs.appendFile(path.normalize(__dirname + '/reports/' + file + '.htm'), s,
         function(err) {
@@ -1078,7 +1080,7 @@ const onRequestHandler = async (req, res) => {
         let body = "";
         req.on('data', function(data) {
             body += data;
-            if (body.length > 1e6 * 6) req.connection.destroy(); // 6 MB 
+            if (body.length > 1e6 * 6) req.connection.destroy(); // 6 MB
         });
         req.on('end', function() {
             parsePOSTforms(req, url.parse("/?" + body, true).query, res, jsonObj);
@@ -1086,6 +1088,7 @@ const onRequestHandler = async (req, res) => {
         return;
     }
 
+    //index file
     let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
     let all_files_arr = [];
     for (filenumber in all_files) {
@@ -1098,10 +1101,12 @@ const onRequestHandler = async (req, res) => {
     }
     all_files_arr.sort(filesort());
 
-    let files = "";
-    for (filenumber in all_files_arr) {
-        files += "<a href=?file=" + all_files_arr[filenumber].fname + ">" + all_files_arr[filenumber].fname + "</a><br>";
-    }
+    files = showbox(all_files_arr, 0, "file");
+
+    //    let files = "";
+    //    for (filenumber in all_files_arr) {
+    //        files += "<a href=?file=" + all_files_arr[filenumber].fname + ">" + all_files_arr[filenumber].fname + "</a><br>";
+    //    }
 
     let all_files2 = fs.readdirSync(path.normalize(__dirname + "/reports/"));
     let all_files_arr2 = [];
