@@ -698,6 +698,9 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 if (params['method']) {
                     step.method = params['method'];
                     step.headers = decodeURIComponent(params['headers']).split("\n");
+step.headers = step.headers.filter(function (el) {
+  return el.length>0;
+});
                     step.body = decodeURIComponent(params['body']);
                     step.ignoreWrongSSL = params['ssl'] == "true";
                     step.conLen = params['conlen'] == "true";
@@ -962,12 +965,18 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 if (stepcopy.urlprefix) obiekt = obiekt.replace("<!--URLPREFIX-->", stepcopy.urlprefix);
                 obiekt = obiekt.replace("<!--URL-->", stepcopy.url);
                 var xxxx = "";
+first = true;
                 for (var headernumber in stepcopy.headers) {
+if (!first) xxxx+= "\n";
+first = false;
                     xxxx += stepcopy.headers[headernumber];
                 }
                 obiekt = obiekt.replace("<!--HEADER-->", xxxx);
                 var xxxx = "";
+first = true;
                 for (var bodynumber in stepcopy.body) {
+if (!first) xxxx+= "\n";
+first = false;
                     xxxx += stepcopy.body[bodynumber];
                 }
                 obiekt = obiekt.replace("<!--BODY-->", xxxx)

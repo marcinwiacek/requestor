@@ -105,7 +105,8 @@ junior developers)
 
 JavaScript itself is not very good language (more honestly, it's ugly language, and see for example
 [Programming’s Greatest Mistakes from Mark Rendle](https://www.youtube.com/watch?v=qC_ioJQpv4E) or
-[The Post JavaScript Apocalypse from Douglas Crockford](https://www.youtube.com/watch?v=99Zacm7SsWQ) or even [The top 5 JavaScript issues in all our codebases from Phil Nash](https://www.youtube.com/watch?v=IGl-P4SHo2E)
+[The Post JavaScript Apocalypse from Douglas Crockford](https://www.youtube.com/watch?v=99Zacm7SsWQ) or even [The top 5 JavaScript issues in all our codebases from Phil Nash](https://www.youtube.com/watch?v=IGl-P4SHo2E) or examples from
+[The Worst Programming Language Ever from Mark Rendle](https://www.youtube.com/watch?v=vcFBwt1nu2U)
 or some other materials), but in combination with nodeJS allowed me for creating
 [very nice technically successfull Sobieski+ concept](https://mwiacek.com/www/?q=node/401)
 with full CMS file-based with chats, Google integration, multiuser work and other features.
