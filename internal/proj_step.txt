@@ -93,20 +93,14 @@
         document.getElementById("lastrequesttype").value = obj.method.toUpperCase();
         document.getElementById("lastrequesturl").value = obj.url;
         document.getElementById("lastrequestheaders").value = "";
-        for (var i = 0; i < obj.headers.length; i++) {
-            document.getElementById("lastrequestheaders").value =
-                document.getElementById("lastrequestheaders").value +
-                decodeURIComponent(obj.headers[i]);
-        }
+        document.getElementById("lastrequestheaders").value =
+                decodeURIComponent(obj.headers);
         document.getElementById("lastrequestbody").value = decodeURIComponent(
             obj.body,
         );
         document.getElementById("lastresponseheaders").value = "";
-        for (var i = 0; i < obj.headers_res.length; i++) {
-            document.getElementById("lastresponseheaders").value =
-                document.getElementById("lastresponseheaders").value +
-                decodeURIComponent(obj.headers_res[i]);
-        }
+        document.getElementById("lastresponseheaders").value =
+                decodeURIComponent(obj.headers_res);
         document.getElementById("lastresponsetime").value = decodeURIComponent(
             obj.datetime_res,
         );

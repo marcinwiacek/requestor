@@ -192,15 +192,19 @@ async function request2(req, res, times, filename) {
     var headers = "";
     var headers_res = "";
     for (let headername in req.headers) {
-        headers += req.headers[headername] + "\n";
+	if (headers.length!=0) headers+="\n";
+        headers += req.headers[headername];
     }
+console.log("response.headers is -"+response.headers+"-");
     for (let headername in response.headers) {
         if (Array.isArray(response.headers[headername])) {
             for (let headerx in response.headers[headername]) {
-                headers_res += headername + ": " + response.headers[headername][headerx] + "\n";
+	if (headers_res.length!=0) headers_res+="\n";
+                headers_res += headername + ": " + response.headers[headername][headerx];
             }
         } else {
-            headers_res += headername + ": " + response.headers[headername] + "\n";
+	if (headers_res.length!=0) headers_res+="\n";
+            headers_res += headername + ": " + response.headers[headername];
         }
     }
     if (!req.dbid) req.dbid = getDateString(dt);
@@ -262,18 +266,14 @@ async function addToRunReport(file, p, answer) {
 
     s = "Step '" + p + "'\nRequest " + a2.datetime + "\n" +
         a2.method + " " + a2.url + "\n";
-    for (let str in a2.headers) {
-        s += decodeURIComponent(a2.headers[str]) + "\n";
-    }
+    s += decodeURIComponent(a2.headers) + "\n";
     s += "\n" + decodeURIComponent(a2.body);
     s += "\n\n" +
         (a2.error == "" ? "Response " : "Error ") +
         a2.datetime_res + "\n" +
         (a2.cert_res == "" ? "" : decodeURIComponent(a2.cert_res) + "\n") +
         "HTTP code " + a2.code_res + "\n";
-    for (let str in a2.headers_res) {
-        s += decodeURIComponent(a2.headers_res[str]) + "\n";
-    }
+    s += decodeURIComponent(a2.headers_res) + "\n";
     s += "\n" + decodeURIComponent(a2.body_res) + "\n";
     s += "\n\n";
 
@@ -291,22 +291,24 @@ async function addToRunReportHTML(file, p, answer) {
     s = "<b>Step '" + p + "'</b><br>\n" +
         "Request " + a2.datetime + "<br>\n" + a2.method.toUpperCase() + " <a href='" + a2.url + "'>" + a2.url + "</a><br>\n";
     if (a2.headers.length != 0 || a2.body.length != 0) s += "<pre>";
-    for (let str in a2.headers) {
-        s += decodeURIComponent(a2.headers[str]) + "\n";
-    }
+        s += decodeURIComponent(a2.headers);
+    if (!a2.headers.endsWith("\n")) s += "\n";
     s += decodeURIComponent(a2.body);
     if (a2.headers.length != 0 || a2.body.length != 0) s += "</pre>";
-    s += "\n<br>Response " + a2.datetime_res + " with HTTP code " + a2.code_res + "<br>\n";
-    s += (a2.errors === "" ? "" : "<pre>" + a2.errors + "</pre><br>");
-    s += (a2.cert_res == "" ? "" : "<pre>" +
+    s += "\n<br>Response " + a2.datetime_res;
+    if (a2.code_res!=0) s+=  " with HTTP code " + a2.code_res;
+    s+= "<br>\n";
+    s += (a2.errors === "" ? "" : "<pre>" + decodeURIComponent(a2.errors) + "</pre>");
+    s += (a2.cert_res === "" ? "" : "<pre>" +
         decodeURIComponent(a2.cert_res) + "</pre>\n");
     if (a2.headers_res.length != 0) s += "<pre>";
-    for (let str in a2.headers_res) {
-        s += decodeURIComponent(a2.headers_res[str]) + "\n";
-    }
+        s += decodeURIComponent(a2.headers_res);
+    if (!a2.headers_res.endsWith("\n")) s += "\n";
     if (a2.headers_res.length != 0) s += "</pre>";
-    s += "\n<a download='response.htm' href='data:text/html;base64," +
+    if (a2.body_res.length!=0) {
+	s += "\n<a download='response.htm' href='data:text/html;base64," +
         Buffer.from(decodeURIComponent(a2.body_res)).toString('base64') + "'>Response</a>\n";
+    }
     s += "<hr>\n";
     fs.appendFile(path.normalize(__dirname + '/reports/' + file + '.htm'), s,
         function(err) {
@@ -484,18 +486,18 @@ function db_all(filename, sql) {
 async function getJSON(dbid, dt, file) {
     let rows = await db_all(file, "SELECT * from requests where dbid =\"" + dbid + "\" and dt=\"" + decodeURIComponent(dt) + "\"");
     if (rows == null || rows[0] === undefined) {
-        let s = "\"datetime\":\"" + "\",";
-        s += "\"datetime_res\":\"" + "\",";
-        s += "\"errors\":\"" + "\",";
-        s += "\"cert_res\":\"" + "\",";
-        s += "\"ssl_ignore\":\"" + false + "\",";
-        s += "\"code_res\":\"" + "\",";
-        s += "\"url\":\"" + "\",";
-        s += "\"method\":\"GET" + "\",";
-        s += "\"headers\":[\"";
-        s += "\"],\"body\":\"" + "\",";
-        s += "\"headers_res\":[\""
-        s += "\"],\"body_res\":\"" + "\"";
+        let s = "\"datetime\":\"\",";
+        s += "\"datetime_res\":\"\",";
+        s += "\"errors\":\"\",";
+        s += "\"cert_res\":\"\",";
+        s += "\"ssl_ignore\":\"false\",";
+        s += "\"code_res\":\"\",";
+        s += "\"url\":\"\",";
+        s += "\"method\":\"GET\",";
+        s += "\"headers\":\"\",";
+        s += "\"body\":\"\",";
+        s += "\"headers_res\":\"\","
+        s += "\"body_res\":\"\"";
         return s;
     }
 
@@ -508,10 +510,10 @@ async function getJSON(dbid, dt, file) {
     s += "\"code_res\":\"" + rows[0].code_res + "\",";
     s += "\"url\":\"" + rows[0].url + "\",";
     s += "\"method\":\"" + rows[0]["method"] + "\",";
-    s += "\"headers\":[\"" + encodeURIComponent(rows[0]["headers"]);
-    s += "\"],\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
-    s += "\"headers_res\":[\"" + encodeURIComponent(rows[0]["headers_res"]);
-    s += "\"],\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
+    s += "\"headers\":\"" + encodeURIComponent(rows[0]["headers"])+"\",";
+    s += "\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
+    s += "\"headers_res\":\"" + encodeURIComponent(rows[0]["headers_res"])+"\",";
+    s += "\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
     return s;
 }
 
