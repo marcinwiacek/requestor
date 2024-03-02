@@ -1108,9 +1108,8 @@ const onRequestHandler = async (req, res) => {
     let all_files_arr = [];
     for (filenumber in all_files) {
         if (!all_files[filenumber].endsWith('.json')) continue;
-        const lm = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + all_files[filenumber]))).mtime;
         let x = [];
-        x.fname = all_files[filenumber] + " (" + getDateString(lm) + ")";
+        x.fname = all_files[filenumber];// + " (" + getDateString(lm) + ")";
         x.mtime = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + all_files[filenumber]))).mtime;
         all_files_arr.push(x);
     }
@@ -1157,20 +1156,21 @@ function filesort() {
 
 function showbox(arr, pagenum, prefix) {
     number = arr.length / 10;
-    out = "<div>";
+    out = "<div id='"+prefix+"'>";
     i = 0;
     if (pagenum <= number) {
         for (arrnumber in arr) {
             i++;
             if (i < pagenum * 10) continue;
-            out += "<a href=?" + prefix + "=" + arr[arrnumber].fname + ">" +
-                arr[arrnumber].fname + "</a><br>";
+            out += "<a href='?" + prefix + "=" + arr[arrnumber].fname + "'>" +
+                arr[arrnumber].fname + 
+         " (" + getDateString(arr[arrnumber].mtime)+")</a><br>";
             if (i > pagenum * 10 + 9) break;
         }
-        out + "</div><br>";
         for (j = 0; j < number; j++) {
             out += "<a href=?" + prefix + "page=" + j + ">" + j + "</a> ";
         }
+        out += "</div><br>";
     }
     return out;
 }
