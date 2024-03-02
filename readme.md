@@ -5,18 +5,20 @@ Initially created as proof of concept, currently could be used as replacement fo
 Ready API, Postman, JMeter, curl and other similar tools.
 
 # Goals
-* creating simple & powerfull app, which will provide all important technical elements
-* fast starting and making testing for requests (without bla, bla, bla)
-* avoiding stupid, annoying elements visible in similar software
+* Creating simple & powerfull app, which will provide all important technical elements
+* Fast, easy and effective testing for requests (without bla, bla, bla)
+* Avoiding stupid, annoying elements visible in similar software
 (user should be focused on task, which could be/should be done, not on the tool)
-* providing support for modern elements like HTTP/2
+* Providing support for modern elements like HTTP/2
 
 # Features
 * Sending requests (although this point will mix different things, it's worth to mention,
 that this can be POST, GET, XML, JSON, REST, SOAP and others)
-* Preparing requests tests using GUI in web browser (tested in desktop Chromium, Firefox and Safari)
+* Preparing requests tests using GUI in web browser (tested in desktop Chromium, Firefox
+and Safari)
+* Saving data in good formatted text JSON files (changes are easy to track in GIT)
+* Saving execution info in the SQLite DB and easy to read HTML, XML (JUnit) and TXT files
 * Concurrent work (when one user is doing something, other see updates)
-* Generating execution reports
 
 # Installation and running
 You need NodeJS with SQLite3, for example in Ubuntu it's enough to execute just two commands for installing
@@ -35,10 +37,13 @@ for example:
 ```node requestor.js file /TS1```
 
 # TODO
+* ID w bazie nie sa unikalne
+
 Work in progress, some important points:
 * changing params inside body & headers
 * params between steps
 * running shell scripts before request
+* asserts
 * junit results
 * support for own ssl certificates
 * support for YAML or other formats describing service formats
@@ -95,12 +100,12 @@ junior developers)
 * C++ and Rust overcomplicated
 * Java boring (which gave me some chance to pay my bills)
 * Pascal/Delphi perfect solution for creating powerfull GUI apps without big errors (but unfortunatelly dropped by market)
-* PHP/Basic/Visual Basic limited and prepared for some scenarios only [visual basic worst language ever]
+* PHP/Basic/Visual Basic limited and prepared for some scenarios only
 * Sharp languages (C#, etc.) made first impressions wrong (I remember, how slow they were in first versions)
 
 JavaScript itself is not very good language (more honestly, it's ugly language, and see for example
 [Programming’s Greatest Mistakes from Mark Rendle](https://www.youtube.com/watch?v=qC_ioJQpv4E) or
-[The Post JavaScript Apocalypse from Douglas Crockford](https://www.youtube.com/watch?v=99Zacm7SsWQ)
+[The Post JavaScript Apocalypse from Douglas Crockford](https://www.youtube.com/watch?v=99Zacm7SsWQ) or even [The top 5 JavaScript issues in all our codebases from Phil Nash](https://www.youtube.com/watch?v=IGl-P4SHo2E)
 or some other materials), but in combination with nodeJS allowed me for creating
 [very nice technically successfull Sobieski+ concept](https://mwiacek.com/www/?q=node/401)
 with full CMS file-based with chats, Google integration, multiuser work and other features.
@@ -123,4 +128,3 @@ or something else.
 3. ```js-beautify -e "\n" requestor.js > x```
 4. ```html-beautify -e "\n" project.html > x```
 5. ```sudo apt install retext```
-

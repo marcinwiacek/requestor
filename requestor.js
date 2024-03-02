@@ -12,7 +12,7 @@ const tls = require('node:tls');
 const url = require('url');
 const zlib = require('zlib');
 
-const version = "20240224";
+const version = "20240301";
 const hostname = '127.0.0.1';
 const port = 3000;
 const maxResultsPerRequest = 500;
@@ -1171,7 +1171,6 @@ function showbox(arr, pagenum, prefix) {
     return out;
 }
 
-console.log(process.argv);
 if (process.argv.length === 3 || process.argv.length === 4) {
     if (!fs.existsSync(
             path.normalize(__dirname + "/projects/" + process.argv[2]))) {
