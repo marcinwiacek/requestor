@@ -884,6 +884,17 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
     if (consoleLog) console.log(params);
+console.log("cos");
+        if (params["reportpage"]) {
+console.log("reportpage is report page");
+            sendPlain(req, res, await getReportPage(1));
+	    return;
+	}
+console.log("cos2");
+        if (params["filepage"]) {
+            sendPlain(req, res, await getProjectPage(1));
+	    return;
+	}
     if (params["op"] == "newfile") {
         return parsePOSTNewFile(params['name']);
     }
@@ -1113,6 +1124,14 @@ const onRequestHandler = async (req, res) => {
     }
 
     //index file
+    sendHTML(req, res, readFileContentSync("/internal/index.txt")
+        .replace("<!--VERSION-->", version)
+        .replace("<!--FILES-->", await getProjectPage(0))
+        .replace("<!--EXEC-->", await getReportPage(0))
+        .replace("<!--JSLIB-->", readFileContentSync("/internal/libjs.txt")));
+};
+
+async function getProjectPage(pagenum) {
     let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
     let all_files_arr = [];
     for (filenumber in all_files) {
@@ -1123,14 +1142,10 @@ const onRequestHandler = async (req, res) => {
         all_files_arr.push(x);
     }
     all_files_arr.sort(filesort());
+    return showbox(all_files_arr, pagenum, "file");
+}
 
-    files = showbox(all_files_arr, 0, "file");
-
-    //    let files = "";
-    //    for (filenumber in all_files_arr) {
-    //        files += "<a href=?file=" + all_files_arr[filenumber].fname + ">" + all_files_arr[filenumber].fname + "</a><br>";
-    //    }
-
+async function getReportPage(pagenum) {
     let all_files2 = fs.readdirSync(path.normalize(__dirname + "/reports/"));
     let all_files_arr2 = [];
     for (filenumber in all_files2) {
@@ -1142,18 +1157,10 @@ const onRequestHandler = async (req, res) => {
         all_files_arr2.push(x);
     }
     all_files_arr2.sort(filesort());
-    //    let files2 = "";
-    //    for (filenumber in all_files_arr2) {
-    //        files2 += "<a href=?report=" + all_files_arr2[filenumber].fname + ">" + all_files_arr2[filenumber].fname + "</a><br>";
-    //    }
-    files2 = showbox(all_files_arr2, 0, "report");
-
-    sendHTML(req, res, readFileContentSync("/internal/index.txt")
-        .replace("<!--VERSION-->", version)
-        .replace("<!--FILES-->", files)
-        .replace("<!--EXEC-->", files2)
-        .replace("<!--JSLIB-->", readFileContentSync("/internal/libjs.txt")));
-};
+    x=showbox(all_files_arr2, pagenum, "report");
+console.log(x);
+return x;
+}
 
 function filesort() {
     return function(a, b) {
@@ -1177,7 +1184,7 @@ function showbox(arr, pagenum, prefix) {
             if (i > pagenum * 10 + 9) break;
         }
         for (j = 0; j < number; j++) {
-            out += "<a href=?" + prefix + "page=" + j + ">" + j + "</a> ";
+            out += "<a onclick='loadBoxPart(\"" + prefix + "page=" + j + "\",\""+prefix+"\");return false;'>" + j + "</a> ";
         }
         out += "</div><br>";
     }
