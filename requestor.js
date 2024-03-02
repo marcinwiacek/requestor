@@ -707,6 +707,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                     sss = await request2(step, res, times, params['file']);
                     sss = JSON.parse(sss);
                     sss.path = runpath;
+		    sss.file = params['file'];
                     sss = JSON.stringify(sss);
                     sendCallback(params['file'], "runstep", sss);
                     s = {};
@@ -741,11 +742,12 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                         sss = await request2(stepcopy, res, times, params['file']);
                         sss = JSON.parse(sss);
                         sss.path = runpath;
+			sss.file = params['file'];
                         sss = JSON.stringify(sss);
                         sendCallback(params['file'], "runstep", sss);
                         s = {};
                         s['file'] = params['file'];
-                        s['info'] = "Executing " + runpath;
+                        s['info'] = "Executing " + runpath+" iteration "+iteration;
                         console.log(s);
                         console.log(JSON.stringify(s));
                         sendCallback(params['file'], "runner", JSON.stringify(s));

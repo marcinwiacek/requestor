@@ -81,8 +81,7 @@
               "asserts": {
                 "code": "200"
               },
-              "ignoreWrongSSL": false,
-              "dbid": "2023-12-10 20:30:49 206"
+              "ignoreWrongSSL": false
             },
             {
               "name": "st",
@@ -111,8 +110,7 @@
               "asserts": {
                 "code": "200"
               },
-              "ignoreWrongSSL": false,
-              "dbid": "2023-12-10 20:30:49 206"
+              "ignoreWrongSSL": false
             },
             {
               "name": "step3",
@@ -133,8 +131,7 @@
               "asserts": {
                 "code": "200"
               },
-              "conLen": false,
-              "dbid": "2023-12-10 20:33:29 073"
+              "conLen": false
             },
             {
               "name": "step4",
@@ -174,8 +171,7 @@
                 "code": "200"
               },
               "ignoreWrongSSL": false,
-              "conLen": false,
-              "dbid": "2023-12-10 20:52:56 364"
+              "conLen": false
             }
           ]
         }
@@ -219,8 +215,7 @@
               "asserts": {
                 "code": "200"
               },
-              "ignoreWrongSSL": false,
-              "dbid": "2023-12-10 20:30:49 206"
+              "ignoreWrongSSL": false
             },
             {
               "name": "step3",
@@ -241,8 +236,7 @@
               "asserts": {
                 "code": "200"
               },
-              "conLen": false,
-              "dbid": "2023-12-10 20:33:29 073"
+              "conLen": false
             },
             {
               "name": "step4",
@@ -282,8 +276,7 @@
                 "code": "200"
               },
               "ignoreWrongSSL": false,
-              "conLen": false,
-              "dbid": "2023-12-10 20:52:57 206"
+              "conLen": false
             }
           ]
         }
