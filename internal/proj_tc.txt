@@ -40,13 +40,9 @@
                     }
                 }
                 if (x == "") continue;
-                /*                table.addColumn({
-                                    title: x,
-                                    field: x
-                                }, true, x);*/
                 var csvData2 = csvGen(true);
                 table.setData(x + "," + csvData2);
-                dataUpdated();
+            executePOST("op=setdata&path=" + document.getElementById('id').value + "&data=" + encodeURIComponent(x+","+csvData2));
                 break;
             }
         }
@@ -77,7 +73,7 @@
         });
 
         function csvGen(newColumn2) {
-            if (debug) console.log(newColumn2);
+console.log("newcolumn2 is "+newColumn2);
             var data = table.getData();
             var csvData = "";
             first = true;
@@ -101,7 +97,7 @@
         }
 
         function dataUpdated() {
-            executePOST("op=setdata&path=" + path + "&data=" + encodeURIComponent(csvGen(false)));
+            executePOST("op=setdata&path=" + document.getElementById('id').value + "&data=" + encodeURIComponent(csvGen(false)));
         }
 
         table.on("dataChanged", function(data) {
