@@ -742,6 +742,11 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                         var stepcopy = JSON.parse(JSON.stringify(step));
                         for (let d in arra) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                            stepcopy.body = stepcopy.body.replace("{{" + d + "}}", arra[d]);
+    for (let headername in stepcopy.headers) {
+        stepcopy.headers[headername] = 
+        stepcopy.headers[headername].replace("{{" + d + "}}", arra[d]);
+    }
                         }
                         sss = await request(stepcopy, res, times, params['file']);
                         sss = JSON.parse(sss);
@@ -867,10 +872,10 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
                     if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
                     var stepcopy = JSON.parse(JSON.stringify(step));
                     //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
-                    for (let d in arra) {
-                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                    }
-                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
+//                    for (let d in arra) {
+//                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+//                    }
+//                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
                     sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
                 }
             }

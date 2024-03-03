@@ -40,7 +40,6 @@ for example:
 * ID w bazie nie sa unikalne
 
 Work in progress, some important points:
-* changing params inside body & headers
 * params between steps
 * running shell scripts before request
 * asserts
