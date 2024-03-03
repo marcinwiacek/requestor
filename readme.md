@@ -37,8 +37,6 @@ for example:
 ```node requestor.js file /TS1```
 
 # TODO
-* ID w bazie nie sa unikalne
-
 Work in progress, some important points:
 * params between steps
 * running shell scripts before request
@@ -47,6 +45,7 @@ Work in progress, some important points:
 * support for own ssl certificates
 * support for YAML or other formats describing service formats
 * redirect http to https (currently, when you use http URL for GUI, it doesn't do anything)
+* unique DB ID
 
 # Why another app?
 Because many existing apps were written years ago, are obsolete and sometimes have horrible GUI.

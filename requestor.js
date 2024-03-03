@@ -1174,7 +1174,7 @@ function showbox(arr, pagenum, prefix) {
     if (pagenum <= number) {
         for (arrnumber in arr) {
             i++;
-            if (i < pagenum * 10) continue;
+            if (i <= pagenum * 10) continue;
             out += "<a href='?" + prefix + "=" + arr[arrnumber].fname + "'>" +
                 arr[arrnumber].fname +
                 " (" + getDateString(arr[arrnumber].mtime) + ")</a><br>";
