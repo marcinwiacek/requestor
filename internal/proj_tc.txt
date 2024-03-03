@@ -1,5 +1,5 @@
 <form id="d">
-    <p>Name: <input type="text" id="name" name="name" value="<!--NAME-->" /></p>
+    <p>Name <input type="text" id="name" name="name" value="<!--NAME-->" /></p>
 </form>
 
 <div>

@@ -328,6 +328,7 @@
             toggler.addEventListener("contextmenu", (e) => {
                 popupMenuID = e.target.id;
                 popupMenuName = name + "menu";
+		document.getElementById(popupMenuName).addEventListener("contextmenu", (e) => {e.preventDefault();});
                 if (name == "folder") {
                     p = e.target.id.split("/");
                     document.getElementById(name + "menunew").innerHTML = p.length == 1 ? "New testsuite" : "New testcase";
