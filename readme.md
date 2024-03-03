@@ -70,6 +70,9 @@ During this process you get experience, users and maybe also time and sponsors. 
 
 If you're not patient, write & propose something better or shut up and allow big boys to work.
 
+# It is not secure
+It is so much secure as it was possible.
+
 # I want this and this function
 Wait or see previous points. Theoretically, if we don't have technical limits in
 nodeJS, it could be added.

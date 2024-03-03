@@ -28,7 +28,7 @@
     </script>
 
 <body>
-    <b>Files</b><br>
+    <b>Files</b>
     <!--FILES-->
     <p>
         <button onclick='addFile();return false;'>
@@ -51,7 +51,7 @@
             }
         </script>
 
-    <p><b>Executions</b><br>
+    <p><b>Executions</b>
         <!--EXEC-->
 </body>
 
