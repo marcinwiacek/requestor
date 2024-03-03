@@ -184,7 +184,7 @@ async function executeRequest(req) {
     });
 }
 
-async function request2(req, res, times, filename) {
+async function request(req, res, times, filename) {
     let dt = new Date();
     let curDT = getDateString(dt);
     var response = await executeRequest(req);
@@ -262,7 +262,6 @@ function sendCSS(req, res, text) {
 async function addToRunReport(file, p, answer) {
     if (!fileLog) return;
     a2 = JSON.parse(answer);
-
     s = "Step '" + p + "'\nRequest " + a2.datetime + "\n" +
         a2.method + " " + a2.url + "\n";
     s += decodeURIComponent(a2.headers) + "\n";
@@ -275,7 +274,6 @@ async function addToRunReport(file, p, answer) {
     s += decodeURIComponent(a2.headers_res) + "\n";
     s += "\n" + decodeURIComponent(a2.body_res) + "\n";
     s += "\n\n";
-
     fs.appendFile(path.normalize(__dirname + '/reports/' + file + '.txt'), s,
         function(err) {
             if (err) {
@@ -300,7 +298,6 @@ async function addToRunReportHTML(file, p, answer) {
     if (a2.code_res != 0) s += " with HTTP code " + a2.code_res;
     s += "<br>\n";
     s += (a2.errors === "" ? "" : "<pre>" + decodeURIComponent(a2.errors) + "</pre>");
-
     s += (a2.cert_res === "" ? "" : "<span class=cert style='display:none'><pre>" +
         decodeURIComponent(a2.cert_res) + "</pre></span>\n");
     if (a2.headers_res.length != 0) s += "<pre>";
@@ -713,7 +710,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 runpath = ts.name + "/" + tc.name + "/" + step.name;
 
                 if (lines.length == 0) {
-                    sss = await request2(step, res, times, params['file']);
+                    sss = await request(step, res, times, params['file']);
                     sss = JSON.parse(sss);
                     sss.path = runpath;
                     sss.file = params['file'];
@@ -746,7 +743,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                         for (let d in arra) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                         }
-                        sss = await request2(stepcopy, res, times, params['file']);
+                        sss = await request(stepcopy, res, times, params['file']);
                         sss = JSON.parse(sss);
                         sss.path = runpath;
                         sss.file = params['file'];
