@@ -192,17 +192,17 @@ async function request2(req, res, times, filename) {
     var headers = "";
     var headers_res = "";
     for (let headername in req.headers) {
-	if (headers.length!=0) headers+="\n";
+        if (headers.length != 0) headers += "\n";
         headers += req.headers[headername];
     }
     for (let headername in response.headers) {
         if (Array.isArray(response.headers[headername])) {
             for (let headerx in response.headers[headername]) {
-	if (headers_res.length!=0) headers_res+="\n";
+                if (headers_res.length != 0) headers_res += "\n";
                 headers_res += headername + ": " + response.headers[headername][headerx];
             }
         } else {
-	if (headers_res.length!=0) headers_res+="\n";
+            if (headers_res.length != 0) headers_res += "\n";
             headers_res += headername + ": " + response.headers[headername];
         }
     }
@@ -288,30 +288,30 @@ async function addToRunReportHTML(file, p, answer) {
     if (!fileLog) return;
     a2 = JSON.parse(answer);
     s = "<b>Step '" + p + "'</b><br>\n" +
-"<span class=req>"+
+        "<span class=req>" +
         "Request " + a2.datetime + "<br>\n" + a2.method.toUpperCase() + " <a href='" + a2.url + "'>" + a2.url + "</a><br>\n";
     if (a2.headers.length != 0 || a2.body.length != 0) s += "<pre>";
-        s += decodeURIComponent(a2.headers);
+    s += decodeURIComponent(a2.headers);
     if (!a2.headers.endsWith("\n")) s += "\n";
     s += decodeURIComponent(a2.body);
     if (a2.headers.length != 0 || a2.body.length != 0) s += "</pre>";
-s+="</span><span class=resp>";
+    s += "</span><span class=resp>";
     s += "\n<br>Response " + a2.datetime_res;
-    if (a2.code_res!=0) s+=  " with HTTP code " + a2.code_res;
-    s+= "<br>\n";
+    if (a2.code_res != 0) s += " with HTTP code " + a2.code_res;
+    s += "<br>\n";
     s += (a2.errors === "" ? "" : "<pre>" + decodeURIComponent(a2.errors) + "</pre>");
 
     s += (a2.cert_res === "" ? "" : "<span class=cert style='display:none'><pre>" +
         decodeURIComponent(a2.cert_res) + "</pre></span>\n");
     if (a2.headers_res.length != 0) s += "<pre>";
-        s += decodeURIComponent(a2.headers_res);
+    s += decodeURIComponent(a2.headers_res);
     if (!a2.headers_res.endsWith("\n")) s += "\n";
     if (a2.headers_res.length != 0) s += "</pre>";
-    if (a2.body_res.length!=0) {
-	s += "\n<a download='response.htm' href='data:text/html;base64," +
-        Buffer.from(decodeURIComponent(a2.body_res)).toString('base64') + "'>Response</a>\n";
+    if (a2.body_res.length != 0) {
+        s += "\n<a download='response.htm' href='data:text/html;base64," +
+            Buffer.from(decodeURIComponent(a2.body_res)).toString('base64') + "'>Response</a>\n";
     }
-s+="</span>";
+    s += "</span>";
     s += "<hr>\n";
     fs.appendFile(path.normalize(__dirname + '/reports/' + file + '.htm'), s,
         function(err) {
@@ -513,9 +513,9 @@ async function getJSON(dbid, dt, file) {
     s += "\"code_res\":\"" + rows[0].code_res + "\",";
     s += "\"url\":\"" + rows[0].url + "\",";
     s += "\"method\":\"" + rows[0]["method"] + "\",";
-    s += "\"headers\":\"" + encodeURIComponent(rows[0]["headers"])+"\",";
+    s += "\"headers\":\"" + encodeURIComponent(rows[0]["headers"]) + "\",";
     s += "\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
-    s += "\"headers_res\":\"" + encodeURIComponent(rows[0]["headers_res"])+"\",";
+    s += "\"headers_res\":\"" + encodeURIComponent(rows[0]["headers_res"]) + "\",";
     s += "\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
     return s;
 }
@@ -669,7 +669,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
             });
         fs.appendFile(path.normalize(__dirname + '/reports/' + params['file'] + dt + '.htm'),
             "<b>Run '" + params['path'] + "'</b><hr>" +
-	    "<script>function hideshow(n) {all=document.getElementsByClassName(n);for (let i = 0; i < all.length; i++) {all[i].style.display=all[i].style.display=='none'?'block':'none';}}</script>"+
+            "<script>function hideshow(n) {all=document.getElementsByClassName(n);for (let i = 0; i < all.length; i++) {all[i].style.display=all[i].style.display=='none'?'block':'none';}}</script>" +
             "<input type=\"checkbox\" onclick='hideshow(\"cert\")'>Show certificate info" +
             "<input type=\"checkbox\" checked onclick='hideshow(\"req\")'>Show request info" +
             "<input type=\"checkbox\" checked onclick='hideshow(\"resp\")'>Show response info<hr>",
@@ -702,9 +702,9 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 if (params['method']) {
                     step.method = params['method'];
                     step.headers = decodeURIComponent(params['headers']).split("\n");
-step.headers = step.headers.filter(function (el) {
-  return el.length>0;
-});
+                    step.headers = step.headers.filter(function(el) {
+                        return el.length > 0;
+                    });
                     step.body = decodeURIComponent(params['body']);
                     step.ignoreWrongSSL = params['ssl'] == "true";
                     step.conLen = params['conlen'] == "true";
@@ -716,7 +716,7 @@ step.headers = step.headers.filter(function (el) {
                     sss = await request2(step, res, times, params['file']);
                     sss = JSON.parse(sss);
                     sss.path = runpath;
-		    sss.file = params['file'];
+                    sss.file = params['file'];
                     sss = JSON.stringify(sss);
                     sendCallback(params['file'], "runstep", sss);
                     s = {};
@@ -749,12 +749,12 @@ step.headers = step.headers.filter(function (el) {
                         sss = await request2(stepcopy, res, times, params['file']);
                         sss = JSON.parse(sss);
                         sss.path = runpath;
-			sss.file = params['file'];
+                        sss.file = params['file'];
                         sss = JSON.stringify(sss);
                         sendCallback(params['file'], "runstep", sss);
                         s = {};
                         s['file'] = params['file'];
-                        s['info'] = "Executing " + runpath+" iteration "+iteration;
+                        s['info'] = "Executing " + runpath + " iteration " + iteration;
                         sendCallback(params['file'], "runner", JSON.stringify(s));
                         addToRunReport(params['file'] + dt, runpath, sss);
                         addToRunReportHTML(params['file'] + dt, runpath, sss);
@@ -884,14 +884,14 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
     if (consoleLog) console.log(params);
-        if (params["reportpage"]) {
-            sendPlain(req, res, await getReportPage(parseInt(params['reportpage'])));
-	    return;
-	}
-        if (params["filepage"]) {
-            sendPlain(req, res, await getProjectPage(parseInt(params['filepage'])));
-	    return;
-	}
+    if (params["reportpage"]) {
+        sendPlain(req, res, await getReportPage(parseInt(params['reportpage'])));
+        return;
+    }
+    if (params["filepage"]) {
+        sendPlain(req, res, await getProjectPage(parseInt(params['filepage'])));
+        return;
+    }
     if (params["op"] == "newfile") {
         return parsePOSTNewFile(params['name']);
     }
@@ -973,18 +973,18 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 if (stepcopy.urlprefix) obiekt = obiekt.replace("<!--URLPREFIX-->", stepcopy.urlprefix);
                 obiekt = obiekt.replace("<!--URL-->", stepcopy.url);
                 var xxxx = "";
-first = true;
+                first = true;
                 for (var headernumber in stepcopy.headers) {
-if (!first) xxxx+= "\n";
-first = false;
+                    if (!first) xxxx += "\n";
+                    first = false;
                     xxxx += stepcopy.headers[headernumber];
                 }
                 obiekt = obiekt.replace("<!--HEADER-->", xxxx);
                 var xxxx = "";
-first = true;
+                first = true;
                 for (var bodynumber in stepcopy.body) {
-if (!first) xxxx+= "\n";
-first = false;
+                    if (!first) xxxx += "\n";
+                    first = false;
                     xxxx += stepcopy.body[bodynumber];
                 }
                 obiekt = obiekt.replace("<!--BODY-->", xxxx)
@@ -1134,7 +1134,7 @@ async function getProjectPage(pagenum) {
     for (filenumber in all_files) {
         if (!all_files[filenumber].endsWith('.json')) continue;
         let x = [];
-        x.fname = all_files[filenumber];// + " (" + getDateString(lm) + ")";
+        x.fname = all_files[filenumber]; // + " (" + getDateString(lm) + ")";
         x.mtime = (await fs.promises.stat(path.normalize(__dirname + '/projects/' + all_files[filenumber]))).mtime;
         all_files_arr.push(x);
     }
@@ -1167,19 +1167,19 @@ function filesort() {
 
 function showbox(arr, pagenum, prefix) {
     number = arr.length / 10;
-    out = "<div id='"+prefix+"'>";
+    out = "<div id='" + prefix + "'>";
     i = 0;
     if (pagenum <= number) {
         for (arrnumber in arr) {
             i++;
             if (i < pagenum * 10) continue;
             out += "<a href='?" + prefix + "=" + arr[arrnumber].fname + "'>" +
-                arr[arrnumber].fname + 
-         " (" + getDateString(arr[arrnumber].mtime)+")</a><br>";
+                arr[arrnumber].fname +
+                " (" + getDateString(arr[arrnumber].mtime) + ")</a><br>";
             if (i > pagenum * 10 + 9) break;
         }
         for (j = 0; j < number; j++) {
-            out += "<a onclick='loadBoxPart(\"" + prefix + "page=" + j + "\",\""+prefix+"\");return false;'>" + j + "</a> ";
+            out += "<a onclick='loadBoxPart(\"" + prefix + "page=" + j + "\",\"" + prefix + "\");return false;'>" + j + "</a> ";
         }
         out += "</div>";
     }
