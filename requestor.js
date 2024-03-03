@@ -304,7 +304,9 @@ async function addToRunReportHTML(file, p, answer) {
     s += decodeURIComponent(a2.headers_res);
     if (!a2.headers_res.endsWith("\n")) s += "\n";
     if (a2.headers_res.length != 0) s += "</pre>";
-    if (a2.body_res.length != 0) {
+    if (a2.headers_res.includes("json")) {
+	s+="<pre>"+decodeURIComponent(a2.body_res)+"</pre>";
+    } else if (a2.body_res.length != 0) {
         s += "\n<a download='response.htm' href='data:text/html;base64," +
             Buffer.from(decodeURIComponent(a2.body_res)).toString('base64') + "'>Response</a>\n";
     }
