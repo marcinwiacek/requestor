@@ -23,6 +23,7 @@ const consoleLog = true;
 let jsonObj = [];
 let dbObj = [];
 let callback = [];
+let sqLiteVersion = "";
 
 function readFileContentSync(fileName, callback) {
     //FIXME: checking if path is going out
@@ -441,7 +442,7 @@ function createTSTree(obj) {
     return tsobj;
 }
 
-function loadDB(name) {
+async function loadDB(name) {
     if (!dbObj[name]) {
         dbObj[name] = new sqlite3.Database(path.normalize(__dirname + "/projects/" + name + ".db"), async (err) => {
             if (err) {
@@ -464,9 +465,12 @@ function loadDB(name) {
     code_res SMALLINT not null,
     dt_res text not null
     );`, () => {});
-            let v = await db_all(name, "SELECT sqlite_version();");
-            console.log(JSON.stringify(v));
         });
+	if (sqLiteVersion === "") {
+            let v = await db_all(name, "SELECT sqlite_version();");
+	    sqLiteVersion = JSON.stringify(v);
+            console.log(JSON.stringify(v));
+	}
     }
 }
 
