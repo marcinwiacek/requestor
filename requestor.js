@@ -466,11 +466,11 @@ async function loadDB(name) {
     dt_res text not null
     );`, () => {});
         });
-	if (sqLiteVersion === "") {
+        if (sqLiteVersion === "") {
             let v = await db_all(name, "SELECT sqlite_version();");
-	    sqLiteVersion = JSON.stringify(v);
+            sqLiteVersion = JSON.stringify(v);
             console.log(JSON.stringify(v));
-	}
+        }
     }
 }
 
@@ -530,7 +530,7 @@ async function parsePOSTRenameElement(params, jsonObj) {
     el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
         el.obj.name = params['new'];
-	jsonObj.modified = true;
+        jsonObj.modified = true;
         sendCallback(params['file'], "renameelement", JSON.stringify(params));
     }
 }
@@ -541,7 +541,7 @@ async function parsePOSTNewElement(params, jsonObj) {
         newTS.name = params["new"];
         newTS.testcases = [];
         jsonObj.testsuites.unshift(newTS);
-	jsonObj.modified = true;
+        jsonObj.modified = true;
         sendCallback(params['file'], "newelement", JSON.stringify(params));
     } else {
         el = findElement(jsonObj, params, params['path'], false, false);
@@ -570,7 +570,7 @@ async function parsePOSTNewElement(params, jsonObj) {
                 newTS.testcases = [];
                 el.parentarray.splice(el.index, 0, newTS);
             }
-    	    jsonObj.modified = true;
+            jsonObj.modified = true;
             sendCallback(params['file'], "newelement", JSON.stringify(params));
         }
     }
@@ -598,7 +598,7 @@ async function parsePOSTNewElementInside(params, jsonObj) {
             newTC.input = [];
             el.obj.testcases.unshift(newTC);
         }
-	jsonObj.modified = true;
+        jsonObj.modified = true;
         sendCallback(params['file'], "newelementinside", JSON.stringify(params));
     }
 }
@@ -606,7 +606,7 @@ async function parsePOSTNewElementInside(params, jsonObj) {
 async function parsePOSTEnableDisableElement(params, jsonObj) {
     el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
-	jsonObj.modified = true;
+        jsonObj.modified = true;
         if (el.obj.disabled == true) {
             delete el.obj.disabled;
         } else {
@@ -620,7 +620,7 @@ async function parsePOSTDeleteElement(params, jsonObj) {
     //fixme delete from db
     el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
-	jsonObj.modified = true;
+        jsonObj.modified = true;
         el.parentarray.splice(el.index, 1);
         sss = params;
         sss['emptyafter'] = jsonObj.testsuites.length == 0;
@@ -631,7 +631,7 @@ async function parsePOSTDeleteElement(params, jsonObj) {
 async function parsePOSTSetData(params, jsonObj) {
     el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
-	jsonObj.modified = true;
+        jsonObj.modified = true;
         el.obj.input = params['data'].split("\n");
     }
 }
@@ -656,11 +656,11 @@ async function parsePOSTSaveFile(params, jsonObj) {
             }
         });
 
-	delete jsonObj.modified;
-	x=[];
-        x.file = params['file'];
-	x.modified = false;
-        sendCallback(params['file'], "setenabledisablesave", JSON.stringify(x));
+    delete jsonObj.modified;
+    x = [];
+    x.file = params['file'];
+    x.modified = false;
+    sendCallback(params['file'], "setenabledisablesave", JSON.stringify(x));
 }
 
 async function parsePOSTNewFile(params) {
@@ -802,7 +802,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
     s['info'] = "";
     sendCallback(params['file'], "runner", JSON.stringify(s));
     sendCallback("null", "mainrunner", "");
-	jsonObj.modified = true;
+    jsonObj.modified = true;
     if (req != null) sendPlain(req, res, sss);
 }
 
@@ -865,7 +865,7 @@ function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
         } else {
             tree.push(createStepTree(newObj));
         }
-	jsonObj.modified = true;
+        jsonObj.modified = true;
         params['struct'] = JSON.stringify(tree);
         sendCallback(params['file'], "pastedrop", JSON.stringify(params));
     }
@@ -913,7 +913,7 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
 
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
-    if (consoleLog) console.log(params);
+    if (consoleLog) console.log(JSON.parse(JSON.stringify(params)));
     if (params["reportpage"]) {
         sendPlain(req, res, await getReportPage(parseInt(params['reportpage'])));
         return;
@@ -1051,12 +1051,11 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
         const params = url.parse(req.url, true).query;
-        if (consoleLog) console.log(params);
+        if (consoleLog) console.log(JSON.parse(JSON.stringify(params)));
         if (params["sse"]) { // PUSH functionality
             res.writeHead(200, {
                 'Cache-Control': 'no-cache',
-                'Content-Type': 'text/event-stream',
-                'Connection': 'keep-alive'
+                'Content-Type': 'text/event-stream'
             });
             const session = crypto.randomBytes(32).toString('base64');
             x = [];
@@ -1064,12 +1063,12 @@ const onRequestHandler = async (req, res) => {
             x.res = res;
             //            console.log("registering SSE " + x);
             callback[session] = x;
-if (params['file']!=null && jsonObj[params['file']]!=null) {
-x=[];
-            x.file = params['file'];
-x.modified = jsonObj[params['file']].modified?true:false;
-        sendCallback(params['file'], "setenabledisablesave", JSON.stringify(x));
-}
+            if (params['file'] != null && jsonObj[params['file']] != null) {
+                x = [];
+                x.file = params['file'];
+                x.modified = jsonObj[params['file']].modified ? true : false;
+                sendCallback(params['file'], "setenabledisablesave", JSON.stringify(x));
+            }
             res.on('close', function() {
                 delete callback[session];
             });
