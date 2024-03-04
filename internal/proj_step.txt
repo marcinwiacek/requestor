@@ -94,13 +94,13 @@
         document.getElementById("lastrequesturl").value = obj.url;
         document.getElementById("lastrequestheaders").value = "";
         document.getElementById("lastrequestheaders").value =
-                decodeURIComponent(obj.headers);
+            decodeURIComponent(obj.headers);
         document.getElementById("lastrequestbody").value = decodeURIComponent(
             obj.body,
         );
         document.getElementById("lastresponseheaders").value = "";
         document.getElementById("lastresponseheaders").value =
-                decodeURIComponent(obj.headers_res);
+            decodeURIComponent(obj.headers_res);
         document.getElementById("lastresponsetime").value = decodeURIComponent(
             obj.datetime_res,
         );
@@ -154,13 +154,43 @@
 
         return false;
     }
+
+    function syncBody1() {
+        document.getElementById("body").style.height =
+            document.getElementById("lastrequestbody").style.height;
+    }
+
+    new ResizeObserver(syncBody1).observe(document.getElementById("lastrequestbody"));
+
+    function syncBody2() {
+        document.getElementById("lastrequestbody").style.height =
+            document.getElementById("body").style.height;
+    }
+
+    new ResizeObserver(syncBody2).observe(document.getElementById("body"));
+
+    function syncHeader1() {
+        document.getElementById("header").style.height =
+            document.getElementById("lastrequestheaders").style.height;
+    }
+
+    new ResizeObserver(syncHeader1).observe(document.getElementById("lastrequestheaders"));
+
+    function syncHeader2() {
+        document.getElementById("lastrequestheaders").style.height =
+            document.getElementById("header").style.height;
+    }
+
+    new ResizeObserver(syncHeader2).observe(document.getElementById("header"));
 </script>
 <!--PATH-->
 <form onsubmit="return sendRunStep()">
     <table>
         <tr>
-            <td valign="bottom">
-                <br />Name <input type="text" id="name" value="<!--NAME-->" size="58" />
+            <td valign="bottom" width=50%>
+                <div style='display:flex'>
+                    Name&nbsp;<input type="text" id="name" value="<!--NAME-->" />
+                </div>
             </td>
             <td valign="bottom">
                 When
@@ -168,81 +198,112 @@
                     <!--WHENLAST-->
                 </select>
             </td>
-            <td valign="bottom"></td>
         </tr>
         <tr>
             <td valign="top">
-                <select id="type">
-                    <option value="get">GET</option>
-                    <option value="head">HEAD</option>
-                    <option value="post">POST</option>
-                    <option value="put">PUT</option>
-                    <option value="delete">DELETE</option>
-                    <option value="connect">CONNECT</option>
-                    <option value="options">OPTIONS</option>
-                    <option value="trace">TRACE</option>
-                    <option value="patch">PATCH</option>
-                </select>
-                <script>
-                    selectMethod("type", "<!--METHOD-->");
-                </script>
-                <!--URLPREFIX-->&nbsp;&nbsp;
-                <input type="text" id="url" value="<!--URL-->" size="58" />
-                <p>
-                    Headers<br /><textarea cols="65" rows="5" id="header"><!--HEADER--></textarea>
-                </p>
-                <p>
-                    Body<br /><textarea cols="65" rows="7" id="body"><!--BODY--></textarea>
-                </p>
+                <div style='display:flex'>
+                    <select id="type">
+                        <option value="get">GET</option>
+                        <option value="head">HEAD</option>
+                        <option value="post">POST</option>
+                        <option value="put">PUT</option>
+                        <option value="delete">DELETE</option>
+                        <option value="connect">CONNECT</option>
+                        <option value="options">OPTIONS</option>
+                        <option value="trace">TRACE</option>
+                        <option value="patch">PATCH</option>
+                    </select>
+                    <script>
+                        selectMethod("type", "<!--METHOD-->");
+                    </script>
+                    <!--URLPREFIX-->&nbsp;<input style='flex:4' type="text" id="url" value="<!--URL-->" />
+                </div>
+            </td>
+            <td>
+                <div style='display:flex'>
+                    <input type="text" id="lastrequesttype" size=7 />
+                    <!--URLPREFIX-->
+                    &nbsp;<input style='flex:4' type="text" id="lastrequesturl" value="" />
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div>Headers</div>
+                <div style='display:flex'>
+                    <textarea style='flex:4;height:100%' rows="5" id="header"><!--HEADER--></textarea>
+                </div>
+            </td>
+            <td>
+                <div>Headers</div>
+                <div style='display:flex'>
+                    <textarea style='flex:4' rows="5" id="lastrequestheaders"></textarea>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div>Body</div>
+                <div style='display:flex'>
+                    <textarea style='flex:4' rows=7 id="body"><!--BODY--></textarea>
+                </div>
+            </td>
+            <td>
+                <div>
+                    Body</div>
+                <div style='display:flex'>
+                    <textarea style='flex:4' rows="7" id="lastrequestbody"></textarea>
+                </div>
+
+            </td>
+        </tr>
+        <tr>
+            <td valign=top>
                 <p>
                     <input type="checkbox" id="ignorewrongssl" <!--SSLIGNORE--> />Ignore SSL
                     errors <br /><input type="checkbox" id="addcontentlength" <!--CONLENGTH-->
                     />Add content-length
                 </p>
 
-                <p>Asserts</p>
-                <p>
+                <p>Asserts<br>
                     <select id="x">
                         <option value="GET">HTTP code</option>
                         <option value="POST">Headers</option>
                         <option value="POST">Body</option>
                     </select>
-                    <input type="text" id="url2" value="200" size="40" />
+                    <input type="text" id="url2" value="200" />
                 </p>
 
                 <p><button id="run" type="submit">Run step</button></p>
             </td>
             <td valign="top">
-                <input type="text" id="lastrequesttype" size="6" />
-                <!--URLPREFIX-->
-                &nbsp;&nbsp;<input type="text" id="lastrequesturl" value="" size="58" />
-                <p>
-                    Headers<br /><textarea cols="65" rows="5" id="lastrequestheaders"></textarea>
-                </p>
-                <p>
-                    Body<br /><textarea cols="65" rows="7" id="lastrequestbody"></textarea>
-                </p>
                 <p>
                     <input type="checkbox" id="lastignorewrongssl" />Ignore SSL errors
                 </p>
                 <p>
-                    Response time <input type="text" id="lastresponsetime" /> Code
-                    <input type="text" id="lastresponsecode" />
+                    Response <input type="text" id="lastresponsetime" /> Code
+                    <input type="text" id="lastresponsecode" size=10 />
                 </p>
-                <p>
-                    Headers<br /><textarea cols="65" rows="5" id="lastresponseheaders"></textarea>
-                </p>
-                <p>
-                    Body<br /><textarea cols="65" rows="7" id="lastresponsebody"></textarea>
-                </p>
-                <p>
-                    Security<br /><textarea cols="65" rows="3" id="lastresponsecert"></textarea>
-                </p>
-                <p>
-                    Errors<br /><textarea cols="65" rows="3" id="lastresponseerror"></textarea>
-                </p>
+                <div>
+                    Headers
+                </div>
+                <div style='display:flex'>
+                    <textarea style='flex:4' rows="5" id="lastresponseheaders"></textarea>
+                </div>
+                <div>
+                    Body</div>
+                <div style='display:flex'>
+                    <textarea style='flex:4' rows="7" id="lastresponsebody"></textarea>
+                </div>
+                <div> Security</div>
+                <div style='display:flex'>
+                    <textarea style='flex:4' rows="3" id="lastresponsecert"></textarea>
+                </div>
+                <div>Errors</div>
+                <div style='display:flex'>
+                    <textarea style='flex:4' rows="3" id="lastresponseerror"></textarea>
+                </div>
             </td>
-            <td valign="top"></td>
         </tr>
     </table>
 </form>

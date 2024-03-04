@@ -28,7 +28,7 @@
     </script>
 
 <body>
-    <b>Files</b>
+    <p><b>Files</b>
     <!--FILES-->
     <p>
         <button onclick='addFile();return false;'>

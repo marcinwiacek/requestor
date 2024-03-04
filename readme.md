@@ -36,17 +36,6 @@ for example:
 
 ```node requestor.js file /TS1```
 
-# TODO
-Work in progress, some important points:
-* params between steps
-* running shell scripts before request
-* asserts
-* junit results
-* support for own ssl certificates
-* support for YAML or other formats describing service formats
-* redirect http to https (currently, when you use http URL for GUI, it doesn't do anything)
-* unique DB ID
-
 # Why another app?
 Because many existing apps were written years ago, are obsolete and sometimes have horrible GUI.
 
@@ -62,9 +51,12 @@ Yes. It's. Month ago it was worse, year ago even worse than month ago and tomorr
 
 Do you feel better with these statement and knowledge?
 
-First of all we're using language, which is not the best (see one of sections below). Additionally I strongly believe, that normally you start from something horrible/small & improve it as long as required (Android 1.0, Windows 1.0 or even iOS 1.0
+First of all we're using language and layout descriptions, which are not the best on the world
+(see one of sections below). Additionally I strongly believe, that normally you should sometimes start
+from something horrible/small & improve it as long as required (Android 1.0, Windows 1.0 or even iOS 1.0
 were NOT excellent, but without them we would not see current versions).
-During this process you get experience, users and maybe also time and sponsors. It accelerates doing things and in some moment you can see snowball effect.
+During this process you get experience, users and maybe also time and sponsors. 
+It accelerates doing things + in some moment you can see snowball effect.
 
 If you're not patient, write & propose something better or shut up and allow big boys to work.
 
@@ -78,6 +70,18 @@ nodeJS, it could be added.
 # Known issues
 * When SSL certificate on the server side has got problems (is expired, etc.), **Requestor**
 doesn't show it - currently (Node 20.11) it's Node limit.
+
+# TODO
+Work in progress, some points:
+
+* params between steps
+* running shell scripts before request
+* asserts
+* junit results
+* support for own ssl certificates
+* support for YAML or other formats describing service formats
+* redirect http to https in GUI (currently, when you use http URL, it doesn't open anything)
+* unique DB ID
 
 # Support
 * GitHub and/or
@@ -96,24 +100,29 @@ have the most important things and working state
 In my life I have used many languages, for example:
 
 * assembler was powerfull (but required too much effort)
-* C nice (but not very welcome in business environments because of memory leaks and problems especially with code created by
-junior developers)
+* C nice (but not very welcome in business environments because of memory leaks
+and problems especially with code created by junior developers; not receommended also
+by US government?)
 * C++ and Rust overcomplicated
 * Java boring (which gave me some chance to pay my bills)
-* Pascal/Delphi perfect solution for creating powerfull GUI apps without big errors (but unfortunatelly dropped by market)
+* Pascal/Delphi perfect solution for creating powerfull GUI apps without
+big errors (but unfortunatelly dropped by market)
 * PHP/Basic/Visual Basic limited and prepared for some scenarios only
-* Sharp languages (C#, etc.) made first impressions wrong (I remember, how slow they were in first versions)
+* Sharp languages (C#, etc.) made first impressions wrong (I remember, how slow
+they were in first versions)
 
-JavaScript itself is not very good language (more honestly, it's ugly language, and see for example
+HTML is not always good for creating complicated layouts + JavaScript itself is not very
+good language (more honestly, it's ugly language, and see for example
 [Programming’s Greatest Mistakes from Mark Rendle](https://www.youtube.com/watch?v=qC_ioJQpv4E) or
-[The Post JavaScript Apocalypse from Douglas Crockford](https://www.youtube.com/watch?v=99Zacm7SsWQ) or even [The top 5 JavaScript issues in all our codebases from Phil Nash](https://www.youtube.com/watch?v=IGl-P4SHo2E) or examples from
+[The Post JavaScript Apocalypse from Douglas Crockford](https://www.youtube.com/watch?v=99Zacm7SsWQ) or even
+[The top 5 JavaScript issues in all our codebases from Phil Nash](https://www.youtube.com/watch?v=IGl-P4SHo2E) or examples from
 [The Worst Programming Language Ever from Mark Rendle](https://www.youtube.com/watch?v=vcFBwt1nu2U)
 or some other materials), but in combination with nodeJS allowed me for creating
 [very nice technically successfull Sobieski+ concept](https://mwiacek.com/www/?q=node/401)
 with full CMS file-based with chats, Google integration, multiuser work and other features.
+
 I see speed, source code availability, lack of problems with onboarding in some companies,
 support for all important features, etc. (and I believe, that this combination has got future for next years).
-
 It doesn't mean of course, that in the future I will not use [Carbon](https://github.com/carbon-language/carbon-lang)
 or something else.
 
