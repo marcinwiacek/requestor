@@ -37,7 +37,7 @@ for example:
 ```node requestor.js file /TS1```
 
 # Why another app?
-Because many existing apps were written years ago, are obsolete and sometimes have horrible GUI.
+Because many existing apps were written years ago and sometimes have horrible GUI or solutions.
 
 # License
 
@@ -52,8 +52,8 @@ Yes. It's. Month ago it was worse, year ago even worse than month ago and tomorr
 Do you feel better with these statement and knowledge?
 
 First of all we're using language and layout descriptions, which are not the best on the world
-(see one of sections below). Additionally I strongly believe, that normally you should sometimes start
-from something horrible/small & improve it as long as required (Android 1.0, Windows 1.0 or even iOS 1.0
+(see one of sections below). Additionally I strongly believe, that normally you start from something
+horrible/small & improve it as long as required (Android 1.0, Windows 1.0 or even iOS 1.0
 were NOT excellent, but without them we would not see current versions).
 During this process you get experience, users and maybe also time and sponsors. 
 It accelerates doing things + in some moment you can see snowball effect.

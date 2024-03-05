@@ -326,7 +326,9 @@ async function addToRunReportHTML(file, p, answer) {
 
 async function sendCallback(file, type, msg) {
     for (let i in callback) {
+//console.log("   callback "+callback[i].file+" "+file);
         if (callback[i].file == file) {
+//console.log("   running callback "+callback[i].file+" "+type+" "+msg);
             callback[i].res.write("event: " + type + "\n");
             callback[i].res.write("data: " + msg + "\n\n");
         }
@@ -657,14 +659,17 @@ async function parsePOSTSaveFile(params, jsonObj) {
         });
 
     delete jsonObj.modified;
-    x = [];
+    x = {};
     x.file = params['file'];
     x.modified = false;
     sendCallback(params['file'], "setenabledisablesave", JSON.stringify(x));
 }
 
-async function parsePOSTNewFile(params) {
-    fs.writeFile(path.normalize(__dirname + '/projects/' + params['name'] + ".json"),
+async function parsePOSTNewFile(req, filename, res) {
+if (fs.existsSync(path.normalize(__dirname + '/projects/' + filename + ".json"))) {
+    sendPlain(req, res, "file exists");
+} else {
+    fs.writeFile(path.normalize(__dirname + '/projects/' + filename + ".json"),
         "{ \"format\": \"created by requestor\",\"testsuites\": []}",
         function(err) {
             if (err) {
@@ -672,6 +677,7 @@ async function parsePOSTNewFile(params) {
             }
         });
     sendPlain(req, res, "");
+}
 }
 
 async function parsePOSTRun(req, params, res, jsonObj) {
@@ -923,7 +929,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         return;
     }
     if (params["op"] == "newfile") {
-        return parsePOSTNewFile(params['name']);
+        return parsePOSTNewFile(req, params['name'], res);
     }
     loadDB(params['file']);
     if (!(params['file'] && fs.existsSync(
@@ -1061,10 +1067,10 @@ const onRequestHandler = async (req, res) => {
             x = [];
             x.file = params['file'];
             x.res = res;
-            //            console.log("registering SSE " + x);
+//                        console.log("registering SSE " + x);
             callback[session] = x;
-            if (params['file'] != null && jsonObj[params['file']] != null) {
-                x = [];
+            if (params['file'] != null && jsonObj[params['file']]) {
+                x = {};
                 x.file = params['file'];
                 x.modified = jsonObj[params['file']].modified ? true : false;
                 sendCallback(params['file'], "setenabledisablesave", JSON.stringify(x));

@@ -31,22 +31,26 @@
     <p><b>Files</b>
     <!--FILES-->
     <p>
-        <button onclick='addFile();return false;'>
+        <button onclick='addFile("");return false;'>
             New file
         </button>
 
         <script>
-            function addFile() {
+            function addFile(n) {
                 while (true) {
-                    var x = prompt("Please enter new file name");
+                    var x = prompt("Please enter new unique file name",n);
                     if (x == null) break;
                     if (x == "") continue;
                     executePOST("op=newfile&" + "name=" + x,
                         function(...args) {
+if (args[0]==="file exists") {
+	addFile(x);
+} else {
                             window.location.href = '/';
+}
                         }
                     );
-                    break;
+break;
                 }
             }
         </script>

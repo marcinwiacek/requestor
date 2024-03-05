@@ -35,6 +35,13 @@
         };
         http.send(URL);
     }
+    
+    function setSaveFile(disabled) {
+            document.getElementById('savefile').disabled = disabled;
+    window.onbeforeunload = disabled?null:function() {
+return "File not saved. Click Cancel to stay on the page or OK to close (file will stay unsaved in server)";
+};
+    }
 
     var source = null;
 
@@ -98,7 +105,7 @@
                 }
             }
             setupLast(obj);
-            document.getElementById('savefile').disabled = false;
+            setSaveFile(false);
         });
         source.addEventListener("renameelement", function(event) {
             var obj = JSON.parse(event.data);
@@ -119,7 +126,7 @@
                     toggler[i].id = toggler[i].id.replace(obj.path, obj.newpath);
                 }
             }
-            document.getElementById('savefile').disabled = false;
+	    setSaveFile(false);
         });
         source.addEventListener("newelement", function(event) {
             var obj = JSON.parse(event.data);
@@ -139,7 +146,7 @@
                 updateFolder(newEl);
             }
             document.getElementById("emptymenu").style.display = 'none';
-            document.getElementById('savefile').disabled = false;
+	    setSaveFile(false);
         });
         source.addEventListener("newelementinside", function(event) {
             var obj = JSON.parse(event.data);
@@ -153,7 +160,7 @@
             if (obj.elplen != 2) {
                 updateFolder(newEl);
             }
-            document.getElementById('savefile').disabled = false;
+	    setSaveFile(false);
         });
         source.addEventListener("pastedrop", function(event) {
             var obj = JSON.parse(event.data);
@@ -172,7 +179,7 @@
                 });
             }
             updateAllFolders();
-            document.getElementById('savefile').disabled = false;
+	    setSaveFile(false);
         });
         source.addEventListener("enabledisableelement", function(event) {
             var obj = JSON.parse(event.data);
@@ -180,7 +187,7 @@
             if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
             if (debug) console.log("SSE enabledisableelement with " + event.data);
             document.getElementById(JSON.parse(event.data).path).classList.toggle("disabled");
-            document.getElementById('savefile').disabled = false;
+	    setSaveFile(false);
         });
         source.addEventListener("deleteelement", function(event) {
             var obj = JSON.parse(event.data);
@@ -192,14 +199,14 @@
             if (obj.emptyafter) {
 		document.getElementById("emptymenu").style.display = 'inline';
 	    }
-            document.getElementById('savefile').disabled = false;
+	    setSaveFile(false);
         });
         source.addEventListener("setenabledisablesave", function(event) {
             var obj = JSON.parse(event.data);
             params = new URLSearchParams(window.location.search);
             if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
-            if (debug) console.log("SSE savefile with " + event.data);
-            document.getElementById('savefile').disabled = !obj.modified;
+            if (debug) console.log("SSE setenabledisablesave with " + event.data);
+            setSaveFile(!obj.modified);
         });
     }
     setupSSE();
