@@ -12,11 +12,11 @@ Ready API, Postman, JMeter, curl and other similar tools.
 * Providing support for modern elements like HTTP/2
 
 # Features
-* Sending requests (although this point will mix different things, it's worth to mention,
+* Sending requests (although this will mix different things, it's worth to mention,
 that this can be POST, GET, XML, JSON, REST, SOAP and others)
 * Preparing requests tests using GUI in web browser (tested in desktop Chromium, Firefox
 and Safari)
-* Saving data in good formatted text JSON files (changes are easy to track in GIT)
+* Saving data in good formatted text JSON files (changes are easy to track in Git)
 * Saving execution info in the SQLite DB and easy to read HTML, XML (JUnit) and TXT files
 * Concurrent work (when one user is doing something, other see updates)
 

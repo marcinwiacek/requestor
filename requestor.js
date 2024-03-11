@@ -15,7 +15,8 @@ const zlib = require('zlib');
 const version = "20240301";
 const hostname = '127.0.0.1';
 const port = 3000;
-const maxResultsPerRequest = 500;
+const DB = false;
+const maxDBResultsPerRequest = 500;
 const fileHTMLLog = true;
 const fileTXTLog = false;
 const consoleLog = true;
@@ -649,6 +650,7 @@ async function parsePOSTSaveFile(params, jsonObj) {
             //            if (err) console.log('ERROR: ' + err);
         });
 
+    delete jsonObj.modified;
     jsonObj.format = "Created with Requestor " + version + " on " + getDateString(lm);
     fs.writeFile(path.normalize(__dirname + '/projects/' + params['file']),
         JSON.stringify(jsonObj, null, 2),
@@ -658,7 +660,6 @@ async function parsePOSTSaveFile(params, jsonObj) {
             }
         });
 
-    delete jsonObj.modified;
     x = {};
     x.file = params['file'];
     x.modified = false;
@@ -1034,7 +1035,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                     var del = "";
                     for (let row in rows) {
                         xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
-                        if (num == maxResultsPerRequest) {
+                        if (num == maxDBResultsPerRequest) {
                             if (del != "") del += ",";
                             del += "'" + rows[row].dt + "'";
                         } else {
@@ -1091,14 +1092,10 @@ const onRequestHandler = async (req, res) => {
             sendCSS(req, res, readFileContentSync("/external/tabulator_midnight.min.css"));
             return;
         }
-        if (params['report'] && fs.existsSync(
-                path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.htm')) {
+        if (params['report'] && 
+(fs.existsSync(path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.htm') ||
+fs.existsSync(path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.txt'))) {
             sendHTML(req, res, readFileContentSync("/reports/" + params['report']));
-            return;
-        }
-        if (params['report'] && fs.existsSync(
-                path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.txt')) {
-            sendPlain(req, res, readFileContentSync("/reports/" + params['report']));
             return;
         }
 
