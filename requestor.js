@@ -12,7 +12,7 @@ const tls = require('node:tls');
 const url = require('url');
 const zlib = require('zlib');
 
-const version = "20240301";
+const version = "20240316";
 const hostname = '127.0.0.1';
 const port = 3000;
 const DB = false;

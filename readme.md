@@ -14,10 +14,10 @@ Ready API, Postman, JMeter, curl and other similar tools.
 # Features
 * Sending requests (although this will mix different things, it's worth to mention,
 that this can be POST, GET, XML, JSON, REST, SOAP and others)
-* Preparing requests tests using GUI in web browser (tested in desktop Chromium, Firefox
-and Safari)
+* Preparing requests tests using GUI in web browser (tested mainly in desktop Firefox, should be
+perfectly fine in Chrome/Edge/Chromium and Safari)
 * Saving data in good formatted text JSON files (changes are easy to track in Git)
-* Saving execution info in the SQLite DB and easy to read HTML, XML (JUnit) and TXT files
+* Saving execution info in the SQLite DB and easy to read HTML and TXT files
 * Concurrent work (when one user is doing something, other see updates)
 
 # Installation and running
@@ -36,15 +36,20 @@ for example:
 
 ```node requestor.js file /TS1```
 
+# Version history
+
+16 March 2024 - Milestone 1
+
 # Why another app?
 Because many existing apps were written years ago and sometimes have horrible GUI or solutions.
 
 # License
+GPLv3. For other please contact author of this repo.
 
 # Ha, ha, license allows for using it for free, I don't need to pay
-Indeed. But remember, that time is money and there is some theorical possibility, that
-your requests to the project member(s) will have lower priority (in other words: I/we do,
-what we can, but will have to pay bills and do some other things too)
+Indeed. But remember, that time is money and there is some (theoretical of course) possibility, that
+your requests to the project member(s) will have lower priority without paying for support
+(in other words: I/we do, what we can, but will have to pay bills and various things depends on it)
 
 # Code is horrible, all should go to the trash, bla, bla, bla
 Yes. It's. Month ago it was worse, year ago even worse than month ago and tomorrow will be better.
