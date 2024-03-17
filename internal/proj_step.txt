@@ -265,13 +265,13 @@
                     />Add content-length
                 </p>
 
-                <p>Asserts<br>
-                    <select id="x">
+                <p style='color:grey'>Asserts<br>
+                    <select id="x" disabled>
                         <option value="GET">HTTP code</option>
                         <option value="POST">Headers</option>
                         <option value="POST">Body</option>
                     </select>
-                    <input type="text" id="url2" value="200" />
+                    <input type="text" id="url2" value="200" disabled />
                 </p>
 
                 <p><button id="run" type="submit">Run step</button></p>
