@@ -1055,6 +1055,28 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     sendPlain(req, res, "");
 }
 
+async function findYAMLServices(req, res) {
+    let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
+    let info = "";
+    let info2 = "";
+    let level = 0;
+    for (filenumber in all_files) {
+        if (!all_files[filenumber].endsWith('.yaml')) continue;
+        info=(readFileContentSync("/projects/"+all_files[filenumber])
+	    .split(/\r\n|\r|\n/g));
+    }
+    for (line in info) {
+	if (level == 0) {
+	    if (info[line]=== "paths:") {
+		level = 1;
+	    }
+	} else {
+	    if (info[line].startsWith("  ")) info2+=info[line];
+	}
+    }
+    sendHTML(req, res, info2);
+}
+
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
         const params = url.parse(req.url, true).query;
@@ -1096,6 +1118,10 @@ const onRequestHandler = async (req, res) => {
 (fs.existsSync(path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.htm') ||
 fs.existsSync(path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.txt'))) {
             sendHTML(req, res, readFileContentSync("/reports/" + params['report']));
+            return;
+        }
+        if (req.url == "/listservices") {
+	    findYAMLServices(req, res);
             return;
         }
 
