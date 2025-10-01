@@ -1063,6 +1063,7 @@ async function findYAMLServices(req, res) {
     for (filenumber in all_files) {
         if (!all_files[filenumber].endsWith('.yaml')) continue;
         info=(readFileContentSync("/projects/"+all_files[filenumber])
+	    .replace(/\t/g,"    ")
 	    .split(/\r\n|\r|\n/g));
     }
     for (line in info) {
@@ -1071,7 +1072,16 @@ async function findYAMLServices(req, res) {
 		level = 1;
 	    }
 	} else {
-	    if (info[line].startsWith("  ")) info2+=info[line];
+	    let x = info[line].replace(/^( )+/,"");
+	    if (info[line].length-x.length==0) {
+		level=0;
+	    } else {
+//		info2+=(info[line].length-x.length)+" "+info[line]+" ";
+		if (info[line].length-x.length==6 &&
+		    x.startsWith("operationId:")) {
+		    info2+=info[line].replace("operationId: ","")+"<br>";
+		}
+	    }
 	}
     }
     sendHTML(req, res, info2);
