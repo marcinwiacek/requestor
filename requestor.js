@@ -954,17 +954,28 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 		    x.startsWith("operationId:")) {
 
                 let newTC = {};
+		params["new"]=info[line].replace("operationId: ","");
                 newTC.name = info[line].replace("operationId: ","");
-
                 newTC.steps = [];
                 newTC.input = [];
                 newTS.testcases.push( newTC);
 		params["path"] = "new testsuite/";
-		params["new"]=info[line].replace("operationId: ","");
         	sendCallback(params['file'], "newelement", JSON.stringify(params));
 
+                let newStep = {};
+		params["new"]=info[line].replace("operationId: ","");
+                newStep.name = info[line].replace("operationId: ","");
+                newStep.method = "POST";
+                newStep.headers = "";
+                newStep.body = "";
+                newStep.ignoreWrongSSL = true;
+                newStep.conLen = true;
+                newStep.url = "https://";
+                newStep.headers = "";
+		newTC.steps.push(newStep);
+		params["path"] = "new testsuite/"+info[line].replace("operationId: ","");
+        	sendCallback(params['file'], "newelement", JSON.stringify(params));
 
-		    info2+=info[line].replace("operationId: ","")+"<br>";
 		}
 	    }
 	}
