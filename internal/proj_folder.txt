@@ -76,6 +76,7 @@
         <a onclick="elementDelete()">Delete</a><br />
         <a onclick="elementCopy()">Copy</a><br />
         <a onclick="elementPaste()">Paste</a><br />
+        <a onclick="elementImport()">Import</a><br />
     </div>
 
     <!--TC-->
@@ -114,6 +115,11 @@
                     break;
                 }
             }
+        }
+
+        function elementImport() {
+            document.getElementById(popupMenuName).classList.toggle("show");
+            executePOST("op=import&path=");
         }
 
         function elementEnableDisable() {

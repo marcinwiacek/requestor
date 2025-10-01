@@ -918,6 +918,61 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
     }
 }
 
+async function parsePOSTImport(req, params, res, jsonObj) {
+	params["path"] = "/";
+        params["new"]="new testsuite";
+        let newTS = {};
+        newTS.name = "new testsuite";
+        newTS.testcases = [];
+        jsonObj.testsuites.unshift(newTS);
+        jsonObj.modified = true;
+        sendCallback(params['file'], "newelement", JSON.stringify(params));
+
+
+    let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
+    let info = "";
+    let info2 = "";
+    let level = 0;
+    for (filenumber in all_files) {
+        if (!all_files[filenumber].endsWith('.yaml')) continue;
+        info=(readFileContentSync("/projects/"+all_files[filenumber])
+	    .replace(/\t/g,"    ")
+	    .split(/\r\n|\r|\n/g));
+    }
+    for (line in info) {
+	if (level == 0) {
+	    if (info[line]=== "paths:") {
+		level = 1;
+	    }
+	} else {
+	    let x = info[line].replace(/^( )+/,"");
+	    if (info[line].length-x.length==0) {
+		level=0;
+	    } else {
+//		info2+=(info[line].length-x.length)+" "+info[line]+" ";
+		if (info[line].length-x.length==6 &&
+		    x.startsWith("operationId:")) {
+
+                let newTC = {};
+                newTC.name = info[line].replace("operationId: ","");
+
+                newTC.steps = [];
+                newTC.input = [];
+                newTS.testcases.push( newTC);
+		params["path"] = "new testsuite/";
+		params["new"]=info[line].replace("operationId: ","");
+        	sendCallback(params['file'], "newelement", JSON.stringify(params));
+
+
+		    info2+=info[line].replace("operationId: ","")+"<br>";
+		}
+	    }
+	}
+    }
+
+
+}
+
 // return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
     if (consoleLog) console.log(JSON.parse(JSON.stringify(params)));
@@ -944,6 +999,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     executed = true;
     if (params["op"] == "run") {
         return parsePOSTRun(req, params, res, jsonObj[params['file']]);
+    } else if (params["op"] == "import") {
+        return parsePOSTImport(req, params, res, jsonObj[params['file']]);
     } else if (params["op"] == "savefile") {
         parsePOSTSaveFile(params, jsonObj[params['file']]);
     } else if (params["op"] == "newelement") {
