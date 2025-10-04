@@ -12,7 +12,7 @@ const tls = require('node:tls');
 const url = require('url');
 const zlib = require('zlib');
 
-const version = "20240316";
+const version = "20251004";
 const hostname = '127.0.0.1';
 const port = 3000;
 const DB = false;
@@ -971,6 +971,10 @@ function prepareYAML(info, linenr, level) {
     }
 }
 
+function generateJSONObjectFromYAML(yaml, section) {
+    console.log("starting section "+section);
+}
+
 async function parsePOSTImport(req, params, res, jsonObj) {
     let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
     let info = "";
@@ -1013,6 +1017,17 @@ for (pathIndex in YAMLobj.paths) {
 		params["newElementPath"] = "new testsuite/"+TC.operationId;
         params["elplen"]="1";
         	sendCallback(params['file'], "newelementinside", JSON.stringify(params));
+
+if (TC.requestBody) {
+	for (contentIndex in TC.requestBody.content) {
+	    if (contentIndex==="application/json") {
+		let body = generateJSONObjectFromYAML(YAMLobj, 
+TC.requestBody.content[contentIndex].schema.$ref?
+TC.requestBody.content[contentIndex].schema.$ref:
+TC.requestBody.content[contentIndex].schema.items.$ref);
+	    }
+	}
+}
 
                 let newStep = {};
                 newStep.name = TC.operationId;
