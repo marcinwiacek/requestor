@@ -559,7 +559,6 @@ async function parsePOSTNewElement(params, jsonObj) {
                 newStep.ignoreWrongSSL = true;
                 newStep.conLen = true;
                 newStep.url = "https://";
-                newStep.headers = "";
                 el.parentarray.splice(el.index, 0, newStep);
             } else if (elpath.length == 2) {
                 let newTC = {};
@@ -592,7 +591,6 @@ async function parsePOSTNewElementInside(params, jsonObj) {
             newStep.ignoreWrongSSL = true;
             newStep.conLen = true;
             newStep.url = "https://";
-            newStep.headers = "";
             el.obj.steps.unshift(newStep);
         } else if (elpath.length == 1) {
             let newTC = {};
@@ -931,7 +929,6 @@ async function parsePOSTImport(req, params, res, jsonObj) {
         jsonObj.modified = true;
         sendCallback(params['file'], "newelement", JSON.stringify(params));
 
-
     let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
     let info = "";
     let info2 = "";
@@ -942,17 +939,34 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 	    .replace(/\t/g,"    ")
 	    .split(/\r\n|\r|\n/g));
     }
+    let serverURL = "";
+    let method = "";
+    let suffixURL = "";
+    let method2 = "";
     for (line in info) {
-	if (level == 0) {
-	    if (info[line]=== "paths:") {
-		level = 1;
-	    }
-	} else {
+	if (level == 1) { //paths
 	    let x = info[line].replace(/^( )+/,"");
-	    if (info[line].length-x.length==0) {
+	    if (info[line].length==x.length) {
 		level=0;
 	    } else {
 //		info2+=(info[line].length-x.length)+" "+info[line]+" ";
+		if (info[line].length-x.length==2) {
+		    suffixURL = x.substring(0,x.length-1);
+		}
+		if (info[line].length-x.length==4) {
+		    if (x==="put:") {
+			method2 = "PUT";
+		    }
+		    if (x==="get:") {
+			method2 = "GET";
+		    }
+		    if (x==="post:") {
+			method2 = "POST";
+		    }
+		    if (x==="delete:") {
+			method2 = "DELETE";
+		    }
+		}
 		if (info[line].length-x.length==6 &&
 		    x.startsWith("operationId:")) {
 
@@ -971,13 +985,12 @@ async function parsePOSTImport(req, params, res, jsonObj) {
                 let newStep = {};
 		params["new"]=x.replace("operationId: ","");
                 newStep.name = x.replace("operationId: ","");
-                newStep.method = "POST";
+                newStep.method = method2;
                 newStep.headers = "";
                 newStep.body = "";
                 newStep.ignoreWrongSSL = true;
                 newStep.conLen = true;
-                newStep.url = "https://";
-                newStep.headers = "";
+                newStep.url = serverURL+suffixURL;
 		newTC.steps.push(newStep);
 		params["path"] = "new testsuite/"+x.replace("operationId: ","");
 		params["newElementPath"] = "new testsuite/"+
@@ -989,10 +1002,24 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 
 		}
 	    }
+	} else if (level==2) { //servers
+	    let x = info[line].replace(/^( )+/,"");
+	    if (info[line].length==x.length) {
+		level=0;
+	    } else {
+		if (x.startsWith("- url: ")) {
+		    serverURL = x.replace("- url: ","");
+		}
+	    }
+	}
+	if (level == 0) {
+	    if (info[line]=== "paths:") {
+		level = 1;
+	    } else if (info[line]=== "servers:") {
+		level = 2;
+	    }
 	}
     }
-
-
 }
 
 // return values from sub functions are ignored.
