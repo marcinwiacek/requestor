@@ -156,15 +156,19 @@
     }
 
     function syncBody1() {
-        document.getElementById("body").style.height =
+        if (document.getElementById("lastrequestbody")!=null) {
+        document.getElementsByTagName("body")[0].style.height=
             document.getElementById("lastrequestbody").style.height;
+}
     }
 
     new ResizeObserver(syncBody1).observe(document.getElementById("lastrequestbody"));
 
     function syncBody2() {
+        if (document.getElementById("lastrequestbody")!=null) {
         document.getElementById("lastrequestbody").style.height =
-            document.getElementById("body").style.height;
+            document.getElementsByTagName("body")[0].style.height;
+}
     }
 
     new ResizeObserver(syncBody2).observe(document.getElementById("body"));

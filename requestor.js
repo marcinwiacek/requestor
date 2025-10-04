@@ -919,8 +919,11 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
 }
 
 async function parsePOSTImport(req, params, res, jsonObj) {
-	params["path"] = "/";
+	params["path"] = "2";
         params["new"]="new testsuite";
+        params["newElementPath"]="new testsuite";
+        params["elplen"]="1";
+        params["op"]="newelement";
         let newTS = {};
         newTS.name = "new testsuite";
         newTS.testcases = [];
@@ -954,17 +957,20 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 		    x.startsWith("operationId:")) {
 
                 let newTC = {};
-		params["new"]=info[line].replace("operationId: ","");
-                newTC.name = info[line].replace("operationId: ","");
+		params["new"]=x.replace("operationId: ","");
+                newTC.name = x.replace("operationId: ","");
                 newTC.steps = [];
                 newTC.input = [];
                 newTS.testcases.push( newTC);
-		params["path"] = "new testsuite/";
-        	sendCallback(params['file'], "newelement", JSON.stringify(params));
+		params["path"] = "new testsuite";
+		params["newElementPath"] = "new testsuite/"+x.replace("operationId: ","");
+        params["elplen"]="1";
+        params["op"]="newelementinside";
+        	sendCallback(params['file'], "newelementinside", JSON.stringify(params));
 
                 let newStep = {};
-		params["new"]=info[line].replace("operationId: ","");
-                newStep.name = info[line].replace("operationId: ","");
+		params["new"]=x.replace("operationId: ","");
+                newStep.name = x.replace("operationId: ","");
                 newStep.method = "POST";
                 newStep.headers = "";
                 newStep.body = "";
@@ -973,8 +979,13 @@ async function parsePOSTImport(req, params, res, jsonObj) {
                 newStep.url = "https://";
                 newStep.headers = "";
 		newTC.steps.push(newStep);
-		params["path"] = "new testsuite/"+info[line].replace("operationId: ","");
-        	sendCallback(params['file'], "newelement", JSON.stringify(params));
+		params["path"] = "new testsuite/"+x.replace("operationId: ","");
+		params["newElementPath"] = "new testsuite/"+
+		x.replace("operationId: ","")+"/"+
+		x.replace("operationId: ","");
+        params["elplen"]="2";
+        params["op"]="newelementinside";
+        	sendCallback(params['file'], "newelementinside", JSON.stringify(params));
 
 		}
 	    }
