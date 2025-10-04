@@ -917,7 +917,6 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
 }
 
 function prepareYAML(info, linenr, level) {
-console.log("entering level "+level);
     let YAMLobj2 = [];
     let line = linenr;
     let description = false;
@@ -931,26 +930,22 @@ console.log("entering level "+level);
 	}
 	let x = info[line].replace(/^( )+/,"");
 	if (info[line].length-x.length<level) {
-	    if (description && x.length==0) {
-	    } else {
-console.log("smaller "+info[line]);
 	    let xx = [];
 	    xx.line = line;
 	    xx.yaml = YAMLobj2;
 	    return xx;    
-	    }
 	} else if (info[line].length-x.length==level) {
 	    description = false;
 	    let ind = x.indexOf(":");
 	    name = x.substring(0,ind);
-console.log("equal "+name+" "+ind+" "+x.length);
+		if (name.startsWith("- ")) name=name.substring(2);
 	    if (x.length-1==ind) {
 		let xx =  prepareYAML(info,line+1,
 			info[line].length-x.length+2);
 		line = xx.line;
     		YAMLobj2[name] = xx.yaml;
 		continue;
-	    } else {
+	    } else if (x.length!=0) {
 		description = x.includes("|-");
 		if (description) {
 		    YAMLobj2[name] = "";
@@ -959,12 +954,12 @@ console.log("equal "+name+" "+ind+" "+x.length);
 		}
 	    }
 	} else {
-console.log("bigger "+info[line]);
 	    if (description) {
     		YAMLobj2[name] += info[line];
-	    } else {
+	    } else if (x.length!=0) {
     		let ind = x.indexOf(":");
 		name = x.substring(0,ind);
+		if (name.startsWith("- ")) name=name.substring(2);
 		    let xx =  prepareYAML(info,line+1,
 			info[line].length-x.length+2);
 		    line = xx.line;
@@ -977,6 +972,20 @@ console.log("bigger "+info[line]);
 }
 
 async function parsePOSTImport(req, params, res, jsonObj) {
+    let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
+    let info = "";
+    let info2 = "";
+    let level = 0;
+    for (filenumber in all_files) {
+        if (!all_files[filenumber].endsWith('.yaml')) continue;
+        info=(readFileContentSync("/projects/"+all_files[filenumber])
+	    .replace(/\t/g,"    ")
+	    .split(/\r\n|\r|\n/g));
+    }
+    let xx = prepareYAML(info, 0,0);
+    let YAMLobj = xx.yaml;
+    console.log(YAMLobj);
+
 	params["path"] = "2";
         params["new"]="new testsuite";
         params["newElementPath"]="new testsuite";
@@ -989,119 +998,41 @@ async function parsePOSTImport(req, params, res, jsonObj) {
         jsonObj.modified = true;
         sendCallback(params['file'], "newelement", JSON.stringify(params));
 
-    let all_files = fs.readdirSync(path.normalize(__dirname + "/projects/"));
-    let info = "";
-    let info2 = "";
-    let level = 0;
-    for (filenumber in all_files) {
-        if (!all_files[filenumber].endsWith('.yaml')) continue;
-        info=(readFileContentSync("/projects/"+all_files[filenumber])
-	    .replace(/\t/g,"    ")
-	    .split(/\r\n|\r|\n/g));
-    }
-    let YAMLobj = prepareYAML(info, 0,0);
-    console.log(YAMLobj.yaml);
+for (pathIndex in YAMLobj.paths) {
+    for (methodIndex in YAMLobj.paths[pathIndex]) {
+	    let TC = YAMLobj.paths[pathIndex][methodIndex];
 
-
-    let serverURL = "";
-    let method = "";
-    let suffixURL = "";
-    let method2 = "";
-    let requestbody = "";
-    let operationid = "";
-    for (line in info) {
-	if (level == 1) { //paths
-	    let x = info[line].replace(/^( )+/,"");
-	    if (info[line].length==x.length) {
-		level=0;
-	    } else {
-//		info2+=(info[line].length-x.length)+" "+info[line]+" ";
-		if (info[line].length-x.length==2) {
-		    suffixURL = x.substring(0,x.length-1);
-		}
-		if (info[line].length-x.length==4) {
-		    if (x==="put:") {
-			method2 = "PUT";
-		    }
-		    if (x==="get:") {
-			method2 = "GET";
-		    }
-		    if (x==="post:") {
-			method2 = "POST";
-		    }
-		    if (x==="delete:") {
-			method2 = "DELETE";
-		    }
-		}
-		if (info[line].length-x.length==6 &&
-		    x.startsWith("operationId:")) {
-		    operationID = x.replace("operationId: ","");
-		}
-		if (info[line].length-x.length==6 &&
-		    x.startsWith("requestBody:")) {
-			level = 3;
-		}
-		if (info[line].length-x.length==6 &&
-		    x.startsWith("responses:")) {
                 let newTC = {};
-                newTC.name = operationId;
+                newTC.name = TC.operationId;
                 newTC.steps = [];
                 newTC.input = [];
                 newTS.testcases.push( newTC);
         params["op"]="newelementinside";
-		params["new"]=operationId;
+		params["new"]=TC.operationId;
 		params["path"] = "new testsuite";
-		params["newElementPath"] = "new testsuite/"+operationId;
+		params["newElementPath"] = "new testsuite/"+TC.operationId;
         params["elplen"]="1";
         	sendCallback(params['file'], "newelementinside", JSON.stringify(params));
 
                 let newStep = {};
-                newStep.name = x.replace("operationId: ","");
-                newStep.method = method2;
+                newStep.name = TC.operationId;
+                newStep.method = methodIndex.toUpperCase();
                 newStep.headers = "";
                 newStep.body = "";
                 newStep.ignoreWrongSSL = true;
                 newStep.conLen = true;
-                newStep.url = serverURL+suffixURL;
+                newStep.url = YAMLobj.servers.url+pathIndex;
 		newTC.steps.push(newStep);
-		params["new"]=x.replace("operationId: ","");
-		params["path"] = "new testsuite/"+operationId;
+		params["new"]=TC.operationId;
+		params["path"] = "new testsuite/"+TC.operationId;
 		params["newElementPath"] = "new testsuite/"+
-		operationId+"/"+operationId;
+		TC.operationId+"/"+TC.operationId;
         params["elplen"]="2";
         params["op"]="newelementinside";
         	sendCallback(params['file'], "newelementinside", JSON.stringify(params));
-		}
-	    }
-	} else if (level==2) { //servers
-	    let x = info[line].replace(/^( )+/,"");
-	    if (info[line].length==x.length) {
-		level=0;
-	    } else {
-		if (x.startsWith("- url: ")) {
-		    serverURL = x.replace("- url: ","");
-		}
-	    }
-	} else if (level==3) { //requestBody
-	    let x = info[line].replace(/^( )+/,"");
-		if (info[line].length-x.length==10 &&
-		    x.startsWith("application/json:")) {
-		    level =4;
-		}
-	} else if (level==4) { //json for body
-	    let x = info[line].replace(/^( )+/,"");
-	    if (x.startsWith("$ref: ")) {
-		    
-	    }
-	}
-	if (level == 0) {
-	    if (info[line]=== "paths:") {
-		level = 1;
-	    } else if (info[line]=== "servers:") {
-		level = 2;
-	    }
-	}
     }
+}
+
 }
 
 // return values from sub functions are ignored.
