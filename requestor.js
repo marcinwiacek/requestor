@@ -943,6 +943,8 @@ async function parsePOSTImport(req, params, res, jsonObj) {
     let method = "";
     let suffixURL = "";
     let method2 = "";
+    let requestbody = "";
+    let operationid = "";
     for (line in info) {
 	if (level == 1) { //paths
 	    let x = info[line].replace(/^( )+/,"");
@@ -969,21 +971,27 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 		}
 		if (info[line].length-x.length==6 &&
 		    x.startsWith("operationId:")) {
-
+		    operationID = x.replace("operationId: ","");
+		}
+		if (info[line].length-x.length==6 &&
+		    x.startsWith("requestBody:")) {
+			level = 3;
+		}
+		if (info[line].length-x.length==6 &&
+		    x.startsWith("responses:")) {
                 let newTC = {};
-		params["new"]=x.replace("operationId: ","");
-                newTC.name = x.replace("operationId: ","");
+                newTC.name = operationId;
                 newTC.steps = [];
                 newTC.input = [];
                 newTS.testcases.push( newTC);
-		params["path"] = "new testsuite";
-		params["newElementPath"] = "new testsuite/"+x.replace("operationId: ","");
-        params["elplen"]="1";
         params["op"]="newelementinside";
+		params["new"]=operationId;
+		params["path"] = "new testsuite";
+		params["newElementPath"] = "new testsuite/"+operationId;
+        params["elplen"]="1";
         	sendCallback(params['file'], "newelementinside", JSON.stringify(params));
 
                 let newStep = {};
-		params["new"]=x.replace("operationId: ","");
                 newStep.name = x.replace("operationId: ","");
                 newStep.method = method2;
                 newStep.headers = "";
@@ -992,14 +1000,13 @@ async function parsePOSTImport(req, params, res, jsonObj) {
                 newStep.conLen = true;
                 newStep.url = serverURL+suffixURL;
 		newTC.steps.push(newStep);
-		params["path"] = "new testsuite/"+x.replace("operationId: ","");
+		params["new"]=x.replace("operationId: ","");
+		params["path"] = "new testsuite/"+operationId;
 		params["newElementPath"] = "new testsuite/"+
-		x.replace("operationId: ","")+"/"+
-		x.replace("operationId: ","");
+		operationId+"/"+operationId;
         params["elplen"]="2";
         params["op"]="newelementinside";
         	sendCallback(params['file'], "newelementinside", JSON.stringify(params));
-
 		}
 	    }
 	} else if (level==2) { //servers
@@ -1010,6 +1017,17 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 		if (x.startsWith("- url: ")) {
 		    serverURL = x.replace("- url: ","");
 		}
+	    }
+	} else if (level==3) { //requestBody
+	    let x = info[line].replace(/^( )+/,"");
+		if (info[line].length-x.length==10 &&
+		    x.startsWith("application/json:")) {
+		    level =4;
+		}
+	} else if (level==4) { //json for body
+	    let x = info[line].replace(/^( )+/,"");
+	    if (x.startsWith("$ref: ")) {
+		    
 	    }
 	}
 	if (level == 0) {
