@@ -916,6 +916,66 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
     }
 }
 
+function prepareYAML(info, linenr, level) {
+console.log("entering level "+level);
+    let YAMLobj2 = [];
+    let line = linenr;
+    let description = false;
+    let name = "";
+    while (true) {
+	if (line>=info.length) {
+	    let xx = [];
+	    xx.line = line;
+	    xx.yaml = YAMLobj2;
+	    return xx;    
+	}
+	let x = info[line].replace(/^( )+/,"");
+	if (info[line].length-x.length<level) {
+	    if (description && x.length==0) {
+	    } else {
+console.log("smaller "+info[line]);
+	    let xx = [];
+	    xx.line = line;
+	    xx.yaml = YAMLobj2;
+	    return xx;    
+	    }
+	} else if (info[line].length-x.length==level) {
+	    description = false;
+	    let ind = x.indexOf(":");
+	    name = x.substring(0,ind);
+console.log("equal "+name+" "+ind+" "+x.length);
+	    if (x.length-1==ind) {
+		let xx =  prepareYAML(info,line+1,
+			info[line].length-x.length+2);
+		line = xx.line;
+    		YAMLobj2[name] = xx.yaml;
+		continue;
+	    } else {
+		description = x.includes("|-");
+		if (description) {
+		    YAMLobj2[name] = "";
+		} else {
+		    YAMLobj2[name] = x.substring(ind+2);
+		}
+	    }
+	} else {
+console.log("bigger "+info[line]);
+	    if (description) {
+    		YAMLobj2[name] += info[line];
+	    } else {
+    		let ind = x.indexOf(":");
+		name = x.substring(0,ind);
+		    let xx =  prepareYAML(info,line+1,
+			info[line].length-x.length+2);
+		    line = xx.line;
+    		    YAMLobj2[name] = xx.yaml;
+		    continue;
+	    }
+	}
+	line++;
+    }
+}
+
 async function parsePOSTImport(req, params, res, jsonObj) {
 	params["path"] = "2";
         params["new"]="new testsuite";
@@ -939,6 +999,10 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 	    .replace(/\t/g,"    ")
 	    .split(/\r\n|\r|\n/g));
     }
+    let YAMLobj = prepareYAML(info, 0,0);
+    console.log(YAMLobj.yaml);
+
+
     let serverURL = "";
     let method = "";
     let suffixURL = "";
