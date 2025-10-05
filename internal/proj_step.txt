@@ -210,6 +210,11 @@ document.cookie = "header1h="+
 //	}
     }
 
+function onInput(x) {
+   x.style.height = "auto";
+   x.style.height = (x.scrollHeight+12)+"px";
+}
+
 </script>
 <!--PATH-->
 <form onsubmit="return sendRunStep()">
@@ -259,13 +264,13 @@ document.cookie = "header1h="+
             <td>
                 <div>Headers</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4;' rows="7" id="header"><!--HEADER--></textarea>
+                    <textarea style='flex:4' oninput=onInput(this) id="header"><!--HEADER--></textarea>
                 </div>
             </td>
             <td>
                 <div>Headers</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4;' rows="7" id="lastrequestheaders"></textarea>
+                    <textarea style='flex:4' oninput=onInput(this)  id="lastrequestheaders"></textarea>
                 </div>
             </td>
         </tr>
@@ -273,14 +278,14 @@ document.cookie = "header1h="+
             <td>
                 <div>Body</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows=7 id="body"><!--BODY--></textarea>
+                    <textarea style='flex:4' oninput=onInput(this) id="body"><!--BODY--></textarea>
                 </div>
             </td>
             <td>
                 <div>
                     Body</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows="7" id="lastrequestbody"></textarea>
+                    <textarea style='flex:4' oninput=onInput(this) id="lastrequestbody"></textarea>
                 </div>
 
             </td>
@@ -350,16 +355,17 @@ document.cookie = "header1h="+
 	switch(xx[0].replaceAll(" ","")) {
 	case "header1w":
 //alert("'"+xx[1]+"'");
-	    document.getElementById("header").style.width = xx[1];
+//	    document.getElementById("header").style.width = xx[1];
 	    break;
 	case "header1h":
+//alert("updating to '"+xx[1]+"'");
 	    document.getElementById("header").style.height = xx[1];
 	    break;
 	case "body1w":
-	    document.getElementById("body").style.width = xx[1];
+//	    document.getElementById("body").style.width = xx[1];
 	    break;
 	case "body1h":
-	    document.getElementById("body").style.height = xx[1];
+	    document.getElementById("body").style.height = "600px";
 	    break;
 //default:
 //alert(x1[inx]);
