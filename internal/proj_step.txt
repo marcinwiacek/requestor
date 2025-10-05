@@ -174,15 +174,19 @@
     new ResizeObserver(syncBody2).observe(document.getElementById("body"));
 
     function syncHeader1() {
+        if (document.getElementById("lastrequestheaders")!=null) {
         document.getElementById("header").style.height =
             document.getElementById("lastrequestheaders").style.height;
+	}
     }
 
     new ResizeObserver(syncHeader1).observe(document.getElementById("lastrequestheaders"));
 
     function syncHeader2() {
+        if (document.getElementById("lastrequestheaders")!=null) {
         document.getElementById("lastrequestheaders").style.height =
             document.getElementById("header").style.height;
+	}
     }
 
     new ResizeObserver(syncHeader2).observe(document.getElementById("header"));

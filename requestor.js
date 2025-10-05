@@ -972,7 +972,33 @@ function prepareYAML(info, linenr, level) {
 }
 
 function generateJSONObjectFromYAML(yaml, section) {
-    console.log("starting section " + section);
+    let obj = {};
+    let sec = section.replace("#/components/schemas/","").replaceAll("'","");
+    console.log("starting section " + section+" "+sec+"");
+    if (yaml.components.schemas[sec]) {
+	for (propertyIndex in yaml.components.schemas[sec].properties) {
+	    let prop = yaml.components.schemas[sec].properties[propertyIndex];
+console.log("property ");
+console.log(prop);
+	    if (prop.$ref) {
+		obj[propertyIndex] = generateJSONObjectFromYAML(yaml,prop.$ref);
+	    } else if (prop.type === "integer") {
+			obj[propertyIndex] = prop.example?Number(prop.example):0;
+	    } else if (prop.type === "string") {
+		    if (prop.enum) {
+			obj[propertyIndex] = ""+prop.enum[0];
+		    } else {
+			obj[propertyIndex] = prop.example?""+prop.example:"";
+		    }
+	    } else if (prop.type === "array") {
+			obj[propertyIndex] = {};
+		if (prop.items.$ref) {
+		obj[propertyIndex][0] = generateJSONObjectFromYAML(yaml,prop.items.$ref);
+		}
+	    }
+	}
+    }
+    return obj;
 }
 
 async function parsePOSTImport(req, params, res, jsonObj) {
@@ -1018,10 +1044,11 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             params["elplen"] = "1";
             sendCallback(params['file'], "newelementinside", JSON.stringify(params));
 
+	    let body = [];
             if (TC.requestBody) {
                 for (contentIndex in TC.requestBody.content) {
                     if (contentIndex === "application/json") {
-                        let body = generateJSONObjectFromYAML(YAMLobj,
+                        body = generateJSONObjectFromYAML(YAMLobj,
                             TC.requestBody.content[contentIndex].schema.$ref ?
                             TC.requestBody.content[contentIndex].schema.$ref :
                             TC.requestBody.content[contentIndex].schema.items.$ref);
@@ -1029,11 +1056,12 @@ async function parsePOSTImport(req, params, res, jsonObj) {
                 }
             }
 
+console.log(body);
             let newStep = {};
             newStep.name = TC.operationId;
             newStep.method = methodIndex.toUpperCase();
             newStep.headers = "";
-            newStep.body = "";
+            newStep.body = JSON.stringify(body,null,2);
             newStep.ignoreWrongSSL = true;
             newStep.conLen = true;
             newStep.url = YAMLobj.servers.url + pathIndex;
@@ -1153,7 +1181,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 var xxxx = "";
                 first = true;
                 for (var bodynumber in stepcopy.body) {
-                    if (!first) xxxx += "\n";
+//                    if (!first) xxxx += "\n";
                     first = false;
                     xxxx += stepcopy.body[bodynumber];
                 }
