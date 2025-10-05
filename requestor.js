@@ -950,7 +950,7 @@ function prepareYAML(info, linenr, level) {
                 if (description) {
                     YAMLobj2[name] = "";
                 } else {
-                    YAMLobj2[name] = x.substring(ind + 2);
+                    YAMLobj2[name] = x.substring(ind + 2).replaceAll("'",""); //fixme
                 }
             }
         } else {
@@ -959,7 +959,7 @@ function prepareYAML(info, linenr, level) {
             } else if (x.length != 0) {
                 let ind = x.indexOf(":");
                 name = x.substring(0, ind);
-                if (name.startsWith("- ")) name = name.substring(2);
+                if (name.startsWith("- ")) name = name.substring(2); //fixme - array instead
                 let xx = prepareYAML(info, line + 1,
                     info[line].length - x.length + 2);
                 line = xx.line;
@@ -1044,7 +1044,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             params["elplen"] = "1";
             sendCallback(params['file'], "newelementinside", JSON.stringify(params));
 
-            let body = [];
+            let body = null;
             if (TC.requestBody) {
                 for (contentIndex in TC.requestBody.content) {
                     if (contentIndex === "application/json") {
@@ -1061,7 +1061,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             newStep.name = TC.operationId;
             newStep.method = methodIndex.toUpperCase();
             newStep.headers = "";
-            newStep.body = JSON.stringify(body, null, 2);
+            newStep.body = body==null?"":JSON.stringify(body, null, 2);
             newStep.ignoreWrongSSL = true;
             newStep.conLen = true;
             newStep.url = YAMLobj.servers.url + pathIndex;

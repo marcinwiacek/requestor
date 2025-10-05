@@ -31,7 +31,7 @@
             }
         };
         http.onerror = function() {
-            alert("request error");
+//            alert("request error "+par);
         };
         http.send(URL);
     }
