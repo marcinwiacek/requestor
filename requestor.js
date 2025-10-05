@@ -1060,7 +1060,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             let newStep = {};
             newStep.name = TC.operationId;
             newStep.method = methodIndex.toUpperCase();
-            newStep.headers = "";
+            newStep.headers = ["content-type: application/json"];
             newStep.body = body==null?"":JSON.stringify(body, null, 2);
             newStep.ignoreWrongSSL = true;
             newStep.conLen = true;

@@ -156,40 +156,60 @@
     }
 
     function syncBody1() {
-        if (document.getElementById("lastrequestbody")!=null) {
-        document.getElementsByTagName("body")[0].style.height=
+//        if (document.getElementById("lastrequestbody")!=null) {
+        document.getElementById("body").style.height=
             document.getElementById("lastrequestbody").style.height;
-}
+        document.getElementById("body").style.width=
+            document.getElementById("lastrequestbody").style.width;
+document.cookie = "lastbody1w="+
+            document.getElementById("lastrequestbody").style.width;
+document.cookie = "lastbody1h="+
+            document.getElementById("lastrequestbody").style.height;
+//}
     }
 
-    new ResizeObserver(syncBody1).observe(document.getElementById("lastrequestbody"));
 
     function syncBody2() {
-        if (document.getElementById("lastrequestbody")!=null) {
+//        if (document.getElementById("lastrequestbody")!=null) {
         document.getElementById("lastrequestbody").style.height =
-            document.getElementsByTagName("body")[0].style.height;
-}
+            document.getElementById("body").style.height;
+        document.getElementById("lastrequestbody").style.width =
+            document.getElementById("body").style.width;
+document.cookie = "body1w="+
+            document.getElementById("body").style.width;
+document.cookie = "body1h="+
+            document.getElementById("body").style.height;
+//}
     }
 
-    new ResizeObserver(syncBody2).observe(document.getElementById("body"));
 
     function syncHeader1() {
-        if (document.getElementById("lastrequestheaders")!=null) {
+//        if (document.getElementById("lastrequestheaders")!=null) {
         document.getElementById("header").style.height =
             document.getElementById("lastrequestheaders").style.height;
-	}
+        document.getElementById("header").style.width =
+            document.getElementById("lastrequestheaders").style.width;
+document.cookie = "lastheader1w="+
+            document.getElementById("lastrequestheaders").style.width;
+document.cookie = "lastheader1h="+
+            document.getElementById("lastrequestheaders").style.height;
+//	}
     }
 
-    new ResizeObserver(syncHeader1).observe(document.getElementById("lastrequestheaders"));
 
     function syncHeader2() {
-        if (document.getElementById("lastrequestheaders")!=null) {
+//        if (document.getElementById("lastrequestheaders")!=null) {
         document.getElementById("lastrequestheaders").style.height =
             document.getElementById("header").style.height;
-	}
+        document.getElementById("lastrequestheaders").style.width =
+            document.getElementById("header").style.width;
+document.cookie = "header1w="+
+            document.getElementById("header").style.width;
+document.cookie = "header1h="+
+            document.getElementById("header").style.height;
+//	}
     }
 
-    new ResizeObserver(syncHeader2).observe(document.getElementById("header"));
 </script>
 <!--PATH-->
 <form onsubmit="return sendRunStep()">
@@ -239,13 +259,13 @@
             <td>
                 <div>Headers</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4;height:100%' rows="5" id="header"><!--HEADER--></textarea>
+                    <textarea style='flex:4;' rows="7" id="header"><!--HEADER--></textarea>
                 </div>
             </td>
             <td>
                 <div>Headers</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows="5" id="lastrequestheaders"></textarea>
+                    <textarea style='flex:4;' rows="7" id="lastrequestheaders"></textarea>
                 </div>
             </td>
         </tr>
@@ -317,4 +337,34 @@
 </form>
 <script>
     selectLastDate();
+
+    new ResizeObserver(syncBody1).observe(document.getElementById("lastrequestbody"));
+    new ResizeObserver(syncBody2).observe(document.getElementById("body"));
+    new ResizeObserver(syncHeader1).observe(document.getElementById("lastrequestheaders"));
+    new ResizeObserver(syncHeader2).observe(document.getElementById("header"));
+
+    x1 = document.cookie.split(";");
+    for (inx in x1) {
+	xx = x1[inx].split("=");
+//console.log(xx);
+	switch(xx[0].replaceAll(" ","")) {
+	case "header1w":
+//alert("'"+xx[1]+"'");
+	    document.getElementById("header").style.width = xx[1];
+	    break;
+	case "header1h":
+	    document.getElementById("header").style.height = xx[1];
+	    break;
+	case "body1w":
+	    document.getElementById("body").style.width = xx[1];
+	    break;
+	case "body1h":
+	    document.getElementById("body").style.height = xx[1];
+	    break;
+//default:
+//alert(x1[inx]);
+	}
+    }
+
+
 </script>
