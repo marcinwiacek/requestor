@@ -8,21 +8,21 @@ Ready API, Postman, JMeter, curl and other similar tools.
 * Creating simple & powerfull app, which will provide all important technical elements
 * Fast, easy and effective testing for requests (without bla, bla, bla)
 * Avoiding stupid, annoying elements visible in similar software
-(user should be focused on task, which could be/should be done, not on the tool)
+(user should be focused on task, not on the tool)
 * Providing support for modern elements like HTTP/2
 
 # Features
-* Sending requests (although this will mix different things, it's worth to mention,
+* Sending requests (although this will mix different things, it's worth to say,
 that this can be POST, GET, XML, JSON, REST, SOAP and others)
 * Preparing requests tests using GUI in web browser (tested mainly in desktop Firefox, should be
 perfectly fine in Chrome/Edge/Chromium and Safari)
 * Saving data in good formatted text JSON files (changes are easy to track in Git)
 * Saving execution info in the SQLite DB and easy to read HTML and TXT files
-* Concurrent work (when one user is doing something, other see updates)
+* Concurrent work (when one user is doing something, others immediatley see updates)
 
 # Installation and running
-You need NodeJS with SQLite3, for example in Ubuntu it's enough to execute just two commands for installing
-and one for start:
+You need NodeJS with SQLite3, for example in Ubuntu it's enough to execute
+just two commands for installing and one for start:
 
 1. ```sudo snap install node --classic --channel=20```
 2. ```sudo npm install sqlite3```
@@ -38,10 +38,12 @@ for example:
 
 # Version history
 
+October 2025 - Milestone 2
 16 March 2024 - Milestone 1
 
 # Why another app?
-Because many existing apps were written years ago and sometimes have horrible GUI or solutions.
+Because many existing apps were written years ago and
+sometimes have horrible GUI or solutions.
 
 # License
 GPLv3. For other please contact author of this repo.

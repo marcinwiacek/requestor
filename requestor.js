@@ -327,9 +327,9 @@ async function addToRunReportHTML(file, p, answer) {
 
 async function sendCallback(file, type, msg) {
     for (let i in callback) {
-//console.log("   callback "+callback[i].file+" "+file);
+        //console.log("   callback "+callback[i].file+" "+file);
         if (callback[i].file == file) {
-//console.log("   running callback "+callback[i].file+" "+type+" "+msg);
+            //console.log("   running callback "+callback[i].file+" "+type+" "+msg);
             callback[i].res.write("event: " + type + "\n");
             callback[i].res.write("data: " + msg + "\n\n");
         }
@@ -665,18 +665,18 @@ async function parsePOSTSaveFile(params, jsonObj) {
 }
 
 async function parsePOSTNewFile(req, filename, res) {
-if (fs.existsSync(path.normalize(__dirname + '/projects/' + filename + ".json"))) {
-    sendPlain(req, res, "file exists");
-} else {
-    fs.writeFile(path.normalize(__dirname + '/projects/' + filename + ".json"),
-        "{ \"format\": \"created by requestor\",\"testsuites\": []}",
-        function(err) {
-            if (err) {
-                //                return console.log(err);
-            }
-        });
-    sendPlain(req, res, "");
-}
+    if (fs.existsSync(path.normalize(__dirname + '/projects/' + filename + ".json"))) {
+        sendPlain(req, res, "file exists");
+    } else {
+        fs.writeFile(path.normalize(__dirname + '/projects/' + filename + ".json"),
+            "{ \"format\": \"created by requestor\",\"testsuites\": []}",
+            function(err) {
+                if (err) {
+                    //                return console.log(err);
+                }
+            });
+        sendPlain(req, res, "");
+    }
 }
 
 async function parsePOSTRun(req, params, res, jsonObj) {
@@ -922,57 +922,57 @@ function prepareYAML(info, linenr, level) {
     let description = false;
     let name = "";
     while (true) {
-	if (line>=info.length) {
-	    let xx = [];
-	    xx.line = line;
-	    xx.yaml = YAMLobj2;
-	    return xx;    
-	}
-	let x = info[line].replace(/^( )+/,"");
-	if (info[line].length-x.length<level) {
-	    let xx = [];
-	    xx.line = line;
-	    xx.yaml = YAMLobj2;
-	    return xx;    
-	} else if (info[line].length-x.length==level) {
-	    description = false;
-	    let ind = x.indexOf(":");
-	    name = x.substring(0,ind);
-		if (name.startsWith("- ")) name=name.substring(2);
-	    if (x.length-1==ind) {
-		let xx =  prepareYAML(info,line+1,
-			info[line].length-x.length+2);
-		line = xx.line;
-    		YAMLobj2[name] = xx.yaml;
-		continue;
-	    } else if (x.length!=0) {
-		description = x.includes("|-");
-		if (description) {
-		    YAMLobj2[name] = "";
-		} else {
-		    YAMLobj2[name] = x.substring(ind+2);
-		}
-	    }
-	} else {
-	    if (description) {
-    		YAMLobj2[name] += info[line];
-	    } else if (x.length!=0) {
-    		let ind = x.indexOf(":");
-		name = x.substring(0,ind);
-		if (name.startsWith("- ")) name=name.substring(2);
-		    let xx =  prepareYAML(info,line+1,
-			info[line].length-x.length+2);
-		    line = xx.line;
-    		    YAMLobj2[name] = xx.yaml;
-		    continue;
-	    }
-	}
-	line++;
+        if (line >= info.length) {
+            let xx = [];
+            xx.line = line;
+            xx.yaml = YAMLobj2;
+            return xx;
+        }
+        let x = info[line].replace(/^( )+/, "");
+        if (info[line].length - x.length < level) {
+            let xx = [];
+            xx.line = line;
+            xx.yaml = YAMLobj2;
+            return xx;
+        } else if (info[line].length - x.length == level) {
+            description = false;
+            let ind = x.indexOf(":");
+            name = x.substring(0, ind);
+            if (name.startsWith("- ")) name = name.substring(2);
+            if (x.length - 1 == ind) {
+                let xx = prepareYAML(info, line + 1,
+                    info[line].length - x.length + 2);
+                line = xx.line;
+                YAMLobj2[name] = xx.yaml;
+                continue;
+            } else if (x.length != 0) {
+                description = x.includes("|-");
+                if (description) {
+                    YAMLobj2[name] = "";
+                } else {
+                    YAMLobj2[name] = x.substring(ind + 2);
+                }
+            }
+        } else {
+            if (description) {
+                YAMLobj2[name] += info[line];
+            } else if (x.length != 0) {
+                let ind = x.indexOf(":");
+                name = x.substring(0, ind);
+                if (name.startsWith("- ")) name = name.substring(2);
+                let xx = prepareYAML(info, line + 1,
+                    info[line].length - x.length + 2);
+                line = xx.line;
+                YAMLobj2[name] = xx.yaml;
+                continue;
+            }
+        }
+        line++;
     }
 }
 
 function generateJSONObjectFromYAML(yaml, section) {
-    console.log("starting section "+section);
+    console.log("starting section " + section);
 }
 
 async function parsePOSTImport(req, params, res, jsonObj) {
@@ -982,72 +982,71 @@ async function parsePOSTImport(req, params, res, jsonObj) {
     let level = 0;
     for (filenumber in all_files) {
         if (!all_files[filenumber].endsWith('.yaml')) continue;
-        info=(readFileContentSync("/projects/"+all_files[filenumber])
-	    .replace(/\t/g,"    ")
-	    .split(/\r\n|\r|\n/g));
+        info = (readFileContentSync("/projects/" + all_files[filenumber])
+            .replace(/\t/g, "    ")
+            .split(/\r\n|\r|\n/g));
     }
-    let xx = prepareYAML(info, 0,0);
+    let xx = prepareYAML(info, 0, 0);
     let YAMLobj = xx.yaml;
     console.log(YAMLobj);
 
-	params["path"] = "2";
-        params["new"]="new testsuite";
-        params["newElementPath"]="new testsuite";
-        params["elplen"]="1";
-        params["op"]="newelement";
-        let newTS = {};
-        newTS.name = "new testsuite";
-        newTS.testcases = [];
-        jsonObj.testsuites.unshift(newTS);
-        jsonObj.modified = true;
-        sendCallback(params['file'], "newelement", JSON.stringify(params));
+    params["path"] = "2";
+    params["new"] = "new testsuite";
+    params["newElementPath"] = "new testsuite";
+    params["elplen"] = "1";
+    params["op"] = "newelement";
+    let newTS = {};
+    newTS.name = "new testsuite";
+    newTS.testcases = [];
+    jsonObj.testsuites.unshift(newTS);
+    jsonObj.modified = true;
+    sendCallback(params['file'], "newelement", JSON.stringify(params));
 
-for (pathIndex in YAMLobj.paths) {
-    for (methodIndex in YAMLobj.paths[pathIndex]) {
-	    let TC = YAMLobj.paths[pathIndex][methodIndex];
+    for (pathIndex in YAMLobj.paths) {
+        for (methodIndex in YAMLobj.paths[pathIndex]) {
+            let TC = YAMLobj.paths[pathIndex][methodIndex];
 
-                let newTC = {};
-                newTC.name = TC.operationId;
-                newTC.steps = [];
-                newTC.input = [];
-                newTS.testcases.push( newTC);
-        params["op"]="newelementinside";
-		params["new"]=TC.operationId;
-		params["path"] = "new testsuite";
-		params["newElementPath"] = "new testsuite/"+TC.operationId;
-        params["elplen"]="1";
-        	sendCallback(params['file'], "newelementinside", JSON.stringify(params));
+            let newTC = {};
+            newTC.name = TC.operationId;
+            newTC.steps = [];
+            newTC.input = [];
+            newTS.testcases.push(newTC);
+            params["op"] = "newelementinside";
+            params["new"] = TC.operationId;
+            params["path"] = "new testsuite";
+            params["newElementPath"] = "new testsuite/" + TC.operationId;
+            params["elplen"] = "1";
+            sendCallback(params['file'], "newelementinside", JSON.stringify(params));
 
-if (TC.requestBody) {
-	for (contentIndex in TC.requestBody.content) {
-	    if (contentIndex==="application/json") {
-		let body = generateJSONObjectFromYAML(YAMLobj, 
-TC.requestBody.content[contentIndex].schema.$ref?
-TC.requestBody.content[contentIndex].schema.$ref:
-TC.requestBody.content[contentIndex].schema.items.$ref);
-	    }
-	}
-}
+            if (TC.requestBody) {
+                for (contentIndex in TC.requestBody.content) {
+                    if (contentIndex === "application/json") {
+                        let body = generateJSONObjectFromYAML(YAMLobj,
+                            TC.requestBody.content[contentIndex].schema.$ref ?
+                            TC.requestBody.content[contentIndex].schema.$ref :
+                            TC.requestBody.content[contentIndex].schema.items.$ref);
+                    }
+                }
+            }
 
-                let newStep = {};
-                newStep.name = TC.operationId;
-                newStep.method = methodIndex.toUpperCase();
-                newStep.headers = "";
-                newStep.body = "";
-                newStep.ignoreWrongSSL = true;
-                newStep.conLen = true;
-                newStep.url = YAMLobj.servers.url+pathIndex;
-		newTC.steps.push(newStep);
-		params["new"]=TC.operationId;
-		params["path"] = "new testsuite/"+TC.operationId;
-		params["newElementPath"] = "new testsuite/"+
-		TC.operationId+"/"+TC.operationId;
-        params["elplen"]="2";
-        params["op"]="newelementinside";
-        	sendCallback(params['file'], "newelementinside", JSON.stringify(params));
+            let newStep = {};
+            newStep.name = TC.operationId;
+            newStep.method = methodIndex.toUpperCase();
+            newStep.headers = "";
+            newStep.body = "";
+            newStep.ignoreWrongSSL = true;
+            newStep.conLen = true;
+            newStep.url = YAMLobj.servers.url + pathIndex;
+            newTC.steps.push(newStep);
+            params["new"] = TC.operationId;
+            params["path"] = "new testsuite/" + TC.operationId;
+            params["newElementPath"] = "new testsuite/" +
+                TC.operationId + "/" + TC.operationId;
+            params["elplen"] = "2";
+            params["op"] = "newelementinside";
+            sendCallback(params['file'], "newelementinside", JSON.stringify(params));
+        }
     }
-}
-
 }
 
 // return values from sub functions are ignored.
@@ -1202,7 +1201,7 @@ const onRequestHandler = async (req, res) => {
             x = [];
             x.file = params['file'];
             x.res = res;
-//                        console.log("registering SSE " + x);
+            //                        console.log("registering SSE " + x);
             callback[session] = x;
             if (params['file'] != null && jsonObj[params['file']]) {
                 x = {};
@@ -1226,9 +1225,9 @@ const onRequestHandler = async (req, res) => {
             sendCSS(req, res, readFileContentSync("/external/tabulator_midnight.min.css"));
             return;
         }
-        if (params['report'] && 
-(fs.existsSync(path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.htm') ||
-fs.existsSync(path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.txt'))) {
+        if (params['report'] &&
+            (fs.existsSync(path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.htm') ||
+                fs.existsSync(path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.txt'))) {
             sendHTML(req, res, readFileContentSync("/reports/" + params['report']));
             return;
         }
