@@ -218,7 +218,7 @@ function onInput(x) {
 </script>
 <!--PATH-->
 <form onsubmit="return sendRunStep()">
-    <table>
+    <table width=100%>
         <tr>
             <td valign="bottom" width=50%>
                 <div style='display:flex'>
@@ -264,13 +264,13 @@ function onInput(x) {
             <td>
                 <div>Headers</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' oninput=onInput(this) id="header"><!--HEADER--></textarea>
+                    <textarea style='flex:4' rows=7 oninput=onInput(this) id="header"><!--HEADER--></textarea>
                 </div>
             </td>
             <td>
                 <div>Headers</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' oninput=onInput(this)  id="lastrequestheaders"></textarea>
+                    <textarea style='flex:4' rows=7 oninput=onInput(this)  id="lastrequestheaders"></textarea>
                 </div>
             </td>
         </tr>
@@ -278,14 +278,14 @@ function onInput(x) {
             <td>
                 <div>Body</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' oninput=onInput(this) id="body"><!--BODY--></textarea>
+                    <textarea style='flex:4' rows=10 oninput=onInput(this) id="body"><!--BODY--></textarea>
                 </div>
             </td>
             <td>
                 <div>
                     Body</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' oninput=onInput(this) id="lastrequestbody"></textarea>
+                    <textarea style='flex:4' rows=10 oninput=onInput(this) id="lastrequestbody"></textarea>
                 </div>
 
             </td>
@@ -321,20 +321,20 @@ function onInput(x) {
                     Headers
                 </div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows="5" id="lastresponseheaders"></textarea>
+                    <textarea style='flex:4' rows="7" id="lastresponseheaders"></textarea>
                 </div>
                 <div>
                     Body</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows="7" id="lastresponsebody"></textarea>
+                    <textarea style='flex:4' rows="10" id="lastresponsebody"></textarea>
                 </div>
                 <div> Security</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows="3" id="lastresponsecert"></textarea>
+                    <textarea style='flex:4' rows="5" id="lastresponsecert"></textarea>
                 </div>
                 <div>Errors</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows="3" id="lastresponseerror"></textarea>
+                    <textarea style='flex:4' rows="5" id="lastresponseerror"></textarea>
                 </div>
             </td>
         </tr>
