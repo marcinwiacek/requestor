@@ -1016,7 +1016,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
     let YAMLobj = xx.yaml;
     console.log(YAMLobj);
 
-    params["path"] = "2";
+    params["path"] = jsonObj.testsuites[0].name;
     params["new"] = "new testsuite";
     params["newElementPath"] = "new testsuite";
     params["elplen"] = "1";
