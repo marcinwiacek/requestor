@@ -249,6 +249,9 @@
             alel.setAttribute("id", id);
             alel.setAttribute("class", "tcts" + (disabled ? " disabled" : "") + " " + type);
             alel.onclick = function() {
+            	    document.getElementById("stepmenu").classList.remove("show");
+                    document.getElementById("foldermenu").classList.remove("show");
+
                 loadRightPart(this.id);
             };
             alel.setAttribute("draggable", true);
@@ -274,6 +277,9 @@
             alel.setAttribute("id", id);
             alel.setAttribute("class", "step" + (disabled ? " disabled" : ""));
             alel.onclick = function() {
+            	    document.getElementById("stepmenu").classList.remove("show");
+                    document.getElementById("foldermenu").classList.remove("show");
+
                 loadRightPart(this.id);
             };
             alel.setAttribute("draggable", true);
@@ -330,8 +336,14 @@
             }
         }
 
+timenow=0;
         function updatePopupMenu(toggler, name) {
             toggler.addEventListener("contextmenu", (e) => {
+		if (name==="folder") {
+            	    document.getElementById("stepmenu").classList.remove("show");
+		} else {
+                    document.getElementById("foldermenu").classList.remove("show");
+		}
                 popupMenuID = e.target.id;
                 popupMenuName = name + "menu";
 		document.getElementById(popupMenuName).addEventListener("contextmenu", (e) => {e.preventDefault();});
@@ -342,6 +354,7 @@
                 }
                 document.getElementById(name + "menu").classList.toggle("show");
                 e.preventDefault();
+		timenow = Date.now();
             });
             toggler.addEventListener("mousemove", (e) => {
                 if (document.getElementById(name + "menu").classList.contains("show"))
@@ -363,4 +376,12 @@
         delete tree;
 
         updateAllFolders();
+
+        document.getElementById("menu").addEventListener("contextmenu", (e) => {
+if (Date.now()-timenow>100) {
+                document.getElementById("foldermenu").classList.remove("show");
+                document.getElementById("stepmenu").classList.remove("show");
+}
+            });
+
     </script>

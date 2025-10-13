@@ -156,7 +156,7 @@
     }
 
     function syncBody1() {
-//        if (document.getElementById("lastrequestbody")!=null) {
+        if (document.getElementById("lastrequestbody")!=null) {
         document.getElementById("body").style.height=
             document.getElementById("lastrequestbody").style.height;
         document.getElementById("body").style.width=
@@ -165,12 +165,12 @@ document.cookie = "lastbody1w="+
             document.getElementById("lastrequestbody").style.width;
 document.cookie = "lastbody1h="+
             document.getElementById("lastrequestbody").style.height;
-//}
+}
     }
 
 
     function syncBody2() {
-//        if (document.getElementById("lastrequestbody")!=null) {
+        if (document.getElementById("lastrequestbody")!=null) {
         document.getElementById("lastrequestbody").style.height =
             document.getElementById("body").style.height;
         document.getElementById("lastrequestbody").style.width =
@@ -179,12 +179,12 @@ document.cookie = "body1w="+
             document.getElementById("body").style.width;
 document.cookie = "body1h="+
             document.getElementById("body").style.height;
-//}
+}
     }
 
 
     function syncHeader1() {
-//        if (document.getElementById("lastrequestheaders")!=null) {
+        if (document.getElementById("lastrequestheaders")!=null) {
         document.getElementById("header").style.height =
             document.getElementById("lastrequestheaders").style.height;
         document.getElementById("header").style.width =
@@ -193,12 +193,12 @@ document.cookie = "lastheader1w="+
             document.getElementById("lastrequestheaders").style.width;
 document.cookie = "lastheader1h="+
             document.getElementById("lastrequestheaders").style.height;
-//	}
+	}
     }
 
 
     function syncHeader2() {
-//        if (document.getElementById("lastrequestheaders")!=null) {
+        if (document.getElementById("lastrequestheaders")!=null) {
         document.getElementById("lastrequestheaders").style.height =
             document.getElementById("header").style.height;
         document.getElementById("lastrequestheaders").style.width =
@@ -207,7 +207,7 @@ document.cookie = "header1w="+
             document.getElementById("header").style.width;
 document.cookie = "header1h="+
             document.getElementById("header").style.height;
-//	}
+	}
     }
 
 function onInput(x) {
