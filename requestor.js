@@ -478,7 +478,7 @@ async function loadDB(name) {
 }
 
 function db_all(filename, sql) {
-console.log(sql);
+//console.log(sql);
     return new Promise((resolve, reject) => {
         const q = [];
         dbObj[filename].each(sql, (err, row) => {
@@ -890,7 +890,7 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
 
                 for (let stepnumber in tc.steps) {
                     var step = tc.steps[stepnumber];
-                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
+//                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
                     if (path + "/" + tc.name + "/" + step.name===params['path']) {
                  //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
                     var stepcopy = JSON.parse(JSON.stringify(step));
@@ -924,7 +924,7 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
                 });
                 for (let stepnumber in tc.steps) {
                     var step = tc.steps[stepnumber];
-                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
+//                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
                     if (path + "/" + tc.name + "/" + step.name===params['path']) {
                  //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
                     var stepcopy = JSON.parse(JSON.stringify(step));
