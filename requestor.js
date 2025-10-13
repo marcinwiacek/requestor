@@ -478,6 +478,7 @@ async function loadDB(name) {
 }
 
 function db_all(filename, sql) {
+console.log(sql);
     return new Promise((resolve, reject) => {
         const q = [];
         dbObj[filename].each(sql, (err, row) => {
@@ -883,6 +884,30 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
             let lines = tc.input;
+            
+            
+             if (lines.length == 0) {
+
+                for (let stepnumber in tc.steps) {
+                    var step = tc.steps[stepnumber];
+                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
+                    if (path + "/" + tc.name + "/" + step.name===params['path']) {
+                 //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
+                    var stepcopy = JSON.parse(JSON.stringify(step));
+                    //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
+                    //                    for (let d in arra) {
+                    //                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                    //                    }
+                    //                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
+                    sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
+                    return;
+                    }
+                }
+
+
+                } else {
+                            
+//fixme            
             let headers = []
             for (let index2 in lines) {
                 let l = lines[index2];
@@ -899,10 +924,9 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
                 });
                 for (let stepnumber in tc.steps) {
                     var step = tc.steps[stepnumber];
-                    if ((path + "/" + tc.name + "/" + step.name).localeCompare(params['path']) != 0) {
-                        continue;
-                    }
-                    if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
+                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
+                    if (path + "/" + tc.name + "/" + step.name===params['path']) {
+                 //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
                     var stepcopy = JSON.parse(JSON.stringify(step));
                     //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
                     //                    for (let d in arra) {
@@ -910,6 +934,10 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
                     //                    }
                     //                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
                     sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
+                    return;
+                    }
+                }
+                
                 }
             }
         }
