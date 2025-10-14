@@ -1,5 +1,5 @@
 <script>
-    const debug = true;
+const debug = true;
 
 function runPath(emptypath) {
     executePOST("op=run&path=" + (emptypath == true ? "" : document.getElementById('id').value));

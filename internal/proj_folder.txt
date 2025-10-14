@@ -219,6 +219,9 @@
     }
 
     function PasteDrop(name) {
+	if (copyID===popupMenuID) {
+	    return false;
+	}
         let elpath1 = copyID.split("/");
         let elpath2 = popupMenuID.split("/");
         if (elpath2.length > elpath1.length || Math.abs(elpath2.length - elpath1.length) == 2) {
