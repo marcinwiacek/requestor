@@ -343,6 +343,9 @@
 
     function updatePopupMenu(toggler, name) {
         toggler.addEventListener("contextmenu", (e) => {
+            if (!e) e = window.event;
+            document.getElementById(name + "menu").style.top = e.pageY + "px";
+            document.getElementById(name + "menu").style.left = e.pageX + "px";
             if (name === "folder") {
                 document.getElementById("stepmenu").classList.remove("show");
             } else {
