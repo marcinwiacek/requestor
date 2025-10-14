@@ -478,7 +478,7 @@ async function loadDB(name) {
 }
 
 function db_all(filename, sql) {
-//console.log(sql);
+    //console.log(sql);
     return new Promise((resolve, reject) => {
         const q = [];
         dbObj[filename].each(sql, (err, row) => {
@@ -884,60 +884,60 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
         for (let tcnumber in ts.testcases) {
             var tc = ts.testcases[tcnumber];
             let lines = tc.input;
-            
-            
-             if (lines.length == 0) {
+
+
+            if (lines.length == 0) {
 
                 for (let stepnumber in tc.steps) {
                     var step = tc.steps[stepnumber];
-//                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
-                    if (path + "/" + tc.name + "/" + step.name===params['path']) {
-                 //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
-                    var stepcopy = JSON.parse(JSON.stringify(step));
-                    //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
-                    //                    for (let d in arra) {
-                    //                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                    //                    }
-                    //                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
-                    sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
-                    return;
+                    //                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
+                    if (path + "/" + tc.name + "/" + step.name === params['path']) {
+                        //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
+                        var stepcopy = JSON.parse(JSON.stringify(step));
+                        //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
+                        //                    for (let d in arra) {
+                        //                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                        //                    }
+                        //                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
+                        sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
+                        return;
                     }
                 }
 
 
-                } else {
-                            
-//fixme            
-            let headers = []
-            for (let index2 in lines) {
-                let l = lines[index2];
-                if (headers.length == 0) {
-                    headers = l.split(",");
-                    continue;
-                }
-                let ll = l.split(",");
-                let i = 0;
-                let arra = [];
-                headers.forEach(function(h) {
-                    arra[h] = ll[i];
-                    i++;
-                });
-                for (let stepnumber in tc.steps) {
-                    var step = tc.steps[stepnumber];
-//                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
-                    if (path + "/" + tc.name + "/" + step.name===params['path']) {
-                 //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
-                    var stepcopy = JSON.parse(JSON.stringify(step));
-                    //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
-                    //                    for (let d in arra) {
-                    //                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                    //                    }
-                    //                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
-                    sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
-                    return;
+            } else {
+
+                //fixme            
+                let headers = []
+                for (let index2 in lines) {
+                    let l = lines[index2];
+                    if (headers.length == 0) {
+                        headers = l.split(",");
+                        continue;
                     }
-                }
-                
+                    let ll = l.split(",");
+                    let i = 0;
+                    let arra = [];
+                    headers.forEach(function(h) {
+                        arra[h] = ll[i];
+                        i++;
+                    });
+                    for (let stepnumber in tc.steps) {
+                        var step = tc.steps[stepnumber];
+                        //                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
+                        if (path + "/" + tc.name + "/" + step.name === params['path']) {
+                            //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
+                            var stepcopy = JSON.parse(JSON.stringify(step));
+                            //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
+                            //                    for (let d in arra) {
+                            //                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
+                            //                    }
+                            //                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
+                            sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
+                            return;
+                        }
+                    }
+
                 }
             }
         }
@@ -978,7 +978,7 @@ function prepareYAML(info, linenr, level) {
                 if (description) {
                     YAMLobj2[name] = "";
                 } else {
-                    YAMLobj2[name] = x.substring(ind + 2).replaceAll("'",""); //fixme
+                    YAMLobj2[name] = x.substring(ind + 2).replaceAll("'", ""); //fixme
                 }
             }
         } else {
@@ -1089,7 +1089,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             newStep.name = TC.operationId;
             newStep.method = methodIndex.toUpperCase();
             newStep.headers = ["content-type: application/json"];
-            newStep.body = body==null?"":JSON.stringify(body, null, 2);
+            newStep.body = body == null ? "" : JSON.stringify(body, null, 2);
             newStep.ignoreWrongSSL = true;
             newStep.conLen = true;
             newStep.url = YAMLobj.servers.url + pathIndex;

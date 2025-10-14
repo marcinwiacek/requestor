@@ -1,387 +1,390 @@
-    <style>
-        a {
-            cursor: pointer;
-        }
+<style>
+    a {
+        cursor: pointer;
+    }
 
-        ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-        }
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
 
-        li {
-            margin-left: 7px;
-        }
+    li {
+        margin-left: 7px;
+    }
 
-        .file {
-            display: block;
-            list-style: none;
-        }
+    .file {
+        display: block;
+        list-style: none;
+    }
 
-        .folder {
-            list-style: none;
-            cursor: pointer;
+    .folder {
+        list-style: none;
+        cursor: pointer;
 
-            >ul {
-                display: none;
-            }
-        }
-
-        .folder-open {
-            >ul {
-                display: block;
-                padding-left: 15px;
-                margin-left: 9px;
-                border-left: 2px solid $color-grey;
-            }
-        }
-
-        .hide {
+        >ul {
             display: none;
-            position: absolute;
-            z-index: 10;
         }
+    }
 
-        .show {
+    .folder-open {
+        >ul {
             display: block;
-            position: absolute;
-            z-index: 10;
+            padding-left: 15px;
+            margin-left: 9px;
+            border-left: 2px solid $color-grey;
         }
+    }
 
-        .disabled {
-            color: grey;
+    .hide {
+        display: none;
+        position: absolute;
+        z-index: 10;
+    }
+
+    .show {
+        display: block;
+        position: absolute;
+        z-index: 10;
+    }
+
+    .disabled {
+        color: grey;
+    }
+</style>
+
+<p>
+<div id="menu"></div>
+<div style="display:none" id="emptymenu">
+    <a onclick="elementNew(true)">New testsuite</a><br />
+</div>
+
+<div class="hide" id="stepmenu" style="border: 5px outset black; background-color: white">
+    <a onclick="elementNew(false)">New step</a><br />
+    <a onclick="elementRename()">Rename</a><br />
+    <a onclick="elementEnableDisable()">Disable/enable</a><br />
+    <a onclick="elementDelete()">Delete</a><br />
+    <a onclick="elementCopy()">Copy</a><br />
+    <a onclick="elementPaste()">Paste</a><br />
+</div>
+
+<div class="hide" id="foldermenu" style="border: 5px outset black; background-color: white">
+    <a onclick="elementNew(false)" id="foldermenunew">New</a><br />
+    <a onclick="elementNewInside()" id="foldermenunewinside">New inside</a><br />
+    <a onclick="elementRename()">Rename</a><br />
+    <a onclick="elementEnableDisable()">Disable/enable</a><br />
+    <a onclick="elementDelete()">Delete</a><br />
+    <a onclick="elementCopy()">Copy</a><br />
+    <a onclick="elementPaste()">Paste</a><br />
+    <a onclick="elementImport()">Import</a><br />
+</div>
+
+<!--TC-->
+
+<script>
+    var popupMenuID = "";
+    var popupMenuName = "";
+    var copyID = "";
+
+    function getPath(path) {
+        var retVal = "";
+        for (i = 0; i < path.length; i++) {
+            if (retVal != "") retVal += "/";
+            retVal += path[i];
         }
-    </style>
+        return retVal;
+    }
 
-    <p>
-    <div id="menu"></div>
-    <div style="display:none" id="emptymenu">
-        <a onclick="elementNew(true)">New testsuite</a><br />
-    </div>
+    function elementRename() {
+        document.getElementById(popupMenuName).classList.toggle("show");
 
-    <div class="hide" id="stepmenu" style="border: 5px outset black; background-color: white">
-        <a onclick="elementNew(false)">New step</a><br />
-        <a onclick="elementRename()">Rename</a><br />
-        <a onclick="elementEnableDisable()">Disable/enable</a><br />
-        <a onclick="elementDelete()">Delete</a><br />
-        <a onclick="elementCopy()">Copy</a><br />
-        <a onclick="elementPaste()">Paste</a><br />
-    </div>
+        let elpath = popupMenuID.split("/");
+        let oldName = elpath[elpath.length - 1];
 
-    <div class="hide" id="foldermenu" style="border: 5px outset black; background-color: white">
-        <a onclick="elementNew(false)" id="foldermenunew">New</a><br />
-        <a onclick="elementNewInside()" id="foldermenunewinside">New inside</a><br />
-        <a onclick="elementRename()">Rename</a><br />
-        <a onclick="elementEnableDisable()">Disable/enable</a><br />
-        <a onclick="elementDelete()">Delete</a><br />
-        <a onclick="elementCopy()">Copy</a><br />
-        <a onclick="elementPaste()">Paste</a><br />
-        <a onclick="elementImport()">Import</a><br />
-    </div>
+        while (true) {
+            var newName = prompt("Please enter unique name", oldName);
 
-    <!--TC-->
-
-    <script>
-        var popupMenuID = "";
-        var popupMenuName = "";
-        var copyID = "";
-
-        function getPath(path) {
-            var retVal = "";
-            for (i = 0; i < path.length; i++) {
-                if (retVal != "") retVal += "/";
-                retVal += path[i];
+            if (newName == null) {
+                break;
             }
-            return retVal;
-        }
+            elpath[elpath.length - 1] = newName;
+            newElementPath = getPath(elpath);
 
-        function elementRename() {
-            document.getElementById(popupMenuName).classList.toggle("show");
-
-            let elpath = popupMenuID.split("/");
-            let oldName = elpath[elpath.length - 1];
-
-            while (true) {
-                var newName = prompt("Please enter unique name", oldName);
-
-                if (newName == null) {
-                    break;
-                }
-                elpath[elpath.length - 1] = newName;
-                newElementPath = getPath(elpath);
-
-                if (document.getElementById(newElementPath) == null) {
-                    executePOST("op=renameelement&" + "path=" + popupMenuID + "&new=" + newName + "&newpath=" + newElementPath);
-                    break;
-                }
-            }
-        }
-
-        function elementImport() {
-            document.getElementById(popupMenuName).classList.toggle("show");
-            executePOST("op=import&path=");
-        }
-
-        function elementEnableDisable() {
-            document.getElementById(popupMenuName).classList.toggle("show");
-            executePOST("op=enabledisableelement&path=" + popupMenuID);
-        }
-
-        function elementNew(empty) {
-            if (!empty) document.getElementById(popupMenuName).classList.toggle("show");
-
-            let oldName = "";
-            if (popupMenuID == "/") popupMenuID = "";
-            let elpath = popupMenuID.split("/");
-
-            while (true) {
-                var newName = prompt("Please enter unique name", oldName);
-                if (newName == null) {
-                    break;
-                }
-                oldName = newName;
-
-                elpath[elpath.length - 1] = newName;
-                newElementPath = getPath(elpath);
-
-                if (document.getElementById(newElementPath) == null) {
-                    executePOST("op=newelement&path=" + popupMenuID + "&new=" + newName +
-                        "&newElementPath=" + newElementPath + "&elplen=" + elpath.length);
-                    break;
-                }
+            if (document.getElementById(newElementPath) == null) {
+                executePOST("op=renameelement&" + "path=" + popupMenuID + "&new=" + newName + "&newpath=" + newElementPath);
+                break;
             }
         }
+    }
 
-        function elementNewInside() {
-            document.getElementById(popupMenuName).classList.toggle("show");
+    function elementImport() {
+        document.getElementById(popupMenuName).classList.toggle("show");
+        executePOST("op=import&path=");
+    }
 
-            let oldName = "";
-            let elpath = popupMenuID.split("/");
+    function elementEnableDisable() {
+        document.getElementById(popupMenuName).classList.toggle("show");
+        executePOST("op=enabledisableelement&path=" + popupMenuID);
+    }
 
-            while (true) {
-                var newName = prompt("Please enter unique name", oldName);
-                if (newName == null) {
-                    break;
-                }
+    function elementNew(empty) {
+        if (!empty) document.getElementById(popupMenuName).classList.toggle("show");
 
-                oldName = newName;
-                newElementPath = getPath(elpath) + "/" + newName;
+        let oldName = "";
+        if (popupMenuID == "/") popupMenuID = "";
+        let elpath = popupMenuID.split("/");
 
-                if (document.getElementById(newElementPath) == null) {
-                    executePOST("op=newelementinside&path=" + popupMenuID + "&new=" + newName +
-                        "&newElementPath=" + newElementPath + "&elplen=" + elpath.length);
-                    break;
-                }
+        while (true) {
+            var newName = prompt("Please enter unique name", oldName);
+            if (newName == null) {
+                break;
+            }
+            oldName = newName;
+
+            elpath[elpath.length - 1] = newName;
+            newElementPath = getPath(elpath);
+
+            if (document.getElementById(newElementPath) == null) {
+                executePOST("op=newelement&path=" + popupMenuID + "&new=" + newName +
+                    "&newElementPath=" + newElementPath + "&elplen=" + elpath.length);
+                break;
             }
         }
+    }
 
-        function elementDelete() {
-            document.getElementById(popupMenuName).classList.toggle("show");
-            executePOST("op=deleteelement&path=" + popupMenuID);
+    function elementNewInside() {
+        document.getElementById(popupMenuName).classList.toggle("show");
+
+        let oldName = "";
+        let elpath = popupMenuID.split("/");
+
+        while (true) {
+            var newName = prompt("Please enter unique name", oldName);
+            if (newName == null) {
+                break;
+            }
+
+            oldName = newName;
+            newElementPath = getPath(elpath) + "/" + newName;
+
+            if (document.getElementById(newElementPath) == null) {
+                executePOST("op=newelementinside&path=" + popupMenuID + "&new=" + newName +
+                    "&newElementPath=" + newElementPath + "&elplen=" + elpath.length);
+                break;
+            }
         }
+    }
 
-        function elementCopy() {
-            copyID = popupMenuID;
-            document.getElementById(popupMenuName).classList.toggle("show");
-        }
+    function elementDelete() {
+        document.getElementById(popupMenuName).classList.toggle("show");
+        executePOST("op=deleteelement&path=" + popupMenuID);
+    }
 
-        function elementPaste() {
-            PasteDrop("paste");
-            document.getElementById(popupMenuName).classList.toggle("show");
+    function elementCopy() {
+        copyID = popupMenuID;
+        document.getElementById(popupMenuName).classList.toggle("show");
+    }
+
+    function elementPaste() {
+        PasteDrop("paste");
+        document.getElementById(popupMenuName).classList.toggle("show");
+        copyID = "";
+    }
+
+    function cancelDefault(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+
+    function dragStart(e) {
+        e.dataTransfer.setData("text/plain", e.target.id);
+    }
+
+    function dropEnd(e) {
+        cancelDefault(e);
+
+        copyID = e.dataTransfer.getData("text/plain");
+        popupMenuID = e.target.id;
+
+        let isFolder1 = document.getElementById(copyID).classList.contains("tcts");
+        let isFolder2 = document.getElementById(popupMenuID).classList.contains("tcts");
+        //        console.log("file/folder drop " + copyID + " " + popupMenuID + " " + isFolder1 + " " + isFolder2);
+
+        if (PasteDrop("drop")) {
+            el = document.getElementById(copyID);
+            el.parentNode.remove();
             copyID = "";
         }
+    }
 
-        function cancelDefault(e) {
-            e.preventDefault();
-            e.stopPropagation();
+    function PasteDrop(name) {
+        let elpath1 = copyID.split("/");
+        let elpath2 = popupMenuID.split("/");
+        if (elpath2.length > elpath1.length || Math.abs(elpath2.length - elpath1.length) == 2) {
+            //        console.log("not possible");
             return false;
         }
 
-        function dragStart(e) {
-            e.dataTransfer.setData("text/plain", e.target.id);
+        if (elpath2.length == elpath1.length) {
+            elpath2.pop();
+            newElementPath = getPath(elpath2);
+        } else {
+            newElementPath = popupMenuID;
         }
+        newElementPath = newElementPath + "/";
+        if (newElementPath == "/") newElementPath = "";
+        elpath2 = popupMenuID.split("/");
 
-        function dropEnd(e) {
-            cancelDefault(e);
+        executePOST(
+            "op=" + name + "element&path=" + copyID + "&newpath=" + popupMenuID +
+            "&newElementPath=" + newElementPath + "&elp1len=" + elpath1.length + "&elp2len=" + elpath2.length
+        );
+        return true;
+    }
 
-            copyID = e.dataTransfer.getData("text/plain");
-            popupMenuID = e.target.id;
+    function getFolderElement(name, disabled, id, type) {
+        let alel = document.createElement("a");
+        alel.text = name;
+        alel.setAttribute("id", id);
+        alel.setAttribute("class", "tcts" + (disabled ? " disabled" : "") + " " + type);
+        alel.onclick = function() {
+            document.getElementById("stepmenu").classList.remove("show");
+            document.getElementById("foldermenu").classList.remove("show");
 
-            let isFolder1 = document.getElementById(copyID).classList.contains("tcts");
-            let isFolder2 = document.getElementById(popupMenuID).classList.contains("tcts");
-            //        console.log("file/folder drop " + copyID + " " + popupMenuID + " " + isFolder1 + " " + isFolder2);
+            loadRightPart(this.id);
+        };
+        alel.setAttribute("draggable", true);
+        alel.addEventListener("dragstart", dragStart);
+        alel.addEventListener("drop", dropEnd);
+        alel.addEventListener("dragenter", cancelDefault);
+        alel.addEventListener("dragover", cancelDefault);
+        updatePopupMenu(alel, "folder");
 
-            if (PasteDrop("drop")) {
-                el = document.getElementById(copyID);
-                el.parentNode.remove();
-                copyID = "";
-            }
-        }
+        let ulel = document.createElement("ul");
 
-        function PasteDrop(name) {
-            let elpath1 = copyID.split("/");
-            let elpath2 = popupMenuID.split("/");
-            if (elpath2.length > elpath1.length || Math.abs(elpath2.length - elpath1.length) == 2) {
-                //        console.log("not possible");
-                return false;
-            }
+        let liel = document.createElement("li");
+        liel.setAttribute("class", "folder folder-open");
+        liel.appendChild(alel);
+        liel.appendChild(ulel);
 
-            if (elpath2.length == elpath1.length) {
-                elpath2.pop();
-                newElementPath = getPath(elpath2);
-            } else {
-                newElementPath = popupMenuID;
-            }
-            newElementPath = newElementPath + "/";
-            if (newElementPath == "/") newElementPath = "";
-            elpath2 = popupMenuID.split("/");
+        return liel;
+    }
 
-            executePOST(
-                "op=" + name + "element&path=" + copyID + "&newpath=" + popupMenuID +
-                "&newElementPath=" + newElementPath + "&elp1len=" + elpath1.length + "&elp2len=" + elpath2.length
-            );
-            return true;
-        }
+    function getFileElement(name, disabled, id) {
+        let alel = document.createElement("a");
+        alel.text = name;
+        alel.setAttribute("id", id);
+        alel.setAttribute("class", "step" + (disabled ? " disabled" : ""));
+        alel.onclick = function() {
+            document.getElementById("stepmenu").classList.remove("show");
+            document.getElementById("foldermenu").classList.remove("show");
 
-        function getFolderElement(name, disabled, id, type) {
-            let alel = document.createElement("a");
-            alel.text = name;
-            alel.setAttribute("id", id);
-            alel.setAttribute("class", "tcts" + (disabled ? " disabled" : "") + " " + type);
-            alel.onclick = function() {
-            	    document.getElementById("stepmenu").classList.remove("show");
-                    document.getElementById("foldermenu").classList.remove("show");
+            loadRightPart(this.id);
+        };
+        alel.setAttribute("draggable", true);
+        alel.addEventListener("dragstart", dragStart);
+        alel.addEventListener("drop", dropEnd);
+        alel.addEventListener("dragenter", cancelDefault);
+        alel.addEventListener("dragover", cancelDefault);
+        updatePopupMenu(alel, "step");
 
-                loadRightPart(this.id);
-            };
-            alel.setAttribute("draggable", true);
-            alel.addEventListener("dragstart", dragStart);
-            alel.addEventListener("drop", dropEnd);
-            alel.addEventListener("dragenter", cancelDefault);
-            alel.addEventListener("dragover", cancelDefault);
-            updatePopupMenu(alel, "folder");
+        let liel = document.createElement("li");
+        liel.setAttribute("class", "file");
+        liel.appendChild(alel);
 
-            let ulel = document.createElement("ul");
+        return liel;
+    }
 
-            let liel = document.createElement("li");
-            liel.setAttribute("class", "folder folder-open");
-            liel.appendChild(alel);
-            liel.appendChild(ulel);
+    function addFilesFolders(treeObj, id) {
+        if (treeObj.folders || treeObj.files) {
+            let x = getFolderElement(treeObj.name, treeObj.disabled, id + treeObj.name, treeObj.type);
 
-            return liel;
-        }
-
-        function getFileElement(name, disabled, id) {
-            let alel = document.createElement("a");
-            alel.text = name;
-            alel.setAttribute("id", id);
-            alel.setAttribute("class", "step" + (disabled ? " disabled" : ""));
-            alel.onclick = function() {
-            	    document.getElementById("stepmenu").classList.remove("show");
-                    document.getElementById("foldermenu").classList.remove("show");
-
-                loadRightPart(this.id);
-            };
-            alel.setAttribute("draggable", true);
-            alel.addEventListener("dragstart", dragStart);
-            alel.addEventListener("drop", dropEnd);
-            alel.addEventListener("dragenter", cancelDefault);
-            alel.addEventListener("dragover", cancelDefault);
-            updatePopupMenu(alel, "step");
-
-            let liel = document.createElement("li");
-            liel.setAttribute("class", "file");
-            liel.appendChild(alel);
-
-            return liel;
-        }
-
-        function addFilesFolders(treeObj, id) {
-            if (treeObj.folders || treeObj.files) {
-                let x = getFolderElement(treeObj.name, treeObj.disabled, id + treeObj.name, treeObj.type);
-
-                treeObj.folders.forEach(function(folder, index) {
-                    x.children[1].appendChild(addFilesFolders(folder, id + treeObj.name + "/"));
-                });
-                treeObj.files.forEach(function(file, index) {
-                    fileel = getFileElement(file.name, treeObj.disabled,
-                        id + treeObj.name + "/" + file.name);
-                    x.children[1].appendChild(fileel);
-                });
-                return x;
-            } else {
-                return getFileElement(treeObj.name, treeObj.disabled,
-                    id + treeObj.name);
-            }
-        }
-
-        function updateFolder(obj) {
-            const first = obj.firstChild;
-            if (first.innerHTML == "\u25BC " || first.innerHTML == "\u25B6 ") return;
-            const node = document.createElement("a");
-            node.innerHTML = obj.classList.contains("folder-open") ?
-                "\u25BC " :
-                "\u25B6 ";
-            node.addEventListener("click", function() {
-                this.innerHTML = this.innerHTML == "\u25B6 " ? "\u25BC " : "\u25B6 ";
-                this.parentElement.classList.toggle("folder-open");
+            treeObj.folders.forEach(function(folder, index) {
+                x.children[1].appendChild(addFilesFolders(folder, id + treeObj.name + "/"));
             });
-            obj.prepend(node);
-        }
-
-        function updateAllFolders() {
-            var toggler = document.getElementsByClassName("folder");
-            for (var i = 0; i < toggler.length; i++) {
-                updateFolder(toggler[i]);
-            }
-        }
-
-timenow=0;
-        function updatePopupMenu(toggler, name) {
-            toggler.addEventListener("contextmenu", (e) => {
-		if (name==="folder") {
-            	    document.getElementById("stepmenu").classList.remove("show");
-		} else {
-                    document.getElementById("foldermenu").classList.remove("show");
-		}
-                popupMenuID = e.target.id;
-                popupMenuName = name + "menu";
-		document.getElementById(popupMenuName).addEventListener("contextmenu", (e) => {e.preventDefault();});
-                if (name == "folder") {
-                    p = e.target.id.split("/");
-                    document.getElementById(name + "menunew").innerHTML = p.length == 1 ? "New testsuite" : "New testcase";
-                    document.getElementById(name + "menunewinside").innerHTML = p.length == 1 ? "New testcase" : "New step";
-                }
-                document.getElementById(name + "menu").classList.toggle("show");
-                e.preventDefault();
-		timenow = Date.now();
+            treeObj.files.forEach(function(file, index) {
+                fileel = getFileElement(file.name, treeObj.disabled,
+                    id + treeObj.name + "/" + file.name);
+                x.children[1].appendChild(fileel);
             });
-            toggler.addEventListener("mousemove", (e) => {
-                if (document.getElementById(name + "menu").classList.contains("show"))
-                    return;
-                if (!e) e = window.event;
-                document.getElementById(name + "menu").style.top = e.pageY + "px";
-                document.getElementById(name + "menu").style.left = e.pageX + "px";
-            });
+            return x;
+        } else {
+            return getFileElement(treeObj.name, treeObj.disabled,
+                id + treeObj.name);
         }
+    }
 
-        if (tree.length == 0) {
-            document.getElementById("emptymenu").style.display = 'block';
-        }
-        ulel = document.createElement("ul");
-        document.getElementById("menu").appendChild(ulel);
-        tree.forEach(function(folder, index) {
-            ulel.appendChild(addFilesFolders(folder, ""));
+    function updateFolder(obj) {
+        const first = obj.firstChild;
+        if (first.innerHTML == "\u25BC " || first.innerHTML == "\u25B6 ") return;
+        const node = document.createElement("a");
+        node.innerHTML = obj.classList.contains("folder-open") ?
+            "\u25BC " :
+            "\u25B6 ";
+        node.addEventListener("click", function() {
+            this.innerHTML = this.innerHTML == "\u25B6 " ? "\u25BC " : "\u25B6 ";
+            this.parentElement.classList.toggle("folder-open");
         });
-        delete tree;
+        obj.prepend(node);
+    }
 
-        updateAllFolders();
+    function updateAllFolders() {
+        var toggler = document.getElementsByClassName("folder");
+        for (var i = 0; i < toggler.length; i++) {
+            updateFolder(toggler[i]);
+        }
+    }
 
-        document.getElementById("menu").addEventListener("contextmenu", (e) => {
-if (Date.now()-timenow>100) {
-                document.getElementById("foldermenu").classList.remove("show");
+    timenow = 0;
+
+    function updatePopupMenu(toggler, name) {
+        toggler.addEventListener("contextmenu", (e) => {
+            if (name === "folder") {
                 document.getElementById("stepmenu").classList.remove("show");
-}
+            } else {
+                document.getElementById("foldermenu").classList.remove("show");
+            }
+            popupMenuID = e.target.id;
+            popupMenuName = name + "menu";
+            document.getElementById(popupMenuName).addEventListener("contextmenu", (e) => {
+                e.preventDefault();
             });
+            if (name == "folder") {
+                p = e.target.id.split("/");
+                document.getElementById(name + "menunew").innerHTML = p.length == 1 ? "New testsuite" : "New testcase";
+                document.getElementById(name + "menunewinside").innerHTML = p.length == 1 ? "New testcase" : "New step";
+            }
+            document.getElementById(name + "menu").classList.toggle("show");
+            e.preventDefault();
+            timenow = Date.now();
+        });
+        toggler.addEventListener("mousemove", (e) => {
+            if (document.getElementById(name + "menu").classList.contains("show"))
+                return;
+            if (!e) e = window.event;
+            document.getElementById(name + "menu").style.top = e.pageY + "px";
+            document.getElementById(name + "menu").style.left = e.pageX + "px";
+        });
+    }
 
-    </script>
+    if (tree.length == 0) {
+        document.getElementById("emptymenu").style.display = 'block';
+    }
+    ulel = document.createElement("ul");
+    document.getElementById("menu").appendChild(ulel);
+    tree.forEach(function(folder, index) {
+        ulel.appendChild(addFilesFolders(folder, ""));
+    });
+    delete tree;
+
+    updateAllFolders();
+
+    document.getElementById("menu").addEventListener("contextmenu", (e) => {
+        if (Date.now() - timenow > 100) {
+            document.getElementById("foldermenu").classList.remove("show");
+            document.getElementById("stepmenu").classList.remove("show");
+        }
+    });
+
+</script>

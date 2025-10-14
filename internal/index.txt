@@ -6,30 +6,30 @@
     <!--JSLIB-->
 </head>
 
-    <script>
-        function loadBoxPart(url, boxid) {
-            executePOST("nodebug" + url, function(response, ...args) {
-                var tmp = document.createElement("div");
-                tmp.innerHTML = response;
-                const scriptElements = tmp.querySelectorAll("script");
-                Array.from(scriptElements).forEach((scriptElement) => {
-                    const clonedElement = document.createElement("script");
-                    Array.from(scriptElement.attributes).forEach((attribute) => {
-                        clonedElement.setAttribute(attribute.name, attribute.value);
-                    });
-                    clonedElement.text = scriptElement.text;
-                    scriptElement.parentNode.replaceChild(clonedElement, scriptElement);
+<script>
+    function loadBoxPart(url, boxid) {
+        executePOST("nodebug" + url, function(response, ...args) {
+            var tmp = document.createElement("div");
+            tmp.innerHTML = response;
+            const scriptElements = tmp.querySelectorAll("script");
+            Array.from(scriptElements).forEach((scriptElement) => {
+                const clonedElement = document.createElement("script");
+                Array.from(scriptElement.attributes).forEach((attribute) => {
+                    clonedElement.setAttribute(attribute.name, attribute.value);
                 });
-                document.getElementById(boxid).innerHTML = "";
-                document.getElementById(boxid).appendChild(tmp);
+                clonedElement.text = scriptElement.text;
+                scriptElement.parentNode.replaceChild(clonedElement, scriptElement);
             });
-            return false;
-        }
-    </script>
+            document.getElementById(boxid).innerHTML = "";
+            document.getElementById(boxid).appendChild(tmp);
+        });
+        return false;
+    }
+</script>
 
 <body>
     <p><b>Files</b>
-    <!--FILES-->
+        <!--FILES-->
     <p>
         <button onclick='addFile("");return false;'>
             New file
@@ -38,19 +38,19 @@
         <script>
             function addFile(n) {
                 while (true) {
-                    var x = prompt("Please enter new unique file name",n);
+                    var x = prompt("Please enter new unique file name", n);
                     if (x == null) break;
                     if (x == "") continue;
                     executePOST("op=newfile&" + "name=" + x,
                         function(...args) {
-if (args[0]==="file exists") {
-	addFile(x);
-} else {
-                            window.location.href = '/';
-}
+                            if (args[0] === "file exists") {
+                                addFile(x);
+                            } else {
+                                window.location.href = '/';
+                            }
                         }
                     );
-break;
+                    break;
                 }
             }
         </script>

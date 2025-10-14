@@ -73,7 +73,7 @@
         });
 
         function csvGen(newColumn2) {
-console.log("newcolumn2 is "+newColumn2);
+            console.log("newcolumn2 is "+newColumn2);
             var data = table.getData();
             var csvData = "";
             first = true;

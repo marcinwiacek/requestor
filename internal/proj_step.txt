@@ -1,5 +1,5 @@
 <script async="async">
-    function getHTTPCode(code) {
+function getHTTPCode(code) {
         switch (code) {
             //https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
             case "200":
@@ -79,140 +79,137 @@
         }
     }
 
-    function selectMethod(name, name2) {
-        var selObj = document.getElementById(name);
-        for (var i = 0; i < selObj.options.length; i++) {
-            if (selObj.options[i].text.toUpperCase() == name2.toUpperCase()) {
-                selObj.options[i].selected = true;
-                break;
-            }
+function selectMethod(name, name2) {
+    var selObj = document.getElementById(name);
+    for (var i = 0; i < selObj.options.length; i++) {
+        if (selObj.options[i].text.toUpperCase() == name2.toUpperCase()) {
+            selObj.options[i].selected = true;
+            break;
         }
     }
-
-    function setupLast(obj) {
-        document.getElementById("lastrequesttype").value = obj.method.toUpperCase();
-        document.getElementById("lastrequesturl").value = obj.url;
-        document.getElementById("lastrequestheaders").value = "";
-        document.getElementById("lastrequestheaders").value =
-            decodeURIComponent(obj.headers);
-        document.getElementById("lastrequestbody").value = decodeURIComponent(
-            obj.body,
-        );
-        document.getElementById("lastresponseheaders").value = "";
-        document.getElementById("lastresponseheaders").value =
-            decodeURIComponent(obj.headers_res);
-        document.getElementById("lastresponsetime").value = decodeURIComponent(
-            obj.datetime_res,
-        );
-        document.getElementById("lastresponsebody").value = decodeURIComponent(
-            obj.body_res,
-        );
-        document.getElementById("lastresponsecode").value = getHTTPCode(
-            obj.code_res,
-        );
-        document.getElementById("lastresponsecert").value = decodeURIComponent(
-            obj.cert_res,
-        );
-        document.getElementById("lastresponseerror").value = decodeURIComponent(
-            obj.errors,
-        );
-        document.getElementById("lastignorewrongssl").checked =
-            obj.ssl_ignore == "1";
-    }
-
-    function selectLastDate() {
-        if (document.getElementById("whenlast").value == "") return;
-        executePOST("op=getstep&path=" + document.getElementById("id").value +
-            "&dt=" + encodeURIComponent(document.getElementById("whenlast").value),
-            function(...args) {
-                setupLast(JSON.parse(args[0]));
-            });
-        return false;
-    }
-
-    function sendRunStep() {
-        document.getElementById("run").disabled = true;
-
-        var method = "";
-        var selObj = document.getElementById("type");
-        for (var i = 0; i < selObj.options.length; i++) {
-            if (selObj.options[i].selected) {
-                method = selObj.options[i].value;
-                break;
-            }
-        }
-
-        executePOST("op=run&path=" + document.getElementById("id").value + "&headers=" + encodeURIComponent(document.getElementById("header").value) +
-            "&body=" + encodeURIComponent(document.getElementById("body").value) + "&url=" + encodeURIComponent(document.getElementById("url").value) +
-            "&ssl=" + document.getElementById("ignorewrongssl").checked + "&conlen=" + document.getElementById("addcontentlength").checked +
-            "&method=" + method,
-            function(...args) {
-                document.getElementById("run").disabled = false;
-                //processed with sse
-            }
-        );
-
-        return false;
-    }
-
-    function syncBody1() {
-        if (document.getElementById("lastrequestbody")!=null) {
-        document.getElementById("body").style.height=
-            document.getElementById("lastrequestbody").style.height;
-        document.getElementById("body").style.width=
-            document.getElementById("lastrequestbody").style.width;
-document.cookie = "lastbody1w="+
-            document.getElementById("lastrequestbody").style.width;
-document.cookie = "lastbody1h="+
-            document.getElementById("lastrequestbody").style.height;
 }
+
+function setupLast(obj) {
+    document.getElementById("lastrequesttype").value = obj.method.toUpperCase();
+    document.getElementById("lastrequesturl").value = obj.url;
+    document.getElementById("lastrequestheaders").value = "";
+    document.getElementById("lastrequestheaders").value =
+        decodeURIComponent(obj.headers);
+    document.getElementById("lastrequestbody").value = decodeURIComponent(
+        obj.body,
+    );
+    document.getElementById("lastresponseheaders").value = "";
+    document.getElementById("lastresponseheaders").value =
+        decodeURIComponent(obj.headers_res);
+    document.getElementById("lastresponsetime").value = decodeURIComponent(
+        obj.datetime_res,
+    );
+    document.getElementById("lastresponsebody").value = decodeURIComponent(
+        obj.body_res,
+    );
+    document.getElementById("lastresponsecode").value = getHTTPCode(
+        obj.code_res,
+    );
+    document.getElementById("lastresponsecert").value = decodeURIComponent(
+        obj.cert_res,
+    );
+    document.getElementById("lastresponseerror").value = decodeURIComponent(
+        obj.errors,
+    );
+    document.getElementById("lastignorewrongssl").checked =
+        obj.ssl_ignore == "1";
+}
+
+function selectLastDate() {
+    if (document.getElementById("whenlast").value == "") return;
+    executePOST("op=getstep&path=" + document.getElementById("id").value +
+        "&dt=" + encodeURIComponent(document.getElementById("whenlast").value),
+        function(...args) {
+            setupLast(JSON.parse(args[0]));
+        });
+    return false;
+}
+
+function sendRunStep() {
+    document.getElementById("run").disabled = true;
+
+    var method = "";
+    var selObj = document.getElementById("type");
+    for (var i = 0; i < selObj.options.length; i++) {
+        if (selObj.options[i].selected) {
+            method = selObj.options[i].value;
+            break;
+        }
     }
 
+    executePOST("op=run&path=" + document.getElementById("id").value + "&headers=" + encodeURIComponent(document.getElementById("header").value) +
+        "&body=" + encodeURIComponent(document.getElementById("body").value) + "&url=" + encodeURIComponent(document.getElementById("url").value) +
+        "&ssl=" + document.getElementById("ignorewrongssl").checked + "&conlen=" + document.getElementById("addcontentlength").checked +
+        "&method=" + method,
+        function(...args) {
+            document.getElementById("run").disabled = false;
+            //processed with sse
+        }
+    );
 
-    function syncBody2() {
-        if (document.getElementById("lastrequestbody")!=null) {
+    return false;
+}
+
+function syncBody1() {
+    if (document.getElementById("lastrequestbody") != null) {
+        document.getElementById("body").style.height =
+            document.getElementById("lastrequestbody").style.height;
+        document.getElementById("body").style.width =
+            document.getElementById("lastrequestbody").style.width;
+        document.cookie = "lastbody1w=" +
+            document.getElementById("lastrequestbody").style.width;
+        document.cookie = "lastbody1h=" +
+            document.getElementById("lastrequestbody").style.height;
+    }
+}
+
+function syncBody2() {
+    if (document.getElementById("lastrequestbody") != null) {
         document.getElementById("lastrequestbody").style.height =
             document.getElementById("body").style.height;
         document.getElementById("lastrequestbody").style.width =
             document.getElementById("body").style.width;
-document.cookie = "body1w="+
+        document.cookie = "body1w=" +
             document.getElementById("body").style.width;
-document.cookie = "body1h="+
+        document.cookie = "body1h=" +
             document.getElementById("body").style.height;
-}
     }
+}
 
-
-    function syncHeader1() {
-        if (document.getElementById("lastrequestheaders")!=null) {
+function syncHeader1() {
+    if (document.getElementById("lastrequestheaders") != null) {
         document.getElementById("header").style.height =
             document.getElementById("lastrequestheaders").style.height;
         document.getElementById("header").style.width =
             document.getElementById("lastrequestheaders").style.width;
-document.cookie = "lastheader1w="+
+        document.cookie = "lastheader1w=" +
             document.getElementById("lastrequestheaders").style.width;
-document.cookie = "lastheader1h="+
+        document.cookie = "lastheader1h=" +
             document.getElementById("lastrequestheaders").style.height;
-	}
     }
+}
 
-
-    function syncHeader2() {
-        if (document.getElementById("lastrequestheaders")!=null) {
+function syncHeader2() {
+    if (document.getElementById("lastrequestheaders") != null) {
         document.getElementById("lastrequestheaders").style.height =
             document.getElementById("header").style.height;
         document.getElementById("lastrequestheaders").style.width =
             document.getElementById("header").style.width;
-document.cookie = "header1w="+
+        document.cookie = "header1w=" +
             document.getElementById("header").style.width;
-document.cookie = "header1h="+
+        document.cookie = "header1h=" +
             document.getElementById("header").style.height;
-	}
     }
+}
 
 function onInput(x) {
-   x.style.height = "auto";
-   x.style.height = (x.scrollHeight+12)+"px";
+    x.style.height = "auto";
+    x.style.height = (x.scrollHeight + 12) + "px";
 }
 
 </script>
@@ -341,36 +338,35 @@ function onInput(x) {
     </table>
 </form>
 <script>
-    selectLastDate();
 
-    new ResizeObserver(syncBody1).observe(document.getElementById("lastrequestbody"));
-    new ResizeObserver(syncBody2).observe(document.getElementById("body"));
-    new ResizeObserver(syncHeader1).observe(document.getElementById("lastrequestheaders"));
-    new ResizeObserver(syncHeader2).observe(document.getElementById("header"));
+selectLastDate();
 
-    x1 = document.cookie.split(";");
-    for (inx in x1) {
-	xx = x1[inx].split("=");
-//console.log(xx);
-	switch(xx[0].replaceAll(" ","")) {
-	case "header1w":
-//alert("'"+xx[1]+"'");
-//	    document.getElementById("header").style.width = xx[1];
-	    break;
-	case "header1h":
-//alert("updating to '"+xx[1]+"'");
-	    document.getElementById("header").style.height = xx[1];
-	    break;
-	case "body1w":
-//	    document.getElementById("body").style.width = xx[1];
-	    break;
-	case "body1h":
-	    document.getElementById("body").style.height = "600px";
-	    break;
-//default:
-//alert(x1[inx]);
-	}
+new ResizeObserver(syncBody1).observe(document.getElementById("lastrequestbody"));
+new ResizeObserver(syncBody2).observe(document.getElementById("body"));
+new ResizeObserver(syncHeader1).observe(document.getElementById("lastrequestheaders"));
+new ResizeObserver(syncHeader2).observe(document.getElementById("header"));
+
+x1 = document.cookie.split(";");
+for (inx in x1) {
+    xx = x1[inx].split("=");
+    //console.log(xx);
+    switch (xx[0].replaceAll(" ", "")) {
+        case "header1w":
+            //alert("'"+xx[1]+"'");
+            //document.getElementById("header").style.width = xx[1];
+            break;
+        case "header1h":
+            //alert("updating to '"+xx[1]+"'");
+            document.getElementById("header").style.height = xx[1];
+            break;
+        case "body1w":
+            //document.getElementById("body").style.width = xx[1];
+            break;
+        case "body1h":
+            document.getElementById("body").style.height = "600px";
+            break;
+            //default:
+            //alert(x1[inx]);
     }
-
-
+}
 </script>
