@@ -840,12 +840,6 @@ async function parsePOSTRun(req, params, res, jsonObj) {
 }
 
 async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
-    el = findElement(jsonObj, params, params['path'], deleteDB, deleteOriginal);
-    el2 = findElement(jsonObj, params, params['newpath'], false, false);
-    tree = [];
-    if (el != null && el2 != null) {
-        let newObj = JSON.parse(JSON.stringify(el.obj));
-
         let elpath = params['path'].split("/");//old path
         let elpath2 = params['newpath'].split("/");//new parent path
 
@@ -856,9 +850,14 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
     	    console.log("status1 for "+elpath[0]+"/"+elpath[1]+" "+x2.status);
 	}
 
+
+    el = findElement(jsonObj, params, params['path'], deleteDB, deleteOriginal);
+    el2 = findElement(jsonObj, params, params['newpath'], false, false);
+    tree = [];
+    if (el != null && el2 != null) {
+        let newObj = JSON.parse(JSON.stringify(el.obj));
         if (elpath.length != elpath2.length) {
             if (elpath2.length == 1) {
-//		var x = await createTSTree(params['file'],newObj);
                 while (true) {
                     found = false;
                     for (let tcnumber in el2.obj.testcases) {
