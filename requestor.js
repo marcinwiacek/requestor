@@ -408,21 +408,27 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
     return null;
 }
 
-async function createStepTree(obj) {
+async function createStepTree(file, obj) {
     var stepobj = {}
     stepobj.name = obj.name;
     stepobj.type = 'step';
     stepobj.disabled = obj.disabled && obj.disabled == true ? true : false;
     if (obj.dbid) {
-//	let rows = await db_all(params['file'], "SELECT dt from requests where dbid =\"" + obj.dbid + "\" order by dt desc");
-	stepobj.status='ok';
+	let rows = await db_all(file, "SELECT dt,error_res from requests where dbid =\"" + obj.dbid + "\" order by dt desc");
+	if (rows.length==0) {
+	    stepobj.status='norun';
+	} else if (rows[0].error_res.length==0) {
+	    stepobj.status='ok';
+	} else {
+	    stepobj.status='nok';
+	}
     } else {
 	stepobj.status='norun';
     }
     return stepobj;
 }
 
-async function createTCTree(obj) {
+async function createTCTree(file, obj) {
     var tcobj = {}
     tcobj.name = obj.name;
     tcobj.type = 'tc';
@@ -433,18 +439,18 @@ async function createTCTree(obj) {
 
     for (let stepnumber in obj.steps) {
         var step = obj.steps[stepnumber];
-	var x = await createStepTree(step);
+	var x = await createStepTree(file, step);
         tcobj.files.push(x);
-	if (step.status==='norun') {
+	if (x.status==='norun') {
 	    tcobj.status='norun';
-	} else if (step.status==='nok') {
+	} else if (x.status==='nok') {
 	    tcobj.status='nok';
 	}
     }
     return tcobj;
 }
 
-async function createTSTree(obj) {
+async function createTSTree(file, obj) {
     var tsobj = {}
     tsobj.name = obj.name;
     tsobj.type = 'ts';
@@ -455,11 +461,11 @@ async function createTSTree(obj) {
 
     for (let tcnumber in obj.testcases) {
         var tc = obj.testcases[tcnumber];
-	var x = await createTCTree(tc);
+	var x = await createTCTree(file, tc);
         tsobj.folders.push(x);
-	if (tc.status==='norun') {
+	if (x.status==='norun') {
 	    tsobj.status='norun';
-	} else if (tc.status==='nok') {
+	} else if (x.status==='nok') {
 	    tsobj.status='nok';
 	}
     }
@@ -833,7 +839,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
     if (req != null) sendPlain(req, res, sss);
 }
 
-function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
+async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
     el = findElement(jsonObj, params, params['path'], deleteDB, deleteOriginal);
     el2 = findElement(jsonObj, params, params['newpath'], false, false);
     tree = [];
@@ -886,13 +892,13 @@ function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
             el2.parentarray.splice(el2.index, 0, newObj);
         }
         if (el.type == 'suite') {
-	    var x = createTSTree(newObj);
+	    var x = await createTSTree(params['file'],newObj);
             tree.push(x);
         } else if (el.type == 'tc') {
-	    var x =  createTCTree(newObj);
+	    var x = await createTCTree(params['file'],newObj);
             tree.push(x);
         } else {
-	    var x = createStepTree(newObj);
+	    var x = await createStepTree(params['file'],newObj);
             tree.push(x);
         }
         jsonObj.modified = true;
@@ -1327,7 +1333,7 @@ const onRequestHandler = async (req, res) => {
             let tree = [];
             for (let tsnumber in jsonObj[params['file']].testsuites) {
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
-		var x =  await createTSTree(ts);
+		var x =  await createTSTree(params['file'],ts);
                 tree.push(x);
             }
 
