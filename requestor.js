@@ -20,6 +20,7 @@ const maxDBResultsPerRequest = 500;
 const fileHTMLLog = true;
 const fileTXTLog = false;
 const consoleLog = true;
+const oldRun = 3; //days
 
 let jsonObj = [];
 let dbObj = [];
@@ -407,40 +408,60 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
     return null;
 }
 
-function createStepTree(obj) {
+async function createStepTree(obj) {
     var stepobj = {}
     stepobj.name = obj.name;
     stepobj.type = 'step';
     stepobj.disabled = obj.disabled && obj.disabled == true ? true : false;
+    if (obj.dbid) {
+//	let rows = await db_all(params['file'], "SELECT dt from requests where dbid =\"" + obj.dbid + "\" order by dt desc");
+	stepobj.status='ok';
+    } else {
+	stepobj.status='norun';
+    }
     return stepobj;
 }
 
-function createTCTree(obj) {
+async function createTCTree(obj) {
     var tcobj = {}
     tcobj.name = obj.name;
     tcobj.type = 'tc';
     tcobj.disabled = obj.disabled;
     tcobj.folders = []
     tcobj.files = []
+    tcobj.status = 'ok';
 
     for (let stepnumber in obj.steps) {
         var step = obj.steps[stepnumber];
-        tcobj.files.push(createStepTree(step));
+	var x = await createStepTree(step);
+        tcobj.files.push(x);
+	if (step.status==='norun') {
+	    tcobj.status='norun';
+	} else if (step.status==='nok') {
+	    tcobj.status='nok';
+	}
     }
     return tcobj;
 }
 
-function createTSTree(obj) {
+async function createTSTree(obj) {
     var tsobj = {}
     tsobj.name = obj.name;
     tsobj.type = 'ts';
     tsobj.disabled = obj.disabled;
     tsobj.folders = []
     tsobj.files = []
+    tsobj.status = 'ok';
 
     for (let tcnumber in obj.testcases) {
         var tc = obj.testcases[tcnumber];
-        tsobj.folders.push(createTCTree(tc));
+	var x = await createTCTree(tc);
+        tsobj.folders.push(x);
+	if (tc.status==='norun') {
+	    tsobj.status='norun';
+	} else if (tc.status==='nok') {
+	    tsobj.status='nok';
+	}
     }
     return tsobj;
 }
@@ -865,11 +886,14 @@ function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
             el2.parentarray.splice(el2.index, 0, newObj);
         }
         if (el.type == 'suite') {
-            tree.push(createTSTree(newObj));
+	    var x = createTSTree(newObj);
+            tree.push(x);
         } else if (el.type == 'tc') {
-            tree.push(createTCTree(newObj));
+	    var x =  createTCTree(newObj);
+            tree.push(x);
         } else {
-            tree.push(createStepTree(newObj));
+	    var x = createStepTree(newObj);
+            tree.push(x);
         }
         jsonObj.modified = true;
         params['struct'] = JSON.stringify(tree);
@@ -1303,7 +1327,8 @@ const onRequestHandler = async (req, res) => {
             let tree = [];
             for (let tsnumber in jsonObj[params['file']].testsuites) {
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
-                tree.push(createTSTree(ts));
+		var x =  await createTSTree(ts);
+                tree.push(x);
             }
 
             if (deletefromdb) {

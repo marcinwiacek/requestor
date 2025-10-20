@@ -246,7 +246,16 @@
         return true;
     }
 
-    function getFolderElement(name, disabled, id, type) {
+    function getFolderElement(name, disabled, id, type, status) {
+	let divel = document.createElement('span');
+	if (status==='nok') {
+	    divel.innerHTML="<font color=red>NOK</font>&nbsp;";
+	} else if (status=='norun') {
+	    divel.innerHTML="<font color=amber>NO run</font>&nbsp;";
+	} else {
+	    divel.innerHTML="<font color=green>OK</font>&nbsp;";
+	}
+
         let alel = document.createElement("a");
         alel.text = name;
         alel.setAttribute("id", id);
@@ -263,6 +272,7 @@
         alel.addEventListener("dragenter", cancelDefault);
         alel.addEventListener("dragover", cancelDefault);
         updatePopupMenu(alel, "folder");
+        alel.prepend(divel);
 
         let ulel = document.createElement("ul");
 
@@ -274,7 +284,7 @@
         return liel;
     }
 
-    function getFileElement(name, disabled, id) {
+    function getFileElement(name, disabled, id, status) {
         let alel = document.createElement("a");
         alel.text = name;
         alel.setAttribute("id", id);
@@ -292,8 +302,18 @@
         alel.addEventListener("dragover", cancelDefault);
         updatePopupMenu(alel, "step");
 
+	let divel = document.createElement('span');
+	if (status==='nok') {
+	    divel.innerHTML="<font color=red>NOK</font>&nbsp;";
+	} else if (status=='norun') {
+	    divel.innerHTML="<font color=amber>NO run</font>&nbsp;";
+	} else {
+	    divel.innerHTML="<font color=green>OK</font>&nbsp;";
+	}
+
         let liel = document.createElement("li");
         liel.setAttribute("class", "file");
+        liel.appendChild(divel);
         liel.appendChild(alel);
 
         return liel;
@@ -301,20 +321,20 @@
 
     function addFilesFolders(treeObj, id) {
         if (treeObj.folders || treeObj.files) {
-            let x = getFolderElement(treeObj.name, treeObj.disabled, id + treeObj.name, treeObj.type);
+            let x = getFolderElement(treeObj.name, treeObj.disabled, id + treeObj.name, treeObj.type, treeObj.status);
 
             treeObj.folders.forEach(function(folder, index) {
                 x.children[1].appendChild(addFilesFolders(folder, id + treeObj.name + "/"));
             });
             treeObj.files.forEach(function(file, index) {
                 fileel = getFileElement(file.name, treeObj.disabled,
-                    id + treeObj.name + "/" + file.name);
+                    id + treeObj.name + "/" + file.name, file.status);
                 x.children[1].appendChild(fileel);
             });
             return x;
         } else {
             return getFileElement(treeObj.name, treeObj.disabled,
-                id + treeObj.name);
+                id + treeObj.name, treeObj.status);
         }
     }
 
@@ -379,6 +399,7 @@
     }
     ulel = document.createElement("ul");
     document.getElementById("menu").appendChild(ulel);
+console.log(tree);
     tree.forEach(function(folder, index) {
         ulel.appendChild(addFilesFolders(folder, ""));
     });
