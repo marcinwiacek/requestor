@@ -843,11 +843,18 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
         let elpath = params['path'].split("/");//old path
         let elpath2 = params['newpath'].split("/");//new parent path
 
-	var x1 = await createTSTree(params['file'],findElement(jsonObj, params, elpath[0], false,false).obj);
-	console.log("status1 for "+elpath[0]+" "+x1.status);
+	var x1_before = await createTSTree(params['file'],findElement(jsonObj, params, elpath[0], false,false).obj);
+	console.log("status1 for "+elpath[0]+" "+x1_before.status);
 	if (elpath.length>2) {
-	    var x2 = await createTCTree(params['file'],findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false,false).obj);
-    	    console.log("status1 for "+elpath[0]+"/"+elpath[1]+" "+x2.status);
+	    var x2_before = await createTCTree(params['file'],findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false,false).obj);
+    	    console.log("status1 for "+elpath[0]+"/"+elpath[1]+" "+x2_before.status);
+	}
+
+	var x3_before = await createTSTree(params['file'],findElement(jsonObj, params, elpath2[0], false,false).obj);
+	console.log("status2 for "+elpath2[0]+" "+x3_before.status);
+	if (elpath2.length>2) {
+	    var x4_before = await createTCTree(params['file'],findElement(jsonObj, params, elpath2[0]+"/"+elpath2[1], false,false).obj);
+	    console.log("status2 for "+elpath2[0]+"/"+elpath2[1]+" "+x4_before.status);
 	}
 
 
@@ -899,18 +906,18 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
 	    el2.parentarray.splice(el2.index, 0, newObj);
         }
 
-	var x1 = await createTSTree(params['file'],findElement(jsonObj, params, elpath[0], false,false).obj);
-	console.log("status2 for "+elpath[0]+" "+x1.status);
+	var x1_after = await createTSTree(params['file'],findElement(jsonObj, params, elpath[0], false,false).obj);
+	console.log("status3 for "+elpath[0]+" "+x1_after.status);
 	if (elpath.length>2) {
-	    var x2 = await createTCTree(params['file'],findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false,false).obj);
-    	    console.log("status2 for "+elpath[0]+"/"+elpath[1]+" "+x2.status);
+	    var x2_after = await createTCTree(params['file'],findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false,false).obj);
+    	    console.log("status3 for "+elpath[0]+"/"+elpath[1]+" "+x2_after.status);
 	}
 
-	var x1_after = await createTSTree(params['file'],findElement(jsonObj, params, elpath2[0], false,false).obj);
-	console.log("status3 for "+elpath2[0]+" "+x1_after.status);
+	var x3_after = await createTSTree(params['file'],findElement(jsonObj, params, elpath2[0], false,false).obj);
+	console.log("status4 for "+elpath2[0]+" "+x3_after.status);
 	if (elpath2.length>2) {
-	    var x2_after = await createTCTree(params['file'],findElement(jsonObj, params, elpath2[0]+"/"+elpath2[1], false,false).obj);
-	    console.log("status3 for "+elpath2[0]+"/"+elpath2[1]+" "+x2_after.status);
+	    var x4_after = await createTCTree(params['file'],findElement(jsonObj, params, elpath2[0]+"/"+elpath2[1], false,false).obj);
+	    console.log("status4 for "+elpath2[0]+"/"+elpath2[1]+" "+x4_after.status);
 	}
 
         if (el.type == 'suite') {
