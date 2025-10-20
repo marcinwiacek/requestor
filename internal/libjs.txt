@@ -208,5 +208,17 @@ function setupSSE() {
         if (debug) console.log("SSE setenabledisablesave with " + event.data);
         setSaveFile(!obj.modified);
     });
+    source.addEventListener("updatefolderstatus", function(event) {
+        var obj = JSON.parse(event.data);
+        params = new URLSearchParams(window.location.search);
+        if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
+        if (debug) console.log("SSE updatefolderstatus with " + event.data);
+    });
+    source.addEventListener("updatefilestatus", function(event) {
+        var obj = JSON.parse(event.data);
+        params = new URLSearchParams(window.location.search);
+        if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
+        if (debug) console.log("SSE updatefilestatus with " + event.data);
+    });
 }
 setupSSE(); </script>

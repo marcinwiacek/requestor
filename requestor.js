@@ -435,14 +435,14 @@ async function createTCTree(file, obj) {
     tcobj.disabled = obj.disabled;
     tcobj.folders = []
     tcobj.files = []
-    tcobj.status = 'ok';
+    tcobj.status = 'norun';
 
     for (let stepnumber in obj.steps) {
         var step = obj.steps[stepnumber];
 	var x = await createStepTree(file, step);
         tcobj.files.push(x);
-	if (x.status==='norun') {
-	    tcobj.status='norun';
+	if (x.status==='ok') {
+	    if (tcobj.status!='nok') tcobj.status='ok';
 	} else if (x.status==='nok') {
 	    tcobj.status='nok';
 	}
@@ -457,14 +457,14 @@ async function createTSTree(file, obj) {
     tsobj.disabled = obj.disabled;
     tsobj.folders = []
     tsobj.files = []
-    tsobj.status = 'ok';
+    tsobj.status = 'norun';
 
     for (let tcnumber in obj.testcases) {
         var tc = obj.testcases[tcnumber];
 	var x = await createTCTree(file, tc);
         tsobj.folders.push(x);
-	if (x.status==='norun') {
-	    tsobj.status='norun';
+	if (x.status==='ok') {
+	    if (tsobj.status!='nok') tsobj.status='ok';
 	} else if (x.status==='nok') {
 	    tsobj.status='nok';
 	}
@@ -846,11 +846,19 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
     if (el != null && el2 != null) {
         let newObj = JSON.parse(JSON.stringify(el.obj));
 
-        let elpath = params['path'].split("/");
-        let elpath2 = params['newpath'].split("/");
+        let elpath = params['path'].split("/");//old path
+        let elpath2 = params['newpath'].split("/");//new parent path
+
+	var x1 = await createTSTree(params['file'],findElement(jsonObj, params, elpath[0], false,false).obj);
+	console.log("status1 for "+elpath[0]+" "+x1.status);
+	if (elpath.length>2) {
+	    var x2 = await createTCTree(params['file'],findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false,false).obj);
+    	    console.log("status1 for "+elpath[0]+"/"+elpath[1]+" "+x2.status);
+	}
 
         if (elpath.length != elpath2.length) {
             if (elpath2.length == 1) {
+//		var x = await createTSTree(params['file'],newObj);
                 while (true) {
                     found = false;
                     for (let tcnumber in el2.obj.testcases) {
@@ -889,8 +897,23 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
                 }
                 if (!found) break;
             }
-            el2.parentarray.splice(el2.index, 0, newObj);
+	    el2.parentarray.splice(el2.index, 0, newObj);
         }
+
+	var x1 = await createTSTree(params['file'],findElement(jsonObj, params, elpath[0], false,false).obj);
+	console.log("status2 for "+elpath[0]+" "+x1.status);
+	if (elpath.length>2) {
+	    var x2 = await createTCTree(params['file'],findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false,false).obj);
+    	    console.log("status2 for "+elpath[0]+"/"+elpath[1]+" "+x2.status);
+	}
+
+	var x1_after = await createTSTree(params['file'],findElement(jsonObj, params, elpath2[0], false,false).obj);
+	console.log("status3 for "+elpath2[0]+" "+x1_after.status);
+	if (elpath2.length>2) {
+	    var x2_after = await createTCTree(params['file'],findElement(jsonObj, params, elpath2[0]+"/"+elpath2[1], false,false).obj);
+	    console.log("status3 for "+elpath2[0]+"/"+elpath2[1]+" "+x2_after.status);
+	}
+
         if (el.type == 'suite') {
 	    var x = await createTSTree(params['file'],newObj);
             tree.push(x);
