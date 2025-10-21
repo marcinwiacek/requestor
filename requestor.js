@@ -837,25 +837,12 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
     if (el != null && el2 != null) {
         let newObj = JSON.parse(JSON.stringify(el.obj));
         if (elpath.length != elpath2.length) {
-            if (elpath2.length == 1) {
+            if (elpath2.length == 1 || elpath2.length == 2) {
                 while (true) {
                     found = false;
                     for (let tcnumber in el2.obj.children) {
                         var tc = el2.obj.children[tcnumber];
                         if (tc.name === newObj.name) {
-                            newObj.name = newObj.name + "(copy)";
-                            found = true;
-                        }
-                    }
-                    if (!found) break;
-                }
-                el2.obj.children.unshift(newObj);
-            } else if (elpath2.length == 2) {
-                while (true) {
-                    found = false;
-                    for (let stepnumber in el2.obj.children) {
-                        var step = el2.obj.children[stepnumber];
-                        if (step.name === newObj.name) {
                             newObj.name = newObj.name + "(copy)";
                             found = true;
                         }
