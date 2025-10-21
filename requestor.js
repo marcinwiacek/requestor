@@ -551,7 +551,7 @@ async function parsePOSTNewElement(params, jsonObj) {
         el = findElement(jsonObj, params, params['path'], false, false);
         if (el != null) {
             let elpath = params['path'].split("/");
-	    let newElement = {};
+            let newElement = {};
             newElement.name = params["new"];
             if (elpath.length == 3) {
                 newElement.method = "POST";
@@ -561,8 +561,8 @@ async function parsePOSTNewElement(params, jsonObj) {
                 newElement.conLen = true;
                 newElement.url = "https://";
             } else {
-        	newElement.children = [];
-		if (elpath.length == 2) newElement.input = [];
+                newElement.children = [];
+                if (elpath.length == 2) newElement.input = [];
             }
             el.parentarray.splice(el.index, 0, newElement);
             jsonObj.modified = true;
@@ -576,19 +576,19 @@ async function parsePOSTNewElementInside(params, jsonObj) {
     if (el != null) {
         let elpath = params['path'].split("/");
         if (elpath.length == 2 || elpath.length == 1) {
-    	    let newElement = {};
+            let newElement = {};
             newElement.name = params["new"];
-    	    if (elpath.length == 2) {
-        	newElement.method = "POST";
-        	newElement.headers = "";
-        	newElement.body = "";
-        	newElement.ignoreWrongSSL = true;
-        	newElement.conLen = true;
-        	newElement.url = "https://";
-    	    } else if (elpath.length == 1) {
-        	newElement.children = [];
-        	newElement.input = [];
-	    }
+            if (elpath.length == 2) {
+                newElement.method = "POST";
+                newElement.headers = "";
+                newElement.body = "";
+                newElement.ignoreWrongSSL = true;
+                newElement.conLen = true;
+                newElement.url = "https://";
+            } else if (elpath.length == 1) {
+                newElement.children = [];
+                newElement.input = [];
+            }
             el.obj.children.unshift(newElement);
         }
         jsonObj.modified = true;
