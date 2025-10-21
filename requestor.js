@@ -341,43 +341,42 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
     let elpath = pathString.split("/");
     let objobj = jsonObj.testsuites;
     let level = 1;
-let found = false;
     while (true) {
-found = false;
-	for (let objnumber in objobj) {
-    	    var singleobj = objobj[objnumber];
-    	    if (elpath.length == level && singleobj.name == elpath[level-1]) {
-        	retVal = [];
-        	retVal.type = level == 1? 'suite':(level==2?"tc":"step");
-        	retVal.index = objnumber;
-        	retVal.parentarray = objobj;
-        	if (deleteDBID) {
-            	    retVal.obj = JSON.parse(JSON.stringify(singleobj));
-		    if (retVal.obj.children) {
-            		for (let tcnumber in retVal.obj.children) {
-                	    var tc = retVal.obj.children[tcnumber];
-			    if (tc.children) {
-                		for (let stepnumber in tc.children) {
-                    		    delete tc.children[stepnumber].dbid;
-				}
-                	    }
-			}
-            	    }
-        	} else if (deleteOriginal) {
+        let found = false;
+        for (let objnumber in objobj) {
+            var singleobj = objobj[objnumber];
+            if (elpath.length == level && singleobj.name == elpath[level - 1]) {
+                retVal = [];
+                retVal.type = level == 1 ? 'suite' : (level == 2 ? "tc" : "step");
+                retVal.index = objnumber;
+                retVal.parentarray = objobj;
+                if (deleteDBID) {
+                    retVal.obj = JSON.parse(JSON.stringify(singleobj));
+                    if (retVal.obj.children) {
+                        for (let tcnumber in retVal.obj.children) {
+                            var tc = retVal.obj.children[tcnumber];
+                            if (tc.children) {
+                                for (let stepnumber in tc.children) {
+                                    delete tc.children[stepnumber].dbid;
+                                }
+                            }
+                        }
+                    }
+                } else if (deleteOriginal) {
                     retVal.obj = JSON.parse(JSON.stringify(singleobj));
                     objobj.splice(objnumber, 1);
-		} else {
-            	    retVal.obj = singleobj;
-		}
-        	return retVal;
-	    } else if (elpath.length > level && singleobj.name == elpath[level-1]) {
-		level++;
-		objobj = singleobj.children;
-		break;
-	    }
-	}
-	if (found) continue;
-	return null;
+                } else {
+                    retVal.obj = singleobj;
+                }
+                return retVal;
+            } else if (elpath.length > level && singleobj.name == elpath[level - 1]) {
+                level++;
+                objobj = singleobj.children;
+                break;
+            }
+        }
+        if (found) continue;
+        return null;
     }
 }
 
@@ -387,16 +386,16 @@ async function createStepTree(file, obj) {
     stepobj.type = 'step';
     stepobj.disabled = obj.disabled && obj.disabled == true ? true : false;
     if (obj.dbid) {
-	let rows = await db_all(file, "SELECT dt,error_res from requests where dbid =\"" + obj.dbid + "\" order by dt desc");
-	if (rows.length==0) {
-	    stepobj.status='norun';
-	} else if (rows[0].error_res.length==0) {
-	    stepobj.status='ok';
-	} else {
-	    stepobj.status='nok';
-	}
+        let rows = await db_all(file, "SELECT dt,error_res from requests where dbid =\"" + obj.dbid + "\" order by dt desc");
+        if (rows.length == 0) {
+            stepobj.status = 'norun';
+        } else if (rows[0].error_res.length == 0) {
+            stepobj.status = 'ok';
+        } else {
+            stepobj.status = 'nok';
+        }
     } else {
-	stepobj.status='norun';
+        stepobj.status = 'norun';
     }
     return stepobj;
 }
@@ -412,13 +411,13 @@ async function createTCTree(file, obj) {
 
     for (let stepnumber in obj.children) {
         var step = obj.children[stepnumber];
-	var x = await createStepTree(file, step);
+        var x = await createStepTree(file, step);
         tcobj.files.push(x);
-	if (x.status==='ok') {
-	    if (tcobj.status!='nok') tcobj.status='ok';
-	} else if (x.status==='nok') {
-	    tcobj.status='nok';
-	}
+        if (x.status === 'ok') {
+            if (tcobj.status != 'nok') tcobj.status = 'ok';
+        } else if (x.status === 'nok') {
+            tcobj.status = 'nok';
+        }
     }
     return tcobj;
 }
@@ -434,13 +433,13 @@ async function createTSTree(file, obj) {
 
     for (let tcnumber in obj.children) {
         var tc = obj.children[tcnumber];
-	var x = await createTCTree(file, tc);
+        var x = await createTCTree(file, tc);
         tsobj.folders.push(x);
-	if (x.status==='ok') {
-	    if (tsobj.status!='nok') tsobj.status='ok';
-	} else if (x.status==='nok') {
-	    tsobj.status='nok';
-	}
+        if (x.status === 'ok') {
+            if (tsobj.status != 'nok') tsobj.status = 'ok';
+        } else if (x.status === 'nok') {
+            tsobj.status = 'nok';
+        }
     }
     return tsobj;
 }
@@ -813,22 +812,22 @@ async function parsePOSTRun(req, params, res, jsonObj) {
 }
 
 async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
-        let elpath = params['path'].split("/");//old path
-        let elpath2 = params['newpath'].split("/");//new parent path
+    let elpath = params['path'].split("/"); //old path
+    let elpath2 = params['newpath'].split("/"); //new parent path
 
-	var x1_before = await createTSTree(params['file'],findElement(jsonObj, params, elpath[0], false,false).obj);
-	console.log("status1 for "+elpath[0]+" "+x1_before.status);
-	if (elpath.length>2) {
-	    var x2_before = await createTCTree(params['file'],findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false,false).obj);
-    	    console.log("status1 for "+elpath[0]+"/"+elpath[1]+" "+x2_before.status);
-	}
+    var x1_before = await createTSTree(params['file'], findElement(jsonObj, params, elpath[0], false, false).obj);
+    console.log("status1 for " + elpath[0] + " " + x1_before.status);
+    if (elpath.length > 2) {
+        var x2_before = await createTCTree(params['file'], findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj);
+        console.log("status1 for " + elpath[0] + "/" + elpath[1] + " " + x2_before.status);
+    }
 
-	var x3_before = await createTSTree(params['file'],findElement(jsonObj, params, elpath2[0], false,false).obj);
-	console.log("status2 for "+elpath2[0]+" "+x3_before.status);
-	if (elpath2.length>2) {
-	    var x4_before = await createTCTree(params['file'],findElement(jsonObj, params, elpath2[0]+"/"+elpath2[1], false,false).obj);
-	    console.log("status2 for "+elpath2[0]+"/"+elpath2[1]+" "+x4_before.status);
-	}
+    var x3_before = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0], false, false).obj);
+    console.log("status2 for " + elpath2[0] + " " + x3_before.status);
+    if (elpath2.length > 2) {
+        var x4_before = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1], false, false).obj);
+        console.log("status2 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_before.status);
+    }
 
 
     el = findElement(jsonObj, params, params['path'], deleteDB, deleteOriginal);
@@ -876,31 +875,31 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
                 }
                 if (!found) break;
             }
-	    el2.parentarray.splice(el2.index, 0, newObj);
+            el2.parentarray.splice(el2.index, 0, newObj);
         }
 
-	var x1_after = await createTSTree(params['file'],findElement(jsonObj, params, elpath[0], false,false).obj);
-	console.log("status3 for "+elpath[0]+" "+x1_after.status);
-	if (elpath.length>2) {
-	    var x2_after = await createTCTree(params['file'],findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false,false).obj);
-    	    console.log("status3 for "+elpath[0]+"/"+elpath[1]+" "+x2_after.status);
-	}
+        var x1_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath[0], false, false).obj);
+        console.log("status3 for " + elpath[0] + " " + x1_after.status);
+        if (elpath.length > 2) {
+            var x2_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj);
+            console.log("status3 for " + elpath[0] + "/" + elpath[1] + " " + x2_after.status);
+        }
 
-	var x3_after = await createTSTree(params['file'],findElement(jsonObj, params, elpath2[0], false,false).obj);
-	console.log("status4 for "+elpath2[0]+" "+x3_after.status);
-	if (elpath2.length>2) {
-	    var x4_after = await createTCTree(params['file'],findElement(jsonObj, params, elpath2[0]+"/"+elpath2[1], false,false).obj);
-	    console.log("status4 for "+elpath2[0]+"/"+elpath2[1]+" "+x4_after.status);
-	}
+        var x3_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0], false, false).obj);
+        console.log("status4 for " + elpath2[0] + " " + x3_after.status);
+        if (elpath2.length > 2) {
+            var x4_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1], false, false).obj);
+            console.log("status4 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_after.status);
+        }
 
         if (el.type == 'suite') {
-	    var x = await createTSTree(params['file'],newObj);
+            var x = await createTSTree(params['file'], newObj);
             tree.push(x);
         } else if (el.type == 'tc') {
-	    var x = await createTCTree(params['file'],newObj);
+            var x = await createTCTree(params['file'], newObj);
             tree.push(x);
         } else {
-	    var x = await createStepTree(params['file'],newObj);
+            var x = await createStepTree(params['file'], newObj);
             tree.push(x);
         }
         jsonObj.modified = true;
@@ -1335,7 +1334,7 @@ const onRequestHandler = async (req, res) => {
             let tree = [];
             for (let tsnumber in jsonObj[params['file']].testsuites) {
                 var ts = jsonObj[params['file']].testsuites[tsnumber];
-		var x =  await createTSTree(params['file'],ts);
+                var x = await createTSTree(params['file'], ts);
                 tree.push(x);
             }
 
