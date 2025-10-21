@@ -372,6 +372,7 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
             } else if (elpath.length > level && singleobj.name == elpath[level - 1]) {
                 level++;
                 objobj = singleobj.children;
+		found = true;
                 break;
             }
         }
