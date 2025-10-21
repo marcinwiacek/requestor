@@ -551,28 +551,20 @@ async function parsePOSTNewElement(params, jsonObj) {
         el = findElement(jsonObj, params, params['path'], false, false);
         if (el != null) {
             let elpath = params['path'].split("/");
+	    let newElement = {};
+            newElement.name = params["new"];
             if (elpath.length == 3) {
-                let newStep = {};
-                newStep.name = params["new"];
-                newStep.method = "POST";
-                newStep.headers = "";
-                newStep.body = "";
-                newStep.ignoreWrongSSL = true;
-                newStep.conLen = true;
-                newStep.url = "https://";
-                el.parentarray.splice(el.index, 0, newStep);
-            } else if (elpath.length == 2) {
-                let newTC = {};
-                newTC.name = params["new"];
-                newTC.children = [];
-                newTC.input = [];
-                el.parentarray.splice(el.index, 0, newTC);
-            } else if (elpath.length == 1) {
-                let newTS = {};
-                newTS.name = params["new"];
-                newTS.children = [];
-                el.parentarray.splice(el.index, 0, newTS);
+                newElement.method = "POST";
+                newElement.headers = "";
+                newElement.body = "";
+                newElement.ignoreWrongSSL = true;
+                newElement.conLen = true;
+                newElement.url = "https://";
+            } else {
+        	newElement.children = [];
+		if (elpath.length == 2) newElement.input = [];
             }
+            el.parentarray.splice(el.index, 0, newElement);
             jsonObj.modified = true;
             sendCallback(params['file'], "newelement", JSON.stringify(params));
         }
@@ -583,22 +575,21 @@ async function parsePOSTNewElementInside(params, jsonObj) {
     el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
         let elpath = params['path'].split("/");
-        if (elpath.length == 2) {
-            let newStep = {};
-            newStep.name = params["new"];
-            newStep.method = "POST";
-            newStep.headers = "";
-            newStep.body = "";
-            newStep.ignoreWrongSSL = true;
-            newStep.conLen = true;
-            newStep.url = "https://";
-            el.obj.steps.unshift(newStep);
-        } else if (elpath.length == 1) {
-            let newTC = {};
-            newTC.name = params["new"];
-            newTC.children = [];
-            newTC.input = [];
-            el.obj.testcases.unshift(newTC);
+        if (elpath.length == 2 || elpath.length == 1) {
+    	    let newElement = {};
+            newElement.name = params["new"];
+    	    if (elpath.length == 2) {
+        	newElement.method = "POST";
+        	newElement.headers = "";
+        	newElement.body = "";
+        	newElement.ignoreWrongSSL = true;
+        	newElement.conLen = true;
+        	newElement.url = "https://";
+    	    } else if (elpath.length == 1) {
+        	newElement.children = [];
+        	newElement.input = [];
+	    }
+            el.obj.children.unshift(newElement);
         }
         jsonObj.modified = true;
         sendCallback(params['file'], "newelementinside", JSON.stringify(params));
