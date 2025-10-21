@@ -372,7 +372,7 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
             } else if (elpath.length > level && singleobj.name == elpath[level - 1]) {
                 level++;
                 objobj = singleobj.children;
-		found = true;
+                found = true;
                 break;
             }
         }
@@ -830,7 +830,6 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
         console.log("status2 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_before.status);
     }
 
-
     el = findElement(jsonObj, params, params['path'], deleteDB, deleteOriginal);
     el2 = findElement(jsonObj, params, params['newpath'], false, false);
     tree = [];
@@ -880,12 +879,12 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
             console.log("status4 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_after.status);
         }
 
-            tree.push(        el.type == 'suite'?
-            await createTSTree(params['file'], newObj):
-(el.type == 'tc'?
-        await createTCTree(params['file'], newObj):
-	await createStepTree(params['file'], newObj))
-);
+        tree.push(el.type == 'suite' ?
+            await createTSTree(params['file'], newObj) :
+            (el.type == 'tc' ?
+                await createTCTree(params['file'], newObj) :
+                await createStepTree(params['file'], newObj))
+        );
 
         jsonObj.modified = true;
         params['struct'] = JSON.stringify(tree);
