@@ -54,7 +54,7 @@
   "testsuites": [
     {
       "name": "2",
-      "testcases": [
+      "children": [
         {
           "name": "TestCase1(copy)",
           "input": [
@@ -62,7 +62,7 @@
             "www.google.com/search?q=,test",
             "duckduckgo.com/?q=,test"
           ],
-          "steps": [
+          "children": [
             {
               "name": "step2(copy)",
               "method": "get",
@@ -186,7 +186,7 @@
     },
     {
       "name": "TestSuite1",
-      "testcases": [
+      "children": [
         {
           "name": "TestCase1",
           "input": [
@@ -194,7 +194,7 @@
             "www.google.com/search?q=,test",
             "duckduckgo.com/?q=,test"
           ],
-          "steps": [
+          "children": [
             {
               "name": "st",
               "method": "POST",

@@ -339,6 +339,45 @@ async function sendCallback(file, type, msg) {
 
 function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
     let elpath = pathString.split("/");
+    let objobj = jsonObj.testsuites;
+    let level = 1;
+    while (true) {
+	for (let objnumber in objobj) {
+    	    var singleobj = objobj[objnumber];
+    	    if (elpath.length == level && singleobj.name == elpath[level-1]) {
+        	retVal = [];
+        	retVal.type = level == 1? 'suite':(level==2?"tc":"step");
+        	retVal.index = objnumber;
+        	retVal.parentarray = objobj;
+        	if (deleteDBID) {
+            	    retVal.obj = JSON.parse(JSON.stringify(singleobj));
+		    if (retVal.obj.children) {
+            		for (let tcnumber in retVal.obj.children) {
+                	    var tc = retVal.obj.children[tcnumber];
+			    if (tc.children) {
+                		for (let stepnumber in tc.children) {
+                    		    delete tc.children[stepnumber].dbid;
+				}
+                	    }
+			}
+            	    }
+        	} else if (deleteOriginal) {
+                    retVal.obj = JSON.parse(JSON.stringify(singleobj));
+                    objobj.splice(objnumber, 1);
+		} else {
+            	    retVal.obj = singleobj;
+		}
+        	return retVal;
+	    } else if (elpath.length > level && singleobj.name == elpath[level-1]) {
+		level++;
+		objobj = objobj.children;
+		continue;
+	    }
+	}
+	return null;
+    }
+
+/*
     for (let tsnumber in jsonObj.testsuites) {
         var suite = jsonObj.testsuites[tsnumber];
         if (elpath.length == 1 && suite.name == elpath[0]) {
@@ -346,10 +385,10 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
             retVal.type = 'suite';
             if (deleteDBID) {
                 retVal.obj = JSON.parse(JSON.stringify(suite));
-                for (let tcnumber in retVal.obj.testcases) {
-                    var tc = retVal.obj.testcases[tcnumber];
-                    for (let stepnumber in tc.steps) {
-                        delete tc.steps[stepnumber].dbid;
+                for (let tcnumber in retVal.obj.children) {
+                    var tc = retVal.obj.children[tcnumber];
+                    for (let stepnumber in tc.children) {
+                        delete tc.children[stepnumber].dbid;
                     }
                 }
             } else if (deleteOriginal) {
@@ -406,6 +445,7 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
         }
     }
     return null;
+*/
 }
 
 async function createStepTree(file, obj) {
@@ -437,8 +477,8 @@ async function createTCTree(file, obj) {
     tcobj.files = []
     tcobj.status = 'norun';
 
-    for (let stepnumber in obj.steps) {
-        var step = obj.steps[stepnumber];
+    for (let stepnumber in obj.children) {
+        var step = obj.children[stepnumber];
 	var x = await createStepTree(file, step);
         tcobj.files.push(x);
 	if (x.status==='ok') {
@@ -459,8 +499,8 @@ async function createTSTree(file, obj) {
     tsobj.files = []
     tsobj.status = 'norun';
 
-    for (let tcnumber in obj.testcases) {
-        var tc = obj.testcases[tcnumber];
+    for (let tcnumber in obj.children) {
+        var tc = obj.children[tcnumber];
 	var x = await createTCTree(file, tc);
         tsobj.folders.push(x);
 	if (x.status==='ok') {
@@ -570,7 +610,7 @@ async function parsePOSTNewElement(params, jsonObj) {
     if (params['path'] == "") {
         let newTS = {};
         newTS.name = params["new"];
-        newTS.testcases = [];
+        newTS.children = [];
         jsonObj.testsuites.unshift(newTS);
         jsonObj.modified = true;
         sendCallback(params['file'], "newelement", JSON.stringify(params));
@@ -591,13 +631,13 @@ async function parsePOSTNewElement(params, jsonObj) {
             } else if (elpath.length == 2) {
                 let newTC = {};
                 newTC.name = params["new"];
-                newTC.steps = [];
+                newTC.children = [];
                 newTC.input = [];
                 el.parentarray.splice(el.index, 0, newTC);
             } else if (elpath.length == 1) {
                 let newTS = {};
                 newTS.name = params["new"];
-                newTS.testcases = [];
+                newTS.children = [];
                 el.parentarray.splice(el.index, 0, newTS);
             }
             jsonObj.modified = true;
@@ -623,7 +663,7 @@ async function parsePOSTNewElementInside(params, jsonObj) {
         } else if (elpath.length == 1) {
             let newTC = {};
             newTC.name = params["new"];
-            newTC.steps = [];
+            newTC.children = [];
             newTC.input = [];
             el.obj.testcases.unshift(newTC);
         }
@@ -741,13 +781,13 @@ async function parsePOSTRun(req, params, res, jsonObj) {
         if (params['path'] == "" || ts.name.localeCompare(p[0]) == 0) {} else {
             continue;
         }
-        for (let tcnumber in ts.testcases) {
-            var tc = ts.testcases[tcnumber];
+        for (let tcnumber in ts.children) {
+            var tc = ts.children[tcnumber];
             if (params['path'] == "" || p.length == 1 || (p.length > 1 && tc.name.localeCompare(p[1]) == 0)) {} else {
                 continue;
             }
-            for (let stepnumber in tc.steps) {
-                var step = tc.steps[stepnumber];
+            for (let stepnumber in tc.children) {
+                var step = tc.children[stepnumber];
                 if (tc.disabled && tc.disabled == true) {
                     continue;
                 }
@@ -867,8 +907,8 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
             if (elpath2.length == 1) {
                 while (true) {
                     found = false;
-                    for (let tcnumber in el2.obj.testcases) {
-                        var tc = el2.obj.testcases[tcnumber];
+                    for (let tcnumber in el2.obj.children) {
+                        var tc = el2.obj.children[tcnumber];
                         if (tc.name === newObj.name) {
                             newObj.name = newObj.name + "(copy)";
                             found = true;
@@ -876,12 +916,12 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
                     }
                     if (!found) break;
                 }
-                el2.obj.testcases.unshift(newObj);
+                el2.obj.children.unshift(newObj);
             } else if (elpath2.length == 2) {
                 while (true) {
                     found = false;
-                    for (let stepnumber in el2.obj.steps) {
-                        var step = el2.obj.steps[stepnumber];
+                    for (let stepnumber in el2.obj.children) {
+                        var step = el2.obj.children[stepnumber];
                         if (step.name === newObj.name) {
                             newObj.name = newObj.name + "(copy)";
                             found = true;
@@ -889,7 +929,7 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
                     }
                     if (!found) break;
                 }
-                el2.obj.steps.unshift(newObj);
+                el2.obj.children.unshift(newObj);
             }
         } else {
             while (true) {
@@ -940,15 +980,15 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
     for (let tsnumber in jsonObj.testsuites) {
         var ts = jsonObj.testsuites[tsnumber];
         let path = ts.name;
-        for (let tcnumber in ts.testcases) {
-            var tc = ts.testcases[tcnumber];
+        for (let tcnumber in ts.children) {
+            var tc = ts.children[tcnumber];
             let lines = tc.input;
 
 
             if (lines.length == 0) {
 
-                for (let stepnumber in tc.steps) {
-                    var step = tc.steps[stepnumber];
+                for (let stepnumber in tc.children) {
+                    var step = tc.children[stepnumber];
                     //                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
                     if (path + "/" + tc.name + "/" + step.name === params['path']) {
                         //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
@@ -981,8 +1021,8 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
                         arra[h] = ll[i];
                         i++;
                     });
-                    for (let stepnumber in tc.steps) {
-                        var step = tc.steps[stepnumber];
+                    for (let stepnumber in tc.children) {
+                        var step = tc.children[stepnumber];
                         //                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
                         if (path + "/" + tc.name + "/" + step.name === params['path']) {
                             //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
@@ -1110,7 +1150,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
     params["op"] = "newelement";
     let newTS = {};
     newTS.name = "new testsuite";
-    newTS.testcases = [];
+    newTS.children = [];
     jsonObj.testsuites.unshift(newTS);
     jsonObj.modified = true;
     sendCallback(params['file'], "newelement", JSON.stringify(params));
@@ -1121,9 +1161,9 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 
             let newTC = {};
             newTC.name = TC.operationId;
-            newTC.steps = [];
+            newTC.children = [];
             newTC.input = [];
-            newTS.testcases.push(newTC);
+            newTS.children.push(newTC);
             params["op"] = "newelementinside";
             params["new"] = TC.operationId;
             params["path"] = "new testsuite";
@@ -1152,7 +1192,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             newStep.ignoreWrongSSL = true;
             newStep.conLen = true;
             newStep.url = YAMLobj.servers.url + pathIndex;
-            newTC.steps.push(newStep);
+            newTC.children.push(newStep);
             params["new"] = TC.operationId;
             params["path"] = "new testsuite/" + TC.operationId;
             params["newElementPath"] = "new testsuite/" +
@@ -1232,8 +1272,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
             return;
         }
 
-        for (let tcnumber in suite.testcases) {
-            var tc = suite.testcases[tcnumber];
+        for (let tcnumber in suite.children) {
+            var tc = suite.children[tcnumber];
             if (elpath.length == 2 && suite.name == elpath[0] && tc.name == elpath[1]) {
                 obiekt = readFileContentSync("/internal/proj_tc.txt").replace("<!--NAME-->", tc.name);
                 var xxxx = "<script>var csvData =`";
@@ -1245,8 +1285,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 sendPlain(req, res, obiekt.replace("<!--DATA-->", xxxx));
                 return;
             }
-            for (let stepnumber in tc.steps) {
-                var step = tc.steps[stepnumber];
+            for (let stepnumber in tc.children) {
+                var step = tc.children[stepnumber];
                 if (elpath.length == 3 && suite.name == elpath[0] && tc.name == elpath[1] && step.name == elpath[2]) {} else {
                     continue;
                 }
@@ -1370,10 +1410,10 @@ const onRequestHandler = async (req, res) => {
                 let alldbid = "'abc'";
                 for (let tsnumber in jsonObj[params['file']].testsuites) {
                     var ts = jsonObj[params['file']].testsuites[tsnumber];
-                    for (let tcnumber in ts.testcases) {
-                        var tc = ts.testcases[tcnumber];
-                        for (let stepnumber in tc.steps) {
-                            var step = tc.steps[stepnumber];
+                    for (let tcnumber in ts.children) {
+                        var tc = ts.children[tcnumber];
+                        for (let stepnumber in tc.children) {
+                            var step = tc.children[stepnumber];
                             if (step.dbid) {
                                 alldbid += ",'" + step.dbid + "'";
                             }
