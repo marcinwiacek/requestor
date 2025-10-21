@@ -880,16 +880,13 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
             console.log("status4 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_after.status);
         }
 
-        if (el.type == 'suite') {
-            var x = await createTSTree(params['file'], newObj);
-            tree.push(x);
-        } else if (el.type == 'tc') {
-            var x = await createTCTree(params['file'], newObj);
-            tree.push(x);
-        } else {
-            var x = await createStepTree(params['file'], newObj);
-            tree.push(x);
-        }
+            tree.push(        el.type == 'suite'?
+            await createTSTree(params['file'], newObj):
+(el.type == 'tc'?
+        await createTCTree(params['file'], newObj):
+	await createStepTree(params['file'], newObj))
+);
+
         jsonObj.modified = true;
         params['struct'] = JSON.stringify(tree);
         sendCallback(params['file'], "pastedrop", JSON.stringify(params));
@@ -903,10 +900,7 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
         for (let tcnumber in ts.children) {
             var tc = ts.children[tcnumber];
             let lines = tc.input;
-
-
             if (lines.length == 0) {
-
                 for (let stepnumber in tc.children) {
                     var step = tc.children[stepnumber];
                     //                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
@@ -922,10 +916,7 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
                         return;
                     }
                 }
-
-
             } else {
-
                 //fixme            
                 let headers = []
                 for (let index2 in lines) {
@@ -956,7 +947,6 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
                             return;
                         }
                     }
-
                 }
             }
         }
