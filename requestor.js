@@ -341,7 +341,9 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
     let elpath = pathString.split("/");
     let objobj = jsonObj.testsuites;
     let level = 1;
+let found = false;
     while (true) {
+found = false;
 	for (let objnumber in objobj) {
     	    var singleobj = objobj[objnumber];
     	    if (elpath.length == level && singleobj.name == elpath[level-1]) {
@@ -370,82 +372,13 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
         	return retVal;
 	    } else if (elpath.length > level && singleobj.name == elpath[level-1]) {
 		level++;
-		objobj = objobj.children;
-		continue;
+		objobj = singleobj.children;
+		break;
 	    }
 	}
+	if (found) continue;
 	return null;
     }
-
-/*
-    for (let tsnumber in jsonObj.testsuites) {
-        var suite = jsonObj.testsuites[tsnumber];
-        if (elpath.length == 1 && suite.name == elpath[0]) {
-            retVal = [];
-            retVal.type = 'suite';
-            if (deleteDBID) {
-                retVal.obj = JSON.parse(JSON.stringify(suite));
-                for (let tcnumber in retVal.obj.children) {
-                    var tc = retVal.obj.children[tcnumber];
-                    for (let stepnumber in tc.children) {
-                        delete tc.children[stepnumber].dbid;
-                    }
-                }
-            } else if (deleteOriginal) {
-                retVal.obj = JSON.parse(JSON.stringify(suite));
-                jsonObj.testsuites.splice(tsnumber, 1);
-            } else {
-                retVal.obj = suite;
-            }
-            retVal.index = tsnumber;
-            retVal.parentarray = jsonObj.testsuites;
-            return retVal;
-        }
-        for (let tcnumber in suite.testcases) {
-            var tc = suite.testcases[tcnumber];
-            if (elpath.length == 2 && suite.name == elpath[0] && tc.name == elpath[1]) {
-                retVal = [];
-                retVal.type = 'tc';
-                retVal.obj = tc;
-                if (deleteDBID) {
-                    retVal.obj = JSON.parse(JSON.stringify(tc));
-                    for (let stepnumber in retVal.obj.steps) {
-                        delete retVal.obj.steps[stepnumber].dbid;
-                    }
-                } else if (deleteOriginal) {
-                    retVal.obj = JSON.parse(JSON.stringify(tc));
-                    suite.testcases.splice(tcnumber, 1);
-                } else {
-                    retVal.obj = tc;
-                }
-                retVal.index = tcnumber;
-                retVal.parentarray = suite.testcases;
-                return retVal;
-            }
-            for (let stepnumber in tc.steps) {
-                var step = tc.steps[stepnumber];
-                if (elpath.length == 3 && suite.name == elpath[0] && tc.name == elpath[1] && step.name == elpath[2]) {
-                    retVal = [];
-                    retVal.type = 'step';
-                    retVal.obj = step;
-                    if (deleteDBID) {
-                        retVal.obj = JSON.parse(JSON.stringify(step));
-                        delete retVal.obj.dbid;
-                    } else if (deleteOriginal) {
-                        retVal.obj = JSON.parse(JSON.stringify(step));
-                        tc.steps.splice(stepnumber, 1);
-                    } else {
-                        retVal.obj = step;
-                    }
-                    retVal.index = stepnumber;
-                    retVal.parentarray = tc.steps;
-                    return retVal;
-                }
-            }
-        }
-    }
-    return null;
-*/
 }
 
 async function createStepTree(file, obj) {
