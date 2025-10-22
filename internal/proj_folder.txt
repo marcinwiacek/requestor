@@ -246,15 +246,19 @@
         return true;
     }
 
+    function getStatusHTML(status) {
+	if (status==='nok') {
+	    return "<font color=red>NOK</font>&nbsp;";
+	} else if (status=='norun') {
+	    return "<font color=amber>NO run</font>&nbsp;";
+	} else {
+	    return "<font color=green>OK</font>&nbsp;";
+	}
+    }
+
     function getFolderElement(name, disabled, id, type, status) {
 	let divel = document.createElement('span');
-	if (status==='nok') {
-	    divel.innerHTML="<font color=red>NOK</font>&nbsp;";
-	} else if (status=='norun') {
-	    divel.innerHTML="<font color=amber>NO run</font>&nbsp;";
-	} else {
-	    divel.innerHTML="<font color=green>OK</font>&nbsp;";
-	}
+	divel.innerHTML=getStatusHTML(status);
 
         let alel = document.createElement("a");
         alel.text = name;
@@ -303,13 +307,7 @@
         updatePopupMenu(alel, "step");
 
 	let divel = document.createElement('span');
-	if (status==='nok') {
-	    divel.innerHTML="<font color=red>NOK</font>&nbsp;";
-	} else if (status=='norun') {
-	    divel.innerHTML="<font color=amber>NO run</font>&nbsp;";
-	} else {
-	    divel.innerHTML="<font color=green>OK</font>&nbsp;";
-	}
+	divel.innerHTML=getStatusHTML(status);
 
         let liel = document.createElement("li");
         liel.setAttribute("class", "file");

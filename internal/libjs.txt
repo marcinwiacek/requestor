@@ -213,13 +213,14 @@ function setupSSE() {
         params = new URLSearchParams(window.location.search);
         if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
         if (debug) console.log("SSE updatefolderstatus with " + event.data);
+        document.getElementById(JSON.parse(event.data).path).parentElement.firstChild.firstChild.innerHTML=getStatusHTML(params.status);
     });
     source.addEventListener("updatefilestatus", function(event) {
         var obj = JSON.parse(event.data);
         params = new URLSearchParams(window.location.search);
         if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
         if (debug) console.log("SSE updatefilestatus with " + event.data);
-        document.getElementById(JSON.parse(event.data).path).parentElement.firstChild.innerHTML='ok';
+        document.getElementById(JSON.parse(event.data).path).parentElement.firstChild.innerHTML=getStatusHTML(params.status);
     });
 }
 setupSSE(); </script>
