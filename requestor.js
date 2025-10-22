@@ -410,16 +410,18 @@ async function createTCTree(file, obj) {
     tcobj.disabled = obj.disabled;
     tcobj.folders = []
     tcobj.files = []
-    tcobj.status = 'norun';
+    tcobj.status = '-';
 
     for (let stepnumber in obj.children) {
         var step = obj.children[stepnumber];
         var x = await createStepTree(file, step);
         tcobj.files.push(x);
         if (x.status === 'ok') {
-            if (tcobj.status != 'nok') tcobj.status = 'ok';
+            if (tcobj.status ==='-') tcobj.status = 'ok';
         } else if (x.status === 'nok') {
             tcobj.status = 'nok';
+        } else if (x.status === 'norun') {
+            tcobj.status = 'norun';
         }
     }
     return tcobj;
@@ -432,16 +434,18 @@ async function createTSTree(file, obj) {
     tsobj.disabled = obj.disabled;
     tsobj.folders = []
     tsobj.files = []
-    tsobj.status = 'norun';
+    tsobj.status = '-';
 
     for (let tcnumber in obj.children) {
         var tc = obj.children[tcnumber];
         var x = await createTCTree(file, tc);
         tsobj.folders.push(x);
         if (x.status === 'ok') {
-            if (tsobj.status != 'nok') tsobj.status = 'ok';
+            if (tsobj.status === '-') tsobj.status = 'ok';
         } else if (x.status === 'nok') {
             tsobj.status = 'nok';
+        } else if (x.status === 'norun') {
+            tsobj.status = 'norun';
         }
     }
     return tsobj;
@@ -688,11 +692,13 @@ async function parsePOSTRun(req, params, res, jsonObj) {
         if (params['path'] == "" || ts.name.localeCompare(p[0]) == 0) {} else {
             continue;
         }
+	var x1_before = await createTSTree(params['file'], ts);
         for (let tcnumber in ts.children) {
             var tc = ts.children[tcnumber];
             if (params['path'] == "" || p.length == 1 || (p.length > 1 && tc.name.localeCompare(p[1]) == 0)) {} else {
                 continue;
             }
+	    var x2_before = await createTCTree(params['file'], tc);
             for (let stepnumber in tc.children) {
                 var step = tc.children[stepnumber];
                 if (tc.disabled && tc.disabled == true) {
@@ -789,7 +795,29 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                     }
                 }
             }
+	    var x2_after = await createTCTree(params['file'], tc);
+console.log(x2_before);
+console.log(x2_after);
+
+	    if (x2_before.status!=x2_after.status) {
+                        s = {};
+                        s['file'] = params['file'];
+                        s['path'] = runpath;
+                        s['status'] = x2_after.status;
+                        sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
+
+	    }
         }
+	var x1_after = await createTSTree(params['file'], ts);
+	    if (x1_before.status!=x1_after.status) {
+                        s = {};
+                        s['file'] = params['file'];
+                        s['path'] = runpath;
+                        s['status'] = x1_after.status;
+                        sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
+
+	    }
+
     }
     s = {};
     s['file'] = params['file'];
