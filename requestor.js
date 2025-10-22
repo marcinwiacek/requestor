@@ -368,6 +368,8 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                 } else {
                     retVal.obj = singleobj;
                 }
+                console.log("searching " + pathString);
+                console.log(retVal);
                 return retVal;
             } else if (elpath.length > level && singleobj.name == elpath[level - 1]) {
                 level++;
@@ -539,7 +541,8 @@ async function parsePOSTRenameElement(params, jsonObj) {
     }
 }
 
-async function parsePOSTNewElement(params, jsonObj) {
+async function parsePOSTNewElement(params, jsonObj, createInside) {
+    //console.log(params);
     if (params['path'] == "") {
         let newTS = {};
         newTS.name = params["new"];
@@ -549,50 +552,35 @@ async function parsePOSTNewElement(params, jsonObj) {
         sendCallback(params['file'], "newelement", JSON.stringify(params));
     } else {
         el = findElement(jsonObj, params, params['path'], false, false);
+        //console.log(el);
         if (el != null) {
             let elpath = params['path'].split("/");
+            //            if (!(elpath.length == 1 && !createInside)) {
             let newElement = {};
             newElement.name = params["new"];
-            if (elpath.length == 3) {
+            if (elpath.length == (createInside ? 2 : 3)) {
                 newElement.method = "POST";
                 newElement.headers = "";
                 newElement.body = "";
                 newElement.ignoreWrongSSL = true;
                 newElement.conLen = true;
                 newElement.url = "https://";
-            } else {
-                newElement.children = [];
-                if (elpath.length == 2) newElement.input = [];
-            }
-            el.parentarray.splice(el.index, 0, newElement);
-            jsonObj.modified = true;
-            sendCallback(params['file'], "newelement", JSON.stringify(params));
-        }
-    }
-}
-
-async function parsePOSTNewElementInside(params, jsonObj) {
-    el = findElement(jsonObj, params, params['path'], false, false);
-    if (el != null) {
-        let elpath = params['path'].split("/");
-        if (elpath.length == 2 || elpath.length == 1) {
-            let newElement = {};
-            newElement.name = params["new"];
-            if (elpath.length == 2) {
-                newElement.method = "POST";
-                newElement.headers = "";
-                newElement.body = "";
-                newElement.ignoreWrongSSL = true;
-                newElement.conLen = true;
-                newElement.url = "https://";
-            } else if (elpath.length == 1) {
+            } else if (elpath.length == (createInside ? 1 : 2)) {
                 newElement.children = [];
                 newElement.input = [];
+            } else if (elpath.length == 1) {
+                newElement.children = [];
             }
-            el.obj.children.unshift(newElement);
+            if (createInside) {
+                el.obj.children.unshift(newElement);
+            } else {
+                el.parentarray.splice(el.index, 0, newElement);
+            }
+            //console.log(el);
+            jsonObj.modified = true;
+            sendCallback(params['file'], createInside ? "newelementinside" : "newelement", JSON.stringify(params));
+            //	    }
         }
-        jsonObj.modified = true;
-        sendCallback(params['file'], "newelementinside", JSON.stringify(params));
     }
 }
 
@@ -1135,9 +1123,9 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     } else if (params["op"] == "savefile") {
         parsePOSTSaveFile(params, jsonObj[params['file']]);
     } else if (params["op"] == "newelement") {
-        parsePOSTNewElement(params, jsonObj[params['file']]);
+        parsePOSTNewElement(params, jsonObj[params['file']], false);
     } else if (params["op"] == "newelementinside") {
-        parsePOSTNewElementInside(params, jsonObj[params['file']]);
+        parsePOSTNewElement(params, jsonObj[params['file']], true);
     } else if (params["op"] == "pasteelement") {
         PasteElement(params, jsonObj[params['file']], true, false);
     } else if (params["op"] == "dropelement") {
