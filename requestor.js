@@ -17,10 +17,10 @@ const hostname = '127.0.0.1';
 const port = 3000;
 const DB = false;
 const maxDBResultsPerRequest = 500;
-const fileHTMLLog = true;
+const fileHTMLLog = false;
 const fileTXTLog = false;
 const consoleLog = true;
-const oldRun = 3; //days
+const oldRun = 3; //days //not implemented
 
 let jsonObj = [];
 let dbObj = [];
