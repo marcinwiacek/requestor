@@ -368,8 +368,8 @@ function findElement(jsonObj, params, pathString, deleteDBID, deleteOriginal) {
                 } else {
                     retVal.obj = singleobj;
                 }
-                console.log("searching " + pathString);
-                console.log(retVal);
+//                console.log("searching " + pathString);
+//                console.log(retVal);
                 return retVal;
             } else if (elpath.length > level && singleobj.name == elpath[level - 1]) {
                 level++;
@@ -542,7 +542,6 @@ async function parsePOSTRenameElement(params, jsonObj) {
 }
 
 async function parsePOSTNewElement(params, jsonObj, createInside) {
-    //console.log(params);
     if (params['path'] == "") {
         let newTS = {};
         newTS.name = params["new"];
@@ -552,10 +551,8 @@ async function parsePOSTNewElement(params, jsonObj, createInside) {
         sendCallback(params['file'], "newelement", JSON.stringify(params));
     } else {
         el = findElement(jsonObj, params, params['path'], false, false);
-        //console.log(el);
         if (el != null) {
             let elpath = params['path'].split("/");
-            //            if (!(elpath.length == 1 && !createInside)) {
             let newElement = {};
             newElement.name = params["new"];
             if (elpath.length == (createInside ? 2 : 3)) {
@@ -576,10 +573,8 @@ async function parsePOSTNewElement(params, jsonObj, createInside) {
             } else {
                 el.parentarray.splice(el.index, 0, newElement);
             }
-            //console.log(el);
             jsonObj.modified = true;
             sendCallback(params['file'], createInside ? "newelementinside" : "newelement", JSON.stringify(params));
-            //	    }
         }
     }
 }
