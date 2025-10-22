@@ -725,6 +725,13 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                     s = {};
                     s['file'] = params['file'];
                     s['info'] = "Executing " + runpath;
+
+                        s = {};
+                        s['file'] = params['file'];
+                        s['path'] = runpath;
+                        s['status'] = 'ok';
+                        sendCallback(params['file'], "updatefilestatus", JSON.stringify(s));
+
                     sendCallback(params['file'], "runner", JSON.stringify(s));
                     addToRunReport(params['file'] + dt, runpath, sss);
                     addToRunReportHTML(params['file'] + dt, runpath, sss);
@@ -764,6 +771,13 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                         s['file'] = params['file'];
                         s['info'] = "Executing " + runpath + " iteration " + iteration;
                         sendCallback(params['file'], "runner", JSON.stringify(s));
+
+                        s = {};
+                        s['file'] = params['file'];
+                        s['path'] = runpath;
+                        s['status'] = 'ok';
+                        sendCallback(params['file'], "updatefilestatus", JSON.stringify(s));
+
                         addToRunReport(params['file'] + dt, runpath, sss);
                         addToRunReportHTML(params['file'] + dt, runpath, sss);
                         iteration++;
