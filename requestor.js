@@ -411,7 +411,6 @@ async function createTCTree(file, obj) {
     tcobj.folders = []
     tcobj.files = []
     tcobj.status = '-';
-
     for (let stepnumber in obj.children) {
         var step = obj.children[stepnumber];
         var x = await createStepTree(file, step);
@@ -796,28 +795,22 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 }
             }
 	    var x2_after = await createTCTree(params['file'], tc);
-console.log(x2_before);
-console.log(x2_after);
-
 	    if (x2_before.status!=x2_after.status) {
                         s = {};
                         s['file'] = params['file'];
-                        s['path'] = runpath;
+                        s['path'] =p[0]+"/"+p[1];
                         s['status'] = x2_after.status;
                         sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-
 	    }
         }
 	var x1_after = await createTSTree(params['file'], ts);
 	    if (x1_before.status!=x1_after.status) {
                         s = {};
                         s['file'] = params['file'];
-                        s['path'] = runpath;
+                        s['path'] = p[0];
                         s['status'] = x1_after.status;
                         sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-
 	    }
-
     }
     s = {};
     s['file'] = params['file'];
