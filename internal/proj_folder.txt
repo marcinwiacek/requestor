@@ -131,7 +131,7 @@
         if (!empty) document.getElementById(popupMenuName).classList.toggle("show");
 
         let oldName = "";
-        if (popupMenuID == "/") popupMenuID = "";
+        if (popupMenuID == "/" || empty) popupMenuID = "";
         let elpath = popupMenuID.split("/");
 
         while (true) {
