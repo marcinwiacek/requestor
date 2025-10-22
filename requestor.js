@@ -876,21 +876,14 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
             if (lines.length == 0) {
                 for (let stepnumber in tc.children) {
                     var step = tc.children[stepnumber];
-                    //                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
                     if (path + "/" + tc.name + "/" + step.name === params['path']) {
-                        //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
                         var stepcopy = JSON.parse(JSON.stringify(step));
-                        //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
-                        //                    for (let d in arra) {
-                        //                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                        //                    }
-                        //                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
                         sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
                         return;
                     }
                 }
             } else {
-                //fixme            
+                //fixme
                 let headers = []
                 for (let index2 in lines) {
                     let l = lines[index2];
@@ -907,15 +900,8 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
                     });
                     for (let stepnumber in tc.children) {
                         var step = tc.children[stepnumber];
-                        //                    console.log("-"+path + "/" + tc.name + "/" + step.name+"-");
                         if (path + "/" + tc.name + "/" + step.name === params['path']) {
-                            //   if (!path.includes("/")) path += "/" + tc.name + "/" + step.name;
                             var stepcopy = JSON.parse(JSON.stringify(step));
-                            //                    if (stepcopy.urlprefix) stepcopy.url = stepcopy.urlprefix + stepcopy.url;
-                            //                    for (let d in arra) {
-                            //                        stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                            //                    }
-                            //                    for (const match of stepcopy.url.matchAll(/{{(.*)#(.*)}}/g)) {}
                             sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
                             return;
                         }
