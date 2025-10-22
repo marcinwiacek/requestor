@@ -45,7 +45,7 @@ function readFileContentSync(fileName, callback) {
     }
 }
 
-function loadFile(name) {
+function loadProjectFile(name) {
     if (!jsonObj[name]) {
         try {
             jsonObj[name] = JSON.parse(readFileContentSync("/projects/" + name));
@@ -1094,7 +1094,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         return;
     }
     if (!jsonObj[params['file']]) {
-        loadFile(params['file']);
+        loadProjectFile(params['file']);
     }
     executed = true;
     if (params["op"] == "run") {
@@ -1261,7 +1261,7 @@ const onRequestHandler = async (req, res) => {
                 path.normalize(__dirname + "/projects/" + params['file']))) {
             deletefromdb = (!jsonObj[params['file']]);
 
-            if (!loadFile(params['file'])) {
+            if (!loadProjectFile(params['file'])) {
                 sendHTML(req, res, readFileContentSync("/internal/proj.txt")
                     .replace("<!--NAME-->", "Error reading file"));
                 return;
@@ -1388,7 +1388,7 @@ if (process.argv.length === 3 || process.argv.length === 4) {
         console.log("File '" + process.argv[3] + "' does not exist");
         return;
     }
-    loadFile(process.argv[2]);
+    loadProjectFile(process.argv[2]);
     loadDB(process.argv[2]);
     params = []
     params['file'] = process.argv[2];
