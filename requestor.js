@@ -1427,7 +1427,7 @@ const onRequestHandler = async (req, res) => {
                     });
             }
             sendHTML(req, res, readFileContentSync("/internal/proj.txt")
-                .replace("<!--VERSION-->", version)
+                .replace("<!--VERSION-->", version+" (GPLv3)")
                 .replace("<!--JSLIB-->",
                     readFileContentSync("/internal/libjs.txt"))
                 .replace("<!--FOLDERS_MENU-->",
@@ -1450,7 +1450,7 @@ const onRequestHandler = async (req, res) => {
 
     //index file
     sendHTML(req, res, readFileContentSync("/internal/index.txt")
-        .replace("<!--VERSION-->", version)
+                .replace("<!--VERSION-->", version+" (GPLv3)")
         .replace("<!--FILES-->", await getProjectPage(0))
         .replace("<!--EXEC-->", await getReportPage(0))
         .replace("<!--JSLIB-->", readFileContentSync("/internal/libjs.txt")));
