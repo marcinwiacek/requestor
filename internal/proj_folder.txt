@@ -247,13 +247,15 @@
     }
 
     function getStatusHTML(status) {
-	if (status==='nok') {
+console.log(status);
+    switch(status) {
+	case 'nok':
 	    return "<font color=red>NOK</font>&nbsp;";
-	} else if (status=='norun') {
+	case 'norun':
 	    return "<font color=amber>NO run</font>&nbsp;";
-	} else {
+default:
 	    return "<font color=green>OK</font>&nbsp;";
-	}
+}
     }
 
     function getFolderElement(name, disabled, id, type, status) {
