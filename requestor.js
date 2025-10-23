@@ -1045,7 +1045,7 @@ async function parsePOSTGetStep(req, params, res, jsonObj) {
     }
 }
 
-function prepareYAML(info, linenr, level) {
+function prepareJSONFromYAML(info, linenr, level) {
     let YAMLobj2 = [];
     let line = linenr;
     let description = false;
@@ -1069,7 +1069,7 @@ function prepareYAML(info, linenr, level) {
             name = x.substring(0, ind);
             if (name.startsWith("- ")) name = name.substring(2);
             if (x.length - 1 == ind) {
-                let xx = prepareYAML(info, line + 1,
+                let xx = prepareJSONFromYAML(info, line + 1,
                     info[line].length - x.length + 2);
                 line = xx.line;
                 YAMLobj2[name] = xx.yaml;
@@ -1089,7 +1089,7 @@ function prepareYAML(info, linenr, level) {
                 let ind = x.indexOf(":");
                 name = x.substring(0, ind);
                 if (name.startsWith("- ")) name = name.substring(2); //fixme - array instead
-                let xx = prepareYAML(info, line + 1,
+                let xx = prepareJSONFromYAML(info, line + 1,
                     info[line].length - x.length + 2);
                 line = xx.line;
                 YAMLobj2[name] = xx.yaml;
@@ -1141,8 +1141,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             .replace(/\t/g, "    ")
             .split(/\r\n|\r|\n/g));
     }
-    let xx = prepareYAML(info, 0, 0);
-    let YAMLobj = xx.yaml;
+    let YAMLobj = prepareJSONFromYAML(info, 0, 0).yaml;
     console.log(YAMLobj);
 
     params["path"] = jsonObj.testsuites[0].name;
