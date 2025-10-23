@@ -542,13 +542,13 @@ async function getJSON(dbid, dt, file) {
 }
 
 function updateFolderStatus(file, path, oldstatus, newstatus) {
-	if (oldstatus!=newstatus) {
-                s = {};
-                s['file'] = file;
-                s['path'] = path;
-                s['status'] = newstatus;
-                sendCallback(file, "updatefolderstatus", JSON.stringify(s));
-	}
+    if (oldstatus != newstatus) {
+        s = {};
+        s['file'] = file;
+        s['path'] = path;
+        s['status'] = newstatus;
+        sendCallback(file, "updatefolderstatus", JSON.stringify(s));
+    }
 }
 
 async function parsePOSTRenameElement(params, jsonObj) {
@@ -621,7 +621,7 @@ async function parsePOSTEnableDisableElement(params, jsonObj) {
             findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj) : null;
 
         if (x1_before != null) updateFolderStatus(params['file'], elpath[0], x1_before.status, x1_after.status);
-        if (x2_before != null) updateFolderStatus(params['file'], elpath[0]+"/"+elpath[1], x2_before.status, x2_after.status);
+        if (x2_before != null) updateFolderStatus(params['file'], elpath[0] + "/" + elpath[1], x2_before.status, x2_after.status);
     }
 }
 
@@ -648,7 +648,7 @@ async function parsePOSTDeleteElement(params, jsonObj) {
             findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj) : null;
 
         if (x1_before != null) updateFolderStatus(params['file'], elpath[0], x1_before.status, x1_after.status);
-        if (x2_before != null) updateFolderStatus(params['file'], elpath[0]+"/"+elpath[1], x2_before.status, x2_after.status);
+        if (x2_before != null) updateFolderStatus(params['file'], elpath[0] + "/" + elpath[1], x2_before.status, x2_after.status);
     }
 }
 
@@ -844,10 +844,10 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 }
             }
             var x2_after = await createTCTree(params['file'], tc);
-    	    updateFolderStatus(params['file'], p[0]+"/"+p[1], x2_before.status, x2_after.status);
+            updateFolderStatus(params['file'], p[0] + "/" + p[1], x2_before.status, x2_after.status);
         }
         var x1_after = await createTSTree(params['file'], ts);
-    	updateFolderStatus(params['file'], p[0], x1_before.status, x1_after.status);
+        updateFolderStatus(params['file'], p[0], x1_before.status, x1_after.status);
     }
     s = {};
     s['file'] = params['file'];
@@ -863,17 +863,13 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
     let elpath2 = params['newpath'].split("/"); //new parent path
 
     var x1_before = await createTSTree(params['file'], findElement(jsonObj, params, elpath[0], false, false).obj);
-//    console.log("status1 for " + elpath[0] + " " + x1_before.status);
     if (elpath.length > 2) {
         var x2_before = await createTCTree(params['file'], findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj);
-//        console.log("status1 for " + elpath[0] + "/" + elpath[1] + " " + x2_before.status);
     }
 
     var x3_before = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0], false, false).obj);
-//    console.log("status2 for " + elpath2[0] + " " + x3_before.status);
     if (elpath2.length > 1) {
         var x4_before = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1], false, false).obj);
-//        console.log("status2 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_before.status);
     }
 
     el = findElement(jsonObj, params, params['path'], deleteDB, deleteOriginal);
@@ -923,17 +919,17 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
         sendCallback(params['file'], "pastedrop", JSON.stringify(params));
 
         var x1_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath[0], false, false).obj);
-    	updateFolderStatus(params['file'], elpath[0], x1_before.status, x1_after.status);
+        updateFolderStatus(params['file'], elpath[0], x1_before.status, x1_after.status);
         if (elpath.length > 2) {
             var x2_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj);
-    	    updateFolderStatus(params['file'], elpath[0]+"/"+elpath[1], x2_before.status, x2_after.status);
+            updateFolderStatus(params['file'], elpath[0] + "/" + elpath[1], x2_before.status, x2_after.status);
         }
 
         var x3_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0], false, false).obj);
-    	updateFolderStatus(params['file'], elpath2[0], x3_before.status, x3_after.status);
+        updateFolderStatus(params['file'], elpath2[0], x3_before.status, x3_after.status);
         if (elpath2.length > 1) {
             var x4_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1], false, false).obj);
-    	    updateFolderStatus(params['file'], elpath2[0]+"/"+elpath2[1], x4_before.status, x4_after.status);
+            updateFolderStatus(params['file'], elpath2[0] + "/" + elpath2[1], x4_before.status, x4_after.status);
         }
     }
 }
@@ -1366,7 +1362,7 @@ const onRequestHandler = async (req, res) => {
                     });
             }
             sendHTML(req, res, readFileContentSync("/internal/proj.txt")
-                .replace("<!--VERSION-->", version+" (GPLv3)")
+                .replace("<!--VERSION-->", version + " (GPLv3)")
                 .replace("<!--JSLIB-->",
                     readFileContentSync("/internal/libjs.txt"))
                 .replace("<!--FOLDERS_MENU-->",
@@ -1389,7 +1385,7 @@ const onRequestHandler = async (req, res) => {
 
     //index file
     sendHTML(req, res, readFileContentSync("/internal/index.txt")
-                .replace("<!--VERSION-->", version+" (GPLv3)")
+        .replace("<!--VERSION-->", version + " (GPLv3)")
         .replace("<!--FILES-->", await getProjectPage(0))
         .replace("<!--EXEC-->", await getReportPage(0))
         .replace("<!--JSLIB-->", readFileContentSync("/internal/libjs.txt")));
