@@ -788,21 +788,24 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 if (lines.length == 0) {
                     sss = await request(step, res, times, params['file']);
                     sss = JSON.parse(sss);
-                    sss.path = runpath;
-                    sss.file = params['file'];
-                    sss = JSON.stringify(sss);
-                    sendCallback(params['file'], "runstep", sss);
-                    s = {};
-                    s['file'] = params['file'];
-                    s['info'] = "Executing " + runpath;
+console.log(sss);
 
                         s = {};
                         s['file'] = params['file'];
                         s['path'] = runpath;
-                        s['status'] = 'ok';
+                        s['status'] = sss.errors.length == 0?'ok':'nok';
                         sendCallback(params['file'], "updatefilestatus", JSON.stringify(s));
 
+                    sss.path = runpath;
+                    sss.file = params['file'];
+                    sss = JSON.stringify(sss);
+                    sendCallback(params['file'], "runstep", JSON.stringify(sss));
+
+                    s = {};
+                    s['file'] = params['file'];
+                    s['info'] = "Executing " + runpath;
                     sendCallback(params['file'], "runner", JSON.stringify(s));
+
                     addToRunReport(params['file'] + dt, runpath, sss);
                     addToRunReportHTML(params['file'] + dt, runpath, sss);
                     times.push(JSON.parse(sss).datetime);
@@ -833,20 +836,23 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                         }
                         sss = await request(stepcopy, res, times, params['file']);
                         sss = JSON.parse(sss);
-                        sss.path = runpath;
-                        sss.file = params['file'];
-                        sss = JSON.stringify(sss);
-                        sendCallback(params['file'], "runstep", sss);
-                        s = {};
-                        s['file'] = params['file'];
-                        s['info'] = "Executing " + runpath + " iteration " + iteration;
-                        sendCallback(params['file'], "runner", JSON.stringify(s));
+console.log(sss);
 
                         s = {};
                         s['file'] = params['file'];
                         s['path'] = runpath;
-                        s['status'] = 'ok';
+                        s['status'] = sss.errors.length == 0?'ok':'nok';
                         sendCallback(params['file'], "updatefilestatus", JSON.stringify(s));
+
+                        sss.path = runpath;
+                        sss.file = params['file'];
+                        sss = JSON.stringify(sss);
+                        sendCallback(params['file'], "runstep", sss);
+
+                        s = {};
+                        s['file'] = params['file'];
+                        s['info'] = "Executing " + runpath + " iteration " + iteration;
+                        sendCallback(params['file'], "runner", JSON.stringify(s));
 
                         addToRunReport(params['file'] + dt, runpath, sss);
                         addToRunReportHTML(params['file'] + dt, runpath, sss);
