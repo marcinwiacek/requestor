@@ -788,7 +788,6 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 if (lines.length == 0) {
                     sss = await request(step, res, times, params['file']);
                     sss = JSON.parse(sss);
-                    console.log(sss);
 
                     s = {};
                     s['file'] = params['file'];
@@ -836,7 +835,6 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                         }
                         sss = await request(stepcopy, res, times, params['file']);
                         sss = JSON.parse(sss);
-                        console.log(sss);
 
                         s = {};
                         s['file'] = params['file'];
@@ -905,7 +903,7 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
 
     var x3_before = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0], false, false).obj);
     console.log("status2 for " + elpath2[0] + " " + x3_before.status);
-    if (elpath2.length > 2) {
+    if (elpath2.length > 1) {
         var x4_before = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1], false, false).obj);
         console.log("status2 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_before.status);
     }
@@ -945,20 +943,6 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
             el2.parentarray.splice(el2.index, 0, newObj);
         }
 
-        var x1_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath[0], false, false).obj);
-        console.log("status3 for " + elpath[0] + " " + x1_after.status);
-        if (elpath.length > 2) {
-            var x2_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj);
-            console.log("status3 for " + elpath[0] + "/" + elpath[1] + " " + x2_after.status);
-        }
-
-        var x3_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0], false, false).obj);
-        console.log("status4 for " + elpath2[0] + " " + x3_after.status);
-        if (elpath2.length > 2) {
-            var x4_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1], false, false).obj);
-            console.log("status4 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_after.status);
-        }
-
         tree.push(el.type == 'suite' ?
             await createTSTree(params['file'], newObj) :
             (el.type == 'tc' ?
@@ -969,6 +953,51 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
         jsonObj.modified = true;
         params['struct'] = JSON.stringify(tree);
         sendCallback(params['file'], "pastedrop", JSON.stringify(params));
+
+        var x1_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath[0], false, false).obj);
+        console.log("status3 for " + elpath[0] + " " + x1_after.status);
+        if (elpath.length > 2) {
+            var x2_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj);
+            console.log("status3 for " + elpath[0] + "/" + elpath[1] + " " + x2_after.status);
+    	    if (x2_before.status != x2_after.status) {
+        	s = {};
+                s['file'] = params['file'];
+                s['path'] = elpath[0]+"/"+elpath[1];
+                s['status'] = x2_after.status;
+                sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
+            }
+        }
+
+        var x3_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0], false, false).obj);
+        console.log("status4 for " + elpath2[0] + " " + x3_after.status);
+        if (elpath2.length > 1) {
+            var x4_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1], false, false).obj);
+            console.log("status4 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_after.status);
+    	    if (x4_before.status != x4_after.status) {
+        	s = {};
+                s['file'] = params['file'];
+                s['path'] = elpath2[0]+"/"+elpath2[1];
+                s['status'] = x4_after.status;
+                sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
+            }
+        }
+
+        if (x1_before.status != x1_after.status) {
+            s = {};
+            s['file'] = params['file'];
+            s['path'] = elpath[0];
+            s['status'] = x1_after.status;
+            sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
+        }
+        if (x3_before.status != x3_after.status) {
+            s = {};
+            s['file'] = params['file'];
+            s['path'] = elpath2[0];
+            s['status'] = x3_after.status;
+            sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
+        }
+
+
     }
 }
 
