@@ -541,6 +541,16 @@ async function getJSON(dbid, dt, file) {
     return s;
 }
 
+function updateFolderStatus(file, path, oldstatus, newstatus) {
+	if (oldstatus!=newstatus) {
+                s = {};
+                s['file'] = file;
+                s['path'] = path;
+                s['status'] = newstatus;
+                sendCallback(file, "updatefolderstatus", JSON.stringify(s));
+	}
+}
+
 async function parsePOSTRenameElement(params, jsonObj) {
     el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
@@ -610,22 +620,8 @@ async function parsePOSTEnableDisableElement(params, jsonObj) {
         var x2_after = elpath.length > 2 ? await createTCTree(params['file'],
             findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj) : null;
 
-        if (x1_before != null && x1_before.status != x1_after.status) {
-            s = {};
-            s['file'] = params['file'];
-            s['path'] = elpath[0];
-            s['status'] = x1_after.status;
-            sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-        }
-        console.log(x2_before);
-        console.log(x2_after);
-        if (x2_before != null && x2_before.status != x2_after.status) {
-            s = {};
-            s['file'] = params['file'];
-            s['path'] = elpath[0] + "/" + elpath[1];
-            s['status'] = x2_after.status;
-            sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-        }
+        if (x1_before != null) updateFolderStatus(params['file'], elpath[0], x1_before.status, x1_after.status);
+        if (x2_before != null) updateFolderStatus(params['file'], elpath[0]+"/"+elpath[1], x2_before.status, x2_after.status);
     }
 }
 
@@ -651,24 +647,8 @@ async function parsePOSTDeleteElement(params, jsonObj) {
         var x2_after = elpath.length > 2 ? await createTCTree(params['file'],
             findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj) : null;
 
-        console.log(x1_before);
-        console.log(x1_after);
-        if (x1_before != null && x1_before.status != x1_after.status) {
-            s = {};
-            s['file'] = params['file'];
-            s['path'] = elpath[0];
-            s['status'] = x1_after.status;
-            sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-        }
-        console.log(x2_before);
-        console.log(x2_after);
-        if (x2_before != null && x2_before.status != x2_after.status) {
-            s = {};
-            s['file'] = params['file'];
-            s['path'] = elpath[0] + "/" + elpath[1];
-            s['status'] = x2_after.status;
-            sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-        }
+        if (x1_before != null) updateFolderStatus(params['file'], elpath[0], x1_before.status, x1_after.status);
+        if (x2_before != null) updateFolderStatus(params['file'], elpath[0]+"/"+elpath[1], x2_before.status, x2_after.status);
     }
 }
 
@@ -864,22 +844,10 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 }
             }
             var x2_after = await createTCTree(params['file'], tc);
-            if (x2_before.status != x2_after.status) {
-                s = {};
-                s['file'] = params['file'];
-                s['path'] = p[0] + "/" + p[1];
-                s['status'] = x2_after.status;
-                sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-            }
+    	    updateFolderStatus(params['file'], p[0]+"/"+p[1], x2_before.status, x2_after.status);
         }
         var x1_after = await createTSTree(params['file'], ts);
-        if (x1_before.status != x1_after.status) {
-            s = {};
-            s['file'] = params['file'];
-            s['path'] = p[0];
-            s['status'] = x1_after.status;
-            sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-        }
+    	updateFolderStatus(params['file'], p[0], x1_before.status, x1_after.status);
     }
     s = {};
     s['file'] = params['file'];
@@ -895,17 +863,17 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
     let elpath2 = params['newpath'].split("/"); //new parent path
 
     var x1_before = await createTSTree(params['file'], findElement(jsonObj, params, elpath[0], false, false).obj);
-    console.log("status1 for " + elpath[0] + " " + x1_before.status);
+//    console.log("status1 for " + elpath[0] + " " + x1_before.status);
     if (elpath.length > 2) {
         var x2_before = await createTCTree(params['file'], findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj);
-        console.log("status1 for " + elpath[0] + "/" + elpath[1] + " " + x2_before.status);
+//        console.log("status1 for " + elpath[0] + "/" + elpath[1] + " " + x2_before.status);
     }
 
     var x3_before = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0], false, false).obj);
-    console.log("status2 for " + elpath2[0] + " " + x3_before.status);
+//    console.log("status2 for " + elpath2[0] + " " + x3_before.status);
     if (elpath2.length > 1) {
         var x4_before = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1], false, false).obj);
-        console.log("status2 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_before.status);
+//        console.log("status2 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_before.status);
     }
 
     el = findElement(jsonObj, params, params['path'], deleteDB, deleteOriginal);
@@ -955,46 +923,17 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
         sendCallback(params['file'], "pastedrop", JSON.stringify(params));
 
         var x1_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath[0], false, false).obj);
-        if (x1_before.status != x1_after.status) {
-            s = {};
-            s['file'] = params['file'];
-            s['path'] = elpath[0];
-            s['status'] = x1_after.status;
-            sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-        }
-
-        console.log("status3 for " + elpath[0] + " " + x1_after.status);
+    	updateFolderStatus(params['file'], elpath[0], x1_before.status, x1_after.status);
         if (elpath.length > 2) {
             var x2_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath[0] + "/" + elpath[1], false, false).obj);
-            console.log("status3 for " + elpath[0] + "/" + elpath[1] + " " + x2_after.status);
-            if (x2_before.status != x2_after.status) {
-                s = {};
-                s['file'] = params['file'];
-                s['path'] = elpath[0] + "/" + elpath[1];
-                s['status'] = x2_after.status;
-                sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-            }
+    	    updateFolderStatus(params['file'], elpath[0]+"/"+elpath[1], x2_before.status, x2_after.status);
         }
 
         var x3_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0], false, false).obj);
-        if (x3_before.status != x3_after.status) {
-            s = {};
-            s['file'] = params['file'];
-            s['path'] = elpath2[0];
-            s['status'] = x3_after.status;
-            sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-        }
-        console.log("status4 for " + elpath2[0] + " " + x3_after.status);
+    	updateFolderStatus(params['file'], elpath2[0], x3_before.status, x3_after.status);
         if (elpath2.length > 1) {
             var x4_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1], false, false).obj);
-            console.log("status4 for " + elpath2[0] + "/" + elpath2[1] + " " + x4_after.status);
-            if (x4_before.status != x4_after.status) {
-                s = {};
-                s['file'] = params['file'];
-                s['path'] = elpath2[0] + "/" + elpath2[1];
-                s['status'] = x4_after.status;
-                sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
-            }
+    	    updateFolderStatus(params['file'], elpath2[0]+"/"+elpath2[1], x4_before.status, x4_after.status);
         }
     }
 }

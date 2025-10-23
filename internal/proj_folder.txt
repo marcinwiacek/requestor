@@ -247,17 +247,16 @@
     }
 
     function getStatusHTML(status) {
-console.log(status);
-    switch(status) {
+	switch(status) {
 	case 'nok':
 	    return "<font color=red>NOK</font>&nbsp;";
 	case 'norun':
 	    return "<font color=amber>NO run</font>&nbsp;";
-case 'ok':
+	case 'ok':
 	    return "<font color=green>OK</font>&nbsp;";
-default:
+	default:
 	    return "<font color=grey>---</font>&nbsp;";
-}
+	}
     }
 
     function getFolderElement(name, disabled, id, type, status) {
@@ -401,7 +400,6 @@ default:
     }
     ulel = document.createElement("ul");
     document.getElementById("menu").appendChild(ulel);
-console.log(tree);
     tree.forEach(function(folder, index) {
         ulel.appendChild(addFilesFolders(folder, ""));
     });
