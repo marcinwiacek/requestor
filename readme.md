@@ -38,7 +38,7 @@ for example:
 
 # Version history
 
-October 2025 - Milestone 2
+23 October 2025 - Milestone 2
 16 March 2024 - Milestone 1
 
 # Why another app?
