@@ -253,8 +253,10 @@ console.log(status);
 	    return "<font color=red>NOK</font>&nbsp;";
 	case 'norun':
 	    return "<font color=amber>NO run</font>&nbsp;";
-default:
+case 'ok':
 	    return "<font color=green>OK</font>&nbsp;";
+default:
+	    return "<font color=grey>---</font>&nbsp;";
 }
     }
 

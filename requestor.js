@@ -388,6 +388,8 @@ async function createStepTree(file, obj) {
     stepobj.name = obj.name;
     stepobj.type = 'step';
     stepobj.disabled = obj.disabled && obj.disabled == true ? true : false;
+        stepobj.status = '-';
+    if (!stepobj.disabled) {
     if (obj.dbid) {
         let rows = await db_all(file, "SELECT dt,error_res from requests where dbid =\"" + obj.dbid + "\" order by dt desc");
         if (rows.length == 0) {
@@ -400,6 +402,7 @@ async function createStepTree(file, obj) {
     } else {
         stepobj.status = 'norun';
     }
+}
     return stepobj;
 }
 
@@ -415,6 +418,7 @@ async function createTCTree(file, obj) {
         var step = obj.children[stepnumber];
         var x = await createStepTree(file, step);
         tcobj.files.push(x);
+    if (!tcobj.disabled) {
         if (x.status === 'ok') {
             if (tcobj.status ==='-') tcobj.status = 'ok';
         } else if (x.status === 'nok') {
@@ -422,6 +426,7 @@ async function createTCTree(file, obj) {
         } else if (x.status === 'norun') {
             tcobj.status = 'norun';
         }
+}
     }
     return tcobj;
 }
@@ -434,11 +439,11 @@ async function createTSTree(file, obj) {
     tsobj.folders = []
     tsobj.files = []
     tsobj.status = '-';
-
     for (let tcnumber in obj.children) {
         var tc = obj.children[tcnumber];
         var x = await createTCTree(file, tc);
         tsobj.folders.push(x);
+    if (!tsobj.disabled) {
         if (x.status === 'ok') {
             if (tsobj.status === '-') tsobj.status = 'ok';
         } else if (x.status === 'nok') {
@@ -446,6 +451,7 @@ async function createTSTree(file, obj) {
         } else if (x.status === 'norun') {
             tsobj.status = 'norun';
         }
+}
     }
     return tsobj;
 }
@@ -585,6 +591,12 @@ async function parsePOSTNewElement(params, jsonObj, createInside) {
 async function parsePOSTEnableDisableElement(params, jsonObj) {
     el = findElement(jsonObj, params, params['path'], false, false);
     if (el != null) {
+        let elpath = params['path'].split("/");
+	var x1_before = await createTSTree(params['file'],
+	    findElement(jsonObj, params, elpath[0], false, false).obj);
+	var x2_before = elpath.length>2?await createTCTree(params['file'],
+	    findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false, false).obj):null;
+
         jsonObj.modified = true;
         if (el.obj.disabled == true) {
             delete el.obj.disabled;
@@ -592,6 +604,28 @@ async function parsePOSTEnableDisableElement(params, jsonObj) {
             el.obj.disabled = true;
         }
         sendCallback(params['file'], "enabledisableelement", JSON.stringify(params));
+
+	var x1_after = await createTSTree(params['file'],
+	    findElement(jsonObj, params, elpath[0], false, false).obj);
+	var x2_after = elpath.length>2?await createTCTree(params['file'],
+	    findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false, false).obj):null;
+
+if (x1_before!=null && x1_before.status!=x1_after.status) {
+                        s = {};
+                        s['file'] = params['file'];
+                        s['path'] = elpath[0];
+                        s['status'] = x1_after.status;
+                        sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
+}
+console.log(x2_before);
+console.log(x2_after);
+if (x2_before!=null && x2_before.status!=x2_after.status) {
+                        s = {};
+                        s['file'] = params['file'];
+                        s['path'] = elpath[0]+"/"+elpath[1];
+                        s['status'] = x2_after.status;
+                        sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
+}
     }
 }
 
@@ -608,14 +642,14 @@ async function parsePOSTDeleteElement(params, jsonObj) {
         jsonObj.modified = true;
         el.parentarray.splice(el.index, 1);
 
+        sss = params;
+        sss['emptyafter'] = jsonObj.testsuites.length == 0;
+        sendCallback(params['file'], "deleteelement", JSON.stringify(sss));
+
 	var x1_after = elpath.length>1?await createTSTree(params['file'],
 	    findElement(jsonObj, params, elpath[0], false, false).obj):null;
 	var x2_after = elpath.length>2?await createTCTree(params['file'],
 	    findElement(jsonObj, params, elpath[0]+"/"+elpath[1], false, false).obj):null;
-
-        sss = params;
-        sss['emptyafter'] = jsonObj.testsuites.length == 0;
-        sendCallback(params['file'], "deleteelement", JSON.stringify(sss));
 
 console.log(x1_before);
 console.log(x1_after);
@@ -635,7 +669,6 @@ if (x2_before!=null && x2_before.status!=x2_after.status) {
                         s['status'] = x2_after.status;
                         sendCallback(params['file'], "updatefolderstatus", JSON.stringify(s));
 }
-
     }
 }
 
