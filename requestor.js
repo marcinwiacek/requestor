@@ -146,7 +146,7 @@ async function executeRequest(req) {
                     chunk.push(fragments);
                 });
                 response.on('end', () => {
-		    req.headers = x;
+                    req.headers = x;
                     var resp = {}
                     resp.body = Buffer.concat(chunk).toString();
                     resp.headers = response.headers;
@@ -156,7 +156,7 @@ async function executeRequest(req) {
                     resolve(resp);
                 });
             }).on('error', (e) => {
-		    req.headers = x;
+                req.headers = x;
                 var s = e.errors + " ";
                 var resp = {}
                 resp.body = '';
@@ -175,7 +175,7 @@ async function executeRequest(req) {
                 r.end();
             }
         } catch (e) {
-		    req.headers = x;
+            req.headers = x;
             var resp = {}
             resp.body = '';
             resp.headers = [];
@@ -658,7 +658,7 @@ function replaceArrayWithString(ar) {
     for (let arname in ar) {
         if (Array.isArray(ar[arname])) {
             for (let arx in ar[arname]) {
-        	if (retVal.length != 0) retVal += "\n";
+                if (retVal.length != 0) retVal += "\n";
                 retVal += arname + ": " + ar[arname][ar];
             }
         } else {
@@ -672,24 +672,24 @@ function replaceArrayWithString(ar) {
 function replaceStringWithArray(s) {
     ar = s.split("\n");
     ar = ar.filter(function(el) {
-                        return el.length > 0;
-                    });
+        return el.length > 0;
+    });
     retVal = {};
     for (let arname in ar) {
-	if (ar[arname].indexOf(":")!=0) {
-	    nam = ar[arname].substring(0,ar[arname].indexOf(":"));
-	    val = ar[arname].substring(ar[arname].indexOf(":")+1);
-	    if (retVal[nam] && !Array.isArray(retval[nam])) {
-		x = retVal.val;
-		retVal[nam] = [];
-		retVal[nam].push(x);
-	    }
-	    if (retVal[nam]) {
-		retVal[nam].push(val);
-	    } else {
-		retVal[nam] = val;
-	    }
-	}
+        if (ar[arname].indexOf(":") != 0) {
+            nam = ar[arname].substring(0, ar[arname].indexOf(":"));
+            val = ar[arname].substring(ar[arname].indexOf(":") + 1);
+            if (retVal[nam] && !Array.isArray(retval[nam])) {
+                x = retVal.val;
+                retVal[nam] = [];
+                retVal[nam].push(x);
+            }
+            if (retVal[nam]) {
+                retVal[nam].push(val);
+            } else {
+                retVal[nam] = val;
+            }
+        }
     }
     return retVal;
 }
@@ -701,7 +701,7 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
     let curDT2 = getDateString(new Date());
     if (!req.dbid) req.dbid = getDateString(dt);
     dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-        curDT, req.dbid, req.url, replaceArrayWithString(req.headers), req.body, replaceArrayWithString(response.headers), 
+        curDT, req.dbid, req.url, replaceArrayWithString(req.headers), req.body, replaceArrayWithString(response.headers),
         response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
         err => {});
 
@@ -776,7 +776,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 let lines = tc.input;
                 if (params['method']) {
                     step.method = params['method'];
-		    step.headers = replaceStringWithArray(decodeURIComponent(params['headers']));
+                    step.headers = replaceStringWithArray(decodeURIComponent(params['headers']));
                     step.body = decodeURIComponent(params['body']);
                     step.ignoreWrongSSL = params['ssl'] == "true";
                     step.conLen = params['conlen'] == "true";
@@ -808,15 +808,15 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                             stepcopy.body = stepcopy.body.replace("{{" + d + "}}", arra[d]);
                             for (let headername in stepcopy.headers) {
-			        if (Array.isArray(stepcopy.headers[headername])) {
-        			    for (let arx in stepcopy.headers[headername]) {
-                            		stepcopy.headers[headername][arx] =
-                                    stepcopy.headers[headername][arx].replace("{{" + d + "}}", arra[d]);
-				    }
-				} else {
-                                stepcopy.headers[headername] =
-                                    stepcopy.headers[headername].replace("{{" + d + "}}", arra[d]);
-				}
+                                if (Array.isArray(stepcopy.headers[headername])) {
+                                    for (let arx in stepcopy.headers[headername]) {
+                                        stepcopy.headers[headername][arx] =
+                                            stepcopy.headers[headername][arx].replace("{{" + d + "}}", arra[d]);
+                                    }
+                                } else {
+                                    stepcopy.headers[headername] =
+                                        stepcopy.headers[headername].replace("{{" + d + "}}", arra[d]);
+                                }
                             }
                         }
                         sss = await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt);
