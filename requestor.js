@@ -599,7 +599,6 @@ async function parsePOSTSaveFile(params, jsonObj) {
         path.normalize(__dirname + '/projects/' + params['file'] +
             getDateString(lm).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "")),
         function(err) {
-            //            if (err) console.log('ERROR: ' + err);
         });
 
     delete jsonObj.modified;
@@ -608,7 +607,6 @@ async function parsePOSTSaveFile(params, jsonObj) {
         JSON.stringify(jsonObj, null, 2),
         function(err) {
             if (err) {
-                //            return console.log(err);
             }
         });
 
