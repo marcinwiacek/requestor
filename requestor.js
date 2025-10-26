@@ -88,7 +88,7 @@ async function executeRequest(req) {
     if (req.conLen) {
         req.headers["Content-Length"] = req.body.length;
     }
-    var x = req.headers;
+//    var x = req.headers;
 
     var method2 = null;
     if (q.protocol == "http:") {
@@ -146,7 +146,7 @@ async function executeRequest(req) {
                     chunk.push(fragments);
                 });
                 response.on('end', () => {
-                    req.headers = x;
+//                    req.headers = x;
                     var resp = {}
                     resp.body = Buffer.concat(chunk).toString();
                     resp.headers = response.headers;
@@ -156,7 +156,7 @@ async function executeRequest(req) {
                     resolve(resp);
                 });
             }).on('error', (e) => {
-                req.headers = x;
+//                req.headers = x;
                 var s = e.errors + " ";
                 var resp = {}
                 resp.body = '';
@@ -175,7 +175,7 @@ async function executeRequest(req) {
                 r.end();
             }
         } catch (e) {
-            req.headers = x;
+//            req.headers = x;
             var resp = {}
             resp.body = '';
             resp.headers = [];
