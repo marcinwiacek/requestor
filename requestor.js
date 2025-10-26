@@ -670,14 +670,10 @@ function replaceArrayWithString(ar) {
 }
 
 function replaceStringWithArray(s) {
-console.log("replaceString...");
-console.log(s);
     ar = s.split("\n");
     ar = ar.filter(function(el) {
                         return el.length > 0;
                     });
-console.log(ar);
-console.log('2');
     retVal = {};
     for (let arname in ar) {
 	if (ar[arname].indexOf(":")!=0) {
@@ -695,26 +691,14 @@ console.log('2');
 	    }
 	}
     }
-console.log('3');
-console.log(retVal);
     return retVal;
 }
 
 async function executeRequestAndSaveResults(req, res, times, filename, runpath, iteration, dt0) {
     let dt = new Date();
     let curDT = getDateString(dt);
-console.log("inside execute...");
-console.log(req.headers);
-console.log(replaceArrayWithString(req.headers));
-console.log('execute request');
     var response = await executeRequest(req);
-console.log(response);
-console.log('after exeute');
     let curDT2 = getDateString(new Date());
-console.log(req.headers);
-console.log(replaceArrayWithString(req.headers));
-console.log(response.headers);
-console.log(replaceArrayWithString(response.headers));
     if (!req.dbid) req.dbid = getDateString(dt);
     dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         curDT, req.dbid, req.url, replaceArrayWithString(req.headers), req.body, replaceArrayWithString(response.headers), 
@@ -793,14 +777,11 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 if (params['method']) {
                     step.method = params['method'];
 		    step.headers = replaceStringWithArray(decodeURIComponent(params['headers']));
-console.log("stepheaders");
-console.log(step.headers);
                     step.body = decodeURIComponent(params['body']);
                     step.ignoreWrongSSL = params['ssl'] == "true";
                     step.conLen = params['conlen'] == "true";
                     step.url = decodeURIComponent(params['url']);
                 }
-console.log(step);
                 runpath = ts.name + "/" + tc.name + "/" + step.name;
 
                 if (lines.length == 0) {
@@ -823,10 +804,6 @@ console.log(step);
                             i++;
                         });
                         var stepcopy = JSON.parse(JSON.stringify(step));
-console.log("stepcopyheaders");
-console.log(step.headers);
-console.log(stepcopy.headers);
-console.log(stepcopy);
                         for (let d in arra) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                             stepcopy.body = stepcopy.body.replace("{{" + d + "}}", arra[d]);
@@ -842,9 +819,6 @@ console.log(stepcopy);
 				}
                             }
                         }
-console.log("stepcopyheaders");
-console.log(stepcopy.headers);
-
                         sss = await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt);
                         times.push(sss.datetime);
 
