@@ -86,8 +86,9 @@ async function executeRequest(req) {
     };
 
     if (req.conLen) {
-        req.headers["Content-Length"] = "Content-Length: " + req.body.length;
+        req.headers["Content-Length"] = req.body.length;
     }
+    var x = req.headers;
 
     var method2 = null;
     if (q.protocol == "http:") {
@@ -145,6 +146,7 @@ async function executeRequest(req) {
                     chunk.push(fragments);
                 });
                 response.on('end', () => {
+		    req.headers = x;
                     var resp = {}
                     resp.body = Buffer.concat(chunk).toString();
                     resp.headers = response.headers;
@@ -154,6 +156,7 @@ async function executeRequest(req) {
                     resolve(resp);
                 });
             }).on('error', (e) => {
+		    req.headers = x;
                 var s = e.errors + " ";
                 var resp = {}
                 resp.body = '';
@@ -172,6 +175,7 @@ async function executeRequest(req) {
                 r.end();
             }
         } catch (e) {
+		    req.headers = x;
             var resp = {}
             resp.body = '';
             resp.headers = [];
@@ -649,36 +653,77 @@ async function parsePOSTNewFile(req, filename, res) {
     }
 }
 
+function replaceArrayWithString(ar) {
+    retVal = "";
+    for (let arname in ar) {
+        if (Array.isArray(ar[arname])) {
+            for (let arx in ar[arname]) {
+        	if (retVal.length != 0) retVal += "\n";
+                retVal += arname + ": " + ar[arname][ar];
+            }
+        } else {
+            if (retVal.length != 0) retVal += "\n";
+            retVal += arname + ": " + ar[arname];
+        }
+    }
+    return retVal;
+}
+
+function replaceStringWithArray(s) {
+console.log("replaceString...");
+console.log(s);
+    ar = s.split("\n");
+    ar = ar.filter(function(el) {
+                        return el.length > 0;
+                    });
+console.log(ar);
+console.log('2');
+    retVal = {};
+    for (let arname in ar) {
+	if (ar[arname].indexOf(":")!=0) {
+	    nam = ar[arname].substring(0,ar[arname].indexOf(":"));
+	    val = ar[arname].substring(ar[arname].indexOf(":")+1);
+	    if (retVal[nam] && !Array.isArray(retval[nam])) {
+		x = retVal.val;
+		retVal[nam] = [];
+		retVal[nam].push(x);
+	    }
+	    if (retVal[nam]) {
+		retVal[nam].push(val);
+	    } else {
+		retVal[nam] = val;
+	    }
+	}
+    }
+console.log('3');
+console.log(retVal);
+    return retVal;
+}
+
 async function executeRequestAndSaveResults(req, res, times, filename, runpath, iteration, dt0) {
     let dt = new Date();
     let curDT = getDateString(dt);
+console.log("inside execute...");
+console.log(req.headers);
+console.log(replaceArrayWithString(req.headers));
+console.log('execute request');
     var response = await executeRequest(req);
+console.log(response);
+console.log('after exeute');
     let curDT2 = getDateString(new Date());
-    var headers = "";
-    var headers_res = "";
-    for (let headername in req.headers) {
-        if (headers.length != 0) headers += "\n";
-        headers += req.headers[headername];
-    }
-    for (let headername in response.headers) {
-        if (Array.isArray(response.headers[headername])) {
-            for (let headerx in response.headers[headername]) {
-                if (headers_res.length != 0) headers_res += "\n";
-                headers_res += headername + ": " + response.headers[headername][headerx];
-            }
-        } else {
-            if (headers_res.length != 0) headers_res += "\n";
-            headers_res += headername + ": " + response.headers[headername];
-        }
-    }
+console.log(req.headers);
+console.log(replaceArrayWithString(req.headers));
+console.log(response.headers);
+console.log(replaceArrayWithString(response.headers));
     if (!req.dbid) req.dbid = getDateString(dt);
     dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-        curDT, req.dbid, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
+        curDT, req.dbid, req.url, replaceArrayWithString(req.headers), req.body, replaceArrayWithString(response.headers), 
+        response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
         err => {});
+
     retVal = JSON.parse("{" + await getJSON(req.dbid, curDT, filename) + "}");
     retVal.oldtimes = times;
-    console.log(times);
-    console.log(retVal);
+
     s = {};
     s['file'] = filename;
     s['path'] = runpath;
@@ -687,8 +732,7 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
 
     retVal.path = runpath;
     retVal.file = filename;
-    retVal = JSON.stringify(retVal);
-    sendCallback(filename, "runstep", retVal);
+    sendCallback(filename, "runstep", JSON.stringify(retVal));
 
     s = {};
     s['file'] = filename;
@@ -748,15 +792,15 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 let lines = tc.input;
                 if (params['method']) {
                     step.method = params['method'];
-                    step.headers = decodeURIComponent(params['headers']).split("\n");
-                    step.headers = step.headers.filter(function(el) {
-                        return el.length > 0;
-                    });
+		    step.headers = replaceStringWithArray(decodeURIComponent(params['headers']));
+console.log("stepheaders");
+console.log(step.headers);
                     step.body = decodeURIComponent(params['body']);
                     step.ignoreWrongSSL = params['ssl'] == "true";
                     step.conLen = params['conlen'] == "true";
                     step.url = decodeURIComponent(params['url']);
                 }
+console.log(step);
                 runpath = ts.name + "/" + tc.name + "/" + step.name;
 
                 if (lines.length == 0) {
@@ -779,14 +823,28 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                             i++;
                         });
                         var stepcopy = JSON.parse(JSON.stringify(step));
+console.log("stepcopyheaders");
+console.log(step.headers);
+console.log(stepcopy.headers);
+console.log(stepcopy);
                         for (let d in arra) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                             stepcopy.body = stepcopy.body.replace("{{" + d + "}}", arra[d]);
                             for (let headername in stepcopy.headers) {
+			        if (Array.isArray(stepcopy.headers[headername])) {
+        			    for (let arx in stepcopy.headers[headername]) {
+                            		stepcopy.headers[headername][arx] =
+                                    stepcopy.headers[headername][arx].replace("{{" + d + "}}", arra[d]);
+				    }
+				} else {
                                 stepcopy.headers[headername] =
                                     stepcopy.headers[headername].replace("{{" + d + "}}", arra[d]);
+				}
                             }
                         }
+console.log("stepcopyheaders");
+console.log(stepcopy.headers);
+
                         sss = await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt);
                         times.push(sss.datetime);
 
@@ -807,7 +865,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
     sendCallback(params['file'], "runner", JSON.stringify(s));
     sendCallback("null", "mainrunner", "");
     jsonObj.modified = true;
-    if (req != null) sendPlain(req, res, sss);
+    if (req != null) sendPlain(req, res, JSON.stringify(sss));
 }
 
 async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
