@@ -71,6 +71,16 @@ function getDateString(dt) {
         digits(dt.getMilliseconds(), 3);
 }
 
+function getEmptyResponse(errorInfo) {
+        var resp = {}
+        resp.body = '';
+        resp.headers = [];
+        resp.code = 0;
+        resp.error = errorInfo;
+        resp.certinfo = "";
+        return resp;
+}
+
 async function executeRequest(req) {
     var q = url.parse(req.url, true);
     var certinfo = '';
@@ -88,7 +98,6 @@ async function executeRequest(req) {
     if (req.conLen) {
         req.headers["Content-Length"] = req.body.length;
     }
-//    var x = req.headers;
 
     var method2 = null;
     if (q.protocol == "http:") {
@@ -99,23 +108,12 @@ async function executeRequest(req) {
     }
     resperror = "";
     if (req.url.includes("{{") && req.url.includes("}}")) {
-        if (resperror) {
-            resperror += "\n";
-        }
-        resperror += "Unresolved params";
+        resperror = "Unresolved params";
     }
     if (method2 == null) {
-        var resp = {}
-        resp.body = '';
-        resp.headers = [];
-        resp.code = 0;
-        if (resperror) {
-            resperror += "\n";
-        }
+        if (resperror) resperror += "\n";
         resperror += "Error parsing url, supported http: and https: in this moment";
-        resp.error = resperror;
-        resp.certinfo = "";
-        return (resp);
+	return getEmptyResponse(resperror);
     }
     options.method = req.method;
     options.timeout = 3000;
@@ -146,7 +144,6 @@ async function executeRequest(req) {
                     chunk.push(fragments);
                 });
                 response.on('end', () => {
-//                    req.headers = x;
                     var resp = {}
                     resp.body = Buffer.concat(chunk).toString();
                     resp.headers = response.headers;
@@ -156,38 +153,20 @@ async function executeRequest(req) {
                     resolve(resp);
                 });
             }).on('error', (e) => {
-//                req.headers = x;
                 var s = e.errors + " ";
-                var resp = {}
-                resp.body = '';
-                resp.headers = [];
-                resp.code = 0;
-                if (resperror) {
-                    resperror += "\n";
-                }
+                if (resperror) resperror += "\n";
                 resperror += (s == 'undefined ' ? e.message : s);
-                resp.error = resperror;
-                resp.certinfo = certinfo;
-                resolve(resp);
+		resolve(getEmptyResponse(resperror));
             });
             if (req.method == "post") {
                 r.write(req.body);
                 r.end();
             }
         } catch (e) {
-//            req.headers = x;
-            var resp = {}
-            resp.body = '';
-            resp.headers = [];
-            resp.code = 0;
             var s = e.errors + " ";
-            if (resperror) {
-                resperror += "\n";
-            }
+            if (resperror) resperror += "\n";
             resperror += (s == 'undefined ' ? e.message : s);
-            resp.error = resperror;
-            resp.certinfo = "";
-            resolve(resp);
+	    resolve(getEmptyResponse(resperror));
         }
     });
 }
