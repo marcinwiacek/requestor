@@ -107,8 +107,9 @@ async function executeRequest(req) {
         if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
     }
     resperror = "";
+    //fixme
     if (req.url.includes("{{") && req.url.includes("}}")) {
-        resperror = "Unresolved params";
+        resperror = "Unresolved params in url";
     }
     if (method2 == null) {
         if (resperror) resperror += "\n";
