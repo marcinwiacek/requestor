@@ -188,34 +188,6 @@ async function executeRequest(req) {
     });
 }
 
-async function request(req, res, times, filename) {
-    let dt = new Date();
-    let curDT = getDateString(dt);
-    var response = await executeRequest(req);
-    let curDT2 = getDateString(new Date());
-    var headers = "";
-    var headers_res = "";
-    for (let headername in req.headers) {
-        if (headers.length != 0) headers += "\n";
-        headers += req.headers[headername];
-    }
-    for (let headername in response.headers) {
-        if (Array.isArray(response.headers[headername])) {
-            for (let headerx in response.headers[headername]) {
-                if (headers_res.length != 0) headers_res += "\n";
-                headers_res += headername + ": " + response.headers[headername][headerx];
-            }
-        } else {
-            if (headers_res.length != 0) headers_res += "\n";
-            headers_res += headername + ": " + response.headers[headername];
-        }
-    }
-    if (!req.dbid) req.dbid = getDateString(dt);
-    dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-        curDT, req.dbid, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
-        err => {});
-    return "{" + (await getJSON(req.dbid, curDT, filename)) + ",\"oldtimes\":" + JSON.stringify(times) + "}";
-}
 
 /*
 const ls = child_process('ls', ['/usr']);
@@ -265,7 +237,7 @@ function sendCSS(req, res, text) {
 
 async function addToRunReport(file, p, answer) {
     if (!fileTXTLog) return;
-    a2 = JSON.parse(answer);
+    a2 = answer;
     s = "Step '" + p + "'\nRequest " + a2.datetime + "\n" +
         a2.method + " " + a2.url + "\n";
     s += decodeURIComponent(a2.headers) + "\n";
@@ -288,7 +260,7 @@ async function addToRunReport(file, p, answer) {
 
 async function addToRunReportHTML(file, p, answer) {
     if (!fileHTMLLog) return;
-    a2 = JSON.parse(answer);
+    a2 = answer;
     s = "<b>Step '" + p + "'</b><br>\n" +
         "<span class=req>" +
         "Request " + a2.datetime + "<br>\n" + a2.method.toUpperCase() + " <a href='" + a2.url + "'>" + a2.url + "</a><br>\n";
@@ -677,6 +649,58 @@ async function parsePOSTNewFile(req, filename, res) {
     }
 }
 
+async function executeRequestAndSaveResults(req, res, times, filename, runpath, iteration, dt0) {
+    let dt = new Date();
+    let curDT = getDateString(dt);
+    var response = await executeRequest(req);
+    let curDT2 = getDateString(new Date());
+    var headers = "";
+    var headers_res = "";
+    for (let headername in req.headers) {
+        if (headers.length != 0) headers += "\n";
+        headers += req.headers[headername];
+    }
+    for (let headername in response.headers) {
+        if (Array.isArray(response.headers[headername])) {
+            for (let headerx in response.headers[headername]) {
+                if (headers_res.length != 0) headers_res += "\n";
+                headers_res += headername + ": " + response.headers[headername][headerx];
+            }
+        } else {
+            if (headers_res.length != 0) headers_res += "\n";
+            headers_res += headername + ": " + response.headers[headername];
+        }
+    }
+    if (!req.dbid) req.dbid = getDateString(dt);
+    dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        curDT, req.dbid, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
+        err => {});
+    retVal =  JSON.parse("{"+await getJSON(req.dbid, curDT, filename)+"}");
+    retVal.oldtimes = times;
+console.log(times);
+console.log(retVal);
+                        s = {};
+                        s['file'] = filename;
+                        s['path'] = runpath;
+                        s['status'] = retVal.errors.length == 0 ? 'ok' : 'nok';
+                        sendCallback(filename, "updatefilestatus", JSON.stringify(s));
+
+                        retVal.path = runpath;
+                        retVal.file = filename;
+                        retVal = JSON.stringify(retVal);
+                        sendCallback(filename, "runstep", retVal);
+
+                        s = {};
+                        s['file'] = filename;
+                        s['info'] = "Executing " + runpath + (iteration == -1?"":" iteration " + iteration);
+                        sendCallback(filename, "runner", JSON.stringify(s));
+
+                        addToRunReport(filename + dt0, runpath, retVal);
+                        addToRunReportHTML(filename + dt0, runpath, retVal);
+
+return retVal;
+}
+
 async function parsePOSTRun(req, params, res, jsonObj) {
     var sss = "";
     let times = [];
@@ -688,7 +712,6 @@ async function parsePOSTRun(req, params, res, jsonObj) {
             "Run '" + params['path'] + "'\n\n",
             function(err) {
                 if (err) {
-                    //                return console.log(err);
                 }
             });
     }
@@ -701,20 +724,18 @@ async function parsePOSTRun(req, params, res, jsonObj) {
             "<input type=\"checkbox\" checked onclick='hideshow(\"resp\")'>Show response info<hr>",
             function(err) {
                 if (err) {
-                    //                return console.log(err);
                 }
             });
     }
-    let runit = false;
     for (let tsnumber in jsonObj.testsuites) {
         var ts = jsonObj.testsuites[tsnumber];
-        if (params['path'] == "" || ts.name.localeCompare(p[0]) == 0) {} else {
+        if (params['path'] == "" || ts.name.localeCompare(p[0])== 0) {} else {
             continue;
         }
         var x1_before = await createTSTree(params['file'], ts);
         for (let tcnumber in ts.children) {
             var tc = ts.children[tcnumber];
-            if (params['path'] == "" || p.length == 1 || (p.length > 1 && tc.name.localeCompare(p[1]) == 0)) {} else {
+            if (params['path'] != "" && p.length == 1 || (p.length > 1 && tc.name.localeCompare(p[1]) == 0)) {} else {
                 continue;
             }
             var x2_before = await createTCTree(params['file'], tc);
@@ -741,28 +762,8 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 runpath = ts.name + "/" + tc.name + "/" + step.name;
 
                 if (lines.length == 0) {
-                    sss = await request(step, res, times, params['file']);
-                    sss = JSON.parse(sss);
-
-                    s = {};
-                    s['file'] = params['file'];
-                    s['path'] = runpath;
-                    s['status'] = sss.errors.length == 0 ? 'ok' : 'nok';
-                    sendCallback(params['file'], "updatefilestatus", JSON.stringify(s));
-
-                    sss.path = runpath;
-                    sss.file = params['file'];
-                    sss = JSON.stringify(sss);
-                    sendCallback(params['file'], "runstep", JSON.stringify(sss));
-
-                    s = {};
-                    s['file'] = params['file'];
-                    s['info'] = "Executing " + runpath;
-                    sendCallback(params['file'], "runner", JSON.stringify(s));
-
-                    addToRunReport(params['file'] + dt, runpath, sss);
-                    addToRunReportHTML(params['file'] + dt, runpath, sss);
-                    times.push(JSON.parse(sss).datetime);
+                    sss = await executeRequestAndSaveResults(step, res, times, params['file'], runpath, -1, dt);
+                    times.push(sss.datetime);
                 } else {
                     let iteration = 1;
                     let headers = []
@@ -788,33 +789,11 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                                     stepcopy.headers[headername].replace("{{" + d + "}}", arra[d]);
                             }
                         }
-                        sss = await request(stepcopy, res, times, params['file']);
-                        sss = JSON.parse(sss);
+                        sss = await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt);
+                        times.push(sss.datetime);
 
-                        s = {};
-                        s['file'] = params['file'];
-                        s['path'] = runpath;
-                        s['status'] = sss.errors.length == 0 ? 'ok' : 'nok';
-                        sendCallback(params['file'], "updatefilestatus", JSON.stringify(s));
-
-                        sss.path = runpath;
-                        sss.file = params['file'];
-                        sss = JSON.stringify(sss);
-                        sendCallback(params['file'], "runstep", sss);
-
-                        s = {};
-                        s['file'] = params['file'];
-                        s['info'] = "Executing " + runpath + " iteration " + iteration;
-                        sendCallback(params['file'], "runner", JSON.stringify(s));
-
-                        addToRunReport(params['file'] + dt, runpath, sss);
-                        addToRunReportHTML(params['file'] + dt, runpath, sss);
                         iteration++;
                         step.dbid = stepcopy.dbid;
-                        times.push(JSON.parse(sss).datetime);
-                        if (stepcopy.url.length == step.url.length) {
-                            break;
-                        }
                     }
                 }
             }
@@ -1234,7 +1213,6 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 var xxxx = "";
                 first = true;
                 for (var bodynumber in stepcopy.body) {
-                    //                    if (!first) xxxx += "\n";
                     first = false;
                     xxxx += stepcopy.body[bodynumber];
                 }
