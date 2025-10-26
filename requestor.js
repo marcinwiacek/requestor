@@ -675,30 +675,30 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
     dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         curDT, req.dbid, req.url, headers, req.body, headers_res, response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
         err => {});
-    retVal =  JSON.parse("{"+await getJSON(req.dbid, curDT, filename)+"}");
+    retVal = JSON.parse("{" + await getJSON(req.dbid, curDT, filename) + "}");
     retVal.oldtimes = times;
-console.log(times);
-console.log(retVal);
-                        s = {};
-                        s['file'] = filename;
-                        s['path'] = runpath;
-                        s['status'] = retVal.errors.length == 0 ? 'ok' : 'nok';
-                        sendCallback(filename, "updatefilestatus", JSON.stringify(s));
+    console.log(times);
+    console.log(retVal);
+    s = {};
+    s['file'] = filename;
+    s['path'] = runpath;
+    s['status'] = retVal.errors.length == 0 ? 'ok' : 'nok';
+    sendCallback(filename, "updatefilestatus", JSON.stringify(s));
 
-                        retVal.path = runpath;
-                        retVal.file = filename;
-                        retVal = JSON.stringify(retVal);
-                        sendCallback(filename, "runstep", retVal);
+    retVal.path = runpath;
+    retVal.file = filename;
+    retVal = JSON.stringify(retVal);
+    sendCallback(filename, "runstep", retVal);
 
-                        s = {};
-                        s['file'] = filename;
-                        s['info'] = "Executing " + runpath + (iteration == -1?"":" iteration " + iteration);
-                        sendCallback(filename, "runner", JSON.stringify(s));
+    s = {};
+    s['file'] = filename;
+    s['info'] = "Executing " + runpath + (iteration == -1 ? "" : " iteration " + iteration);
+    sendCallback(filename, "runner", JSON.stringify(s));
 
-                        addToRunReport(filename + dt0, runpath, retVal);
-                        addToRunReportHTML(filename + dt0, runpath, retVal);
+    addToRunReport(filename + dt0, runpath, retVal);
+    addToRunReportHTML(filename + dt0, runpath, retVal);
 
-return retVal;
+    return retVal;
 }
 
 async function parsePOSTRun(req, params, res, jsonObj) {
@@ -711,8 +711,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
         fs.appendFile(path.normalize(__dirname + '/reports/' + params['file'] + dt + '.txt'),
             "Run '" + params['path'] + "'\n\n",
             function(err) {
-                if (err) {
-                }
+                if (err) {}
             });
     }
     if (fileHTMLLog) {
@@ -723,13 +722,12 @@ async function parsePOSTRun(req, params, res, jsonObj) {
             "<input type=\"checkbox\" checked onclick='hideshow(\"req\")'>Show request info" +
             "<input type=\"checkbox\" checked onclick='hideshow(\"resp\")'>Show response info<hr>",
             function(err) {
-                if (err) {
-                }
+                if (err) {}
             });
     }
     for (let tsnumber in jsonObj.testsuites) {
         var ts = jsonObj.testsuites[tsnumber];
-        if (params['path'] == "" || ts.name.localeCompare(p[0])== 0) {} else {
+        if (params['path'] == "" || ts.name.localeCompare(p[0]) == 0) {} else {
             continue;
         }
         var x1_before = await createTSTree(params['file'], ts);
