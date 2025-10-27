@@ -1226,16 +1226,16 @@ const onRequestHandler = async (req, res) => {
             });
             return;
         }
-        var l = ["/external/split.min.js", "/external/split.min.js.map", "/external/tabulator.min.js", "/external/tabulator.min.js.map", "/external/tabulator_midnight.min.css.map"];
+        var l = ["split.min.js", "split.min.js.map", "tabulator.min.js", "tabulator.min.js.map", "tabulator_midnight.min.css.map","tabulator_midnight.min.css"];
         for (u in l) {
-            if (req.url == l[u]) {
-                sendJS(req, res, readFileContentSync(l[u]));
+            if (req.url == "/external/"+l[u]) {
+		if (l[u].endsWith("min.css")) {
+        	    sendCSS(req, res, readFileContentSync("/external/"+l[u]));
+		} else {
+            	    sendJS(req, res, readFileContentSync("/external/"+l[u]));
+		}
                 return;
             }
-        }
-        if (req.url == "/external/tabulator_midnight.min.css") {
-            sendCSS(req, res, readFileContentSync("/external/tabulator_midnight.min.css"));
-            return;
         }
         if (params['report'] &&
             (fs.existsSync(path.normalize(__dirname + "/reports/" + params['report'])) && params['report'].includes('.htm') ||
