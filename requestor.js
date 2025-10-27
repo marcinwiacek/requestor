@@ -293,7 +293,7 @@ async function sendCallback(file, type, msg) {
     }
 }
 
-function findElement(jsonObj, params, pathString) {
+function findElement(jsonObj, pathString) {
     let elpath = pathString.split("/");
     let objobj = jsonObj.testsuites;
     let level = 1;
@@ -483,7 +483,7 @@ function updateFolderStatus(file, path, oldstatus, newstatus) {
 }
 
 async function parsePOSTRenameElement(params, jsonObj) {
-    el = findElement(jsonObj, params, params['path']);
+    el = findElement(jsonObj, params['path']);
     if (el != null) {
         el.obj.name = params['new'];
         jsonObj.modified = true;
@@ -500,7 +500,7 @@ async function parsePOSTNewElement(params, jsonObj, createInside) {
         jsonObj.modified = true;
         sendCallback(params['file'], "newelement", JSON.stringify(params));
     } else {
-        el = findElement(jsonObj, params, params['path']);
+        el = findElement(jsonObj, params['path']);
         if (el != null) {
             let elpath = params['path'].split("/");
             let newElement = {};
@@ -530,13 +530,13 @@ async function parsePOSTNewElement(params, jsonObj, createInside) {
 }
 
 async function parsePOSTEnableDisableElement(params, jsonObj) {
-    el = findElement(jsonObj, params, params['path']);
+    el = findElement(jsonObj, params['path']);
     if (el != null) {
         let elpath = params['path'].split("/");
         var x1_before = await createTSTree(params['file'],
-            findElement(jsonObj, params, elpath[0]).obj);
+            findElement(jsonObj, elpath[0]).obj);
         var x2_before = elpath.length > 2 ? await createTCTree(params['file'],
-            findElement(jsonObj, params, elpath[0] + "/" + elpath[1]).obj) : null;
+            findElement(jsonObj, elpath[0] + "/" + elpath[1]).obj) : null;
 
         jsonObj.modified = true;
         if (el.obj.disabled == true) {
@@ -548,9 +548,9 @@ async function parsePOSTEnableDisableElement(params, jsonObj) {
         sendCallback(params['file'], "enabledisableelement", JSON.stringify(params));
 
         var x1_after = await createTSTree(params['file'],
-            findElement(jsonObj, params, elpath[0]).obj);
+            findElement(jsonObj, elpath[0]).obj);
         var x2_after = elpath.length > 2 ? await createTCTree(params['file'],
-            findElement(jsonObj, params, elpath[0] + "/" + elpath[1]).obj) : null;
+            findElement(jsonObj, elpath[0] + "/" + elpath[1]).obj) : null;
 
         if (x1_before != null) updateFolderStatus(params['file'], elpath[0], x1_before.status, x1_after.status);
         if (x2_before != null) updateFolderStatus(params['file'], elpath[0] + "/" + elpath[1], x2_before.status, x2_after.status);
@@ -559,13 +559,13 @@ async function parsePOSTEnableDisableElement(params, jsonObj) {
 
 async function parsePOSTDeleteElement(params, jsonObj) {
     //fixme delete from db
-    el = findElement(jsonObj, params, params['path']);
+    el = findElement(jsonObj, params['path']);
     if (el != null) {
         let elpath = params['path'].split("/");
         var x1_before = elpath.length > 1 ? await createTSTree(params['file'],
-            findElement(jsonObj, params, elpath[0]).obj) : null;
+            findElement(jsonObj, elpath[0]).obj) : null;
         var x2_before = elpath.length > 2 ? await createTCTree(params['file'],
-            findElement(jsonObj, params, elpath[0] + "/" + elpath[1]).obj) : null;
+            findElement(jsonObj, elpath[0] + "/" + elpath[1]).obj) : null;
 
         jsonObj.modified = true;
         el.parentarray.splice(el.index, 1);
@@ -575,9 +575,9 @@ async function parsePOSTDeleteElement(params, jsonObj) {
         sendCallback(params['file'], "deleteelement", JSON.stringify(sss));
 
         var x1_after = elpath.length > 1 ? await createTSTree(params['file'],
-            findElement(jsonObj, params, elpath[0]).obj) : null;
+            findElement(jsonObj, elpath[0]).obj) : null;
         var x2_after = elpath.length > 2 ? await createTCTree(params['file'],
-            findElement(jsonObj, params, elpath[0] + "/" + elpath[1]).obj) : null;
+            findElement(jsonObj, elpath[0] + "/" + elpath[1]).obj) : null;
 
         if (x1_before != null) updateFolderStatus(params['file'], elpath[0], x1_before.status, x1_after.status);
         if (x2_before != null) updateFolderStatus(params['file'], elpath[0] + "/" + elpath[1], x2_before.status, x2_after.status);
@@ -585,7 +585,7 @@ async function parsePOSTDeleteElement(params, jsonObj) {
 }
 
 async function parsePOSTSetData(params, jsonObj) {
-    el = findElement(jsonObj, params, params['path']);
+    el = findElement(jsonObj, params['path']);
     if (el != null) {
         jsonObj.modified = true;
         el.obj.input = params['data'].split("\n");
@@ -828,17 +828,17 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
     let elpath = params['path'].split("/"); //old path
     let elpath2 = params['newpath'].split("/"); //new parent path
 
-    var x1_before = await createTSTree(params['file'], findElement(jsonObj, params, elpath[0]).obj);
+    var x1_before = await createTSTree(params['file'], findElement(jsonObj, elpath[0]).obj);
     if (elpath.length > 2) {
-        var x2_before = await createTCTree(params['file'], findElement(jsonObj, params, elpath[0] + "/" + elpath[1]).obj);
+        var x2_before = await createTCTree(params['file'], findElement(jsonObj, elpath[0] + "/" + elpath[1]).obj);
     }
 
-    var x3_before = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0]).obj);
+    var x3_before = await createTSTree(params['file'], findElement(jsonObj, elpath2[0]).obj);
     if (elpath2.length > 1) {
-        var x4_before = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1]).obj);
+        var x4_before = await createTCTree(params['file'], findElement(jsonObj, elpath2[0] + "/" + elpath2[1]).obj);
     }
 
-    el = findElement(jsonObj, params, params['path']);
+    el = findElement(jsonObj, params['path']);
     if (deleteOriginal) {
         el.obj = JSON.parse(JSON.stringify(el.obj));
         el.parentarray.splice(el.index, 1);
@@ -854,7 +854,7 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
         }
     }
 
-    el2 = findElement(jsonObj, params, params['newpath']);
+    el2 = findElement(jsonObj, params['newpath']);
     tree = [];
     if (el != null && el2 != null) {
         let newObj = JSON.parse(JSON.stringify(el.obj));
@@ -899,24 +899,24 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
         params['struct'] = JSON.stringify(tree);
         sendCallback(params['file'], "pastedrop", JSON.stringify(params));
 
-        var x1_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath[0]).obj);
+        var x1_after = await createTSTree(params['file'], findElement(jsonObj, elpath[0]).obj);
         updateFolderStatus(params['file'], elpath[0], x1_before.status, x1_after.status);
         if (elpath.length > 2) {
-            var x2_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath[0] + "/" + elpath[1]).obj);
+            var x2_after = await createTCTree(params['file'], findElement(jsonObj, elpath[0] + "/" + elpath[1]).obj);
             updateFolderStatus(params['file'], elpath[0] + "/" + elpath[1], x2_before.status, x2_after.status);
         }
 
-        var x3_after = await createTSTree(params['file'], findElement(jsonObj, params, elpath2[0]).obj);
+        var x3_after = await createTSTree(params['file'], findElement(jsonObj, elpath2[0]).obj);
         updateFolderStatus(params['file'], elpath2[0], x3_before.status, x3_after.status);
         if (elpath2.length > 1) {
-            var x4_after = await createTCTree(params['file'], findElement(jsonObj, params, elpath2[0] + "/" + elpath2[1]).obj);
+            var x4_after = await createTCTree(params['file'], findElement(jsonObj, elpath2[0] + "/" + elpath2[1]).obj);
             updateFolderStatus(params['file'], elpath2[0] + "/" + elpath2[1], x4_before.status, x4_after.status);
         }
     }
 }
 
 async function parsePOSTGetStep(req, params, res, jsonObj) {
-    el = findElement(jsonObj, params, params['path']);
+    el = findElement(jsonObj, params['path']);
     if (el != null && el.type==='step') {
          sendPlain(req, res, "{" + await getJSON(el.obj.dbid, params['dt'], params['file']) + "}");
     }
@@ -1138,7 +1138,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         return;
     }
 
-    el = findElement(jsonObj[params['file']], params, params['path']);
+    el = findElement(jsonObj[params['file']], params['path']);
     if (el != null) {
         if (el.type === 'suite') {
             sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt")
