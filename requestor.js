@@ -646,7 +646,7 @@ function replaceArrayWithString(ar) {
     return retVal;
 }
 
-function replaceStringWithArray(s) {
+function replaceStringArrayWithArray(s) {
     retVal = {};
     for (let arname in s) {
         if (s[arname].indexOf(":") != 0) {
@@ -747,16 +747,12 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                     continue;
                 }
                 let lines = tc.input;
-                    console.log('1');
-                    console.log(step.headers);
                 if (params['method']) {
                     step.method = params['method'];
                     xxxx = decodeURIComponent(params['headers']);
                     xxxx = xxxx.split("\n");
                     step.headers = [];
-                    for (xyz in xxxx) step.headers.push(xxxx[xyz]);
-                    console.log('2');
-                    console.log(step.headers);
+                    for (xyz in xxxx) step.headers.push(xxxx[xyz]);                   
                     step.body = decodeURIComponent(params['body']);
                     step.ignoreWrongSSL = params['ssl'] == "true";
                     step.conLen = params['conlen'] == "true";
@@ -766,9 +762,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
 
                 if (lines.length == 0) {
                     var stepcopy = JSON.parse(JSON.stringify(step));
-                    stepcopy.headers =  replaceStringWithArray(stepcopy.headers);
-                    console.log('4');
-                    console.log(stepcopy.headers);
+                    stepcopy.headers =  replaceStringArrayWithArray(stepcopy.headers);
                     sss = await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, -1, dt);
                     times.push(sss.datetime);
                 } else {
@@ -788,9 +782,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                             i++;
                         });
                         var stepcopy = JSON.parse(JSON.stringify(step));
-                        stepcopy.headers =  replaceStringWithArray(stepcopy.headers);
-                    console.log('3');
-                    console.log(stepcopy.headers);
+                        stepcopy.headers =  replaceStringArrayWithArray(stepcopy.headers);
                         for (let d in arra) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                             stepcopy.body = stepcopy.body.replace("{{" + d + "}}", arra[d]);
