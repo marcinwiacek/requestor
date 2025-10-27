@@ -752,7 +752,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                     xxxx = decodeURIComponent(params['headers']);
                     xxxx = xxxx.split("\n");
                     step.headers = [];
-                    for (xyz in xxxx) step.headers.push(xxxx[xyz]);                   
+                    for (xyz in xxxx) step.headers.push(xxxx[xyz]);
                     step.body = decodeURIComponent(params['body']);
                     step.ignoreWrongSSL = params['ssl'] == "true";
                     step.conLen = params['conlen'] == "true";
@@ -762,7 +762,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
 
                 if (lines.length == 0) {
                     var stepcopy = JSON.parse(JSON.stringify(step));
-                    stepcopy.headers =  replaceStringArrayWithArray(stepcopy.headers);
+                    stepcopy.headers = replaceStringArrayWithArray(stepcopy.headers);
                     sss = await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, -1, dt);
                     times.push(sss.datetime);
                 } else {
@@ -782,7 +782,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                             i++;
                         });
                         var stepcopy = JSON.parse(JSON.stringify(step));
-                        stepcopy.headers =  replaceStringArrayWithArray(stepcopy.headers);
+                        stepcopy.headers = replaceStringArrayWithArray(stepcopy.headers);
                         for (let d in arra) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                             stepcopy.body = stepcopy.body.replace("{{" + d + "}}", arra[d]);
@@ -917,8 +917,8 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
 
 async function parsePOSTGetStep(req, params, res, jsonObj) {
     el = findElement(jsonObj, params['path']);
-    if (el != null && el.type==='step') {
-         sendPlain(req, res, "{" + await getJSON(el.obj.dbid, params['dt'], params['file']) + "}");
+    if (el != null && el.type === 'step') {
+        sendPlain(req, res, "{" + await getJSON(el.obj.dbid, params['dt'], params['file']) + "}");
     }
 }
 
