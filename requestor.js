@@ -649,7 +649,7 @@ function replaceArrayWithString(ar) {
 function replaceStringArrayWithArray(s) {
     retVal = {};
     for (let arname in s) {
-        if (s[arname].indexOf(":") != 0) {
+        if (s[arname].indexOf(":") > 0) {
             nam = s[arname].substring(0, s[arname].indexOf(":"));
             val = s[arname].substring(s[arname].indexOf(":") + 1);
             if (retVal[nam] && !Array.isArray(retVal[nam])) {
@@ -798,13 +798,11 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                                 }
                             }
                         }
-
                         times.push((await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt)).datetime);
-
                         iteration++;
-                        step.dbid = stepcopy.dbid;
                     }
                 }
+                step.dbid = stepcopy.dbid;
             }
             var x2_after = await createTCTree(params['file'], tc);
             updateFolderStatus(params['file'], p[0] + "/" + p[1], x2_before.status, x2_after.status);
