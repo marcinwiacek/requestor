@@ -544,6 +544,7 @@ async function parsePOSTEnableDisableElement(params, jsonObj) {
         } else {
             el.obj.disabled = true;
         }
+
         sendCallback(params['file'], "enabledisableelement", JSON.stringify(params));
 
         var x1_after = await createTSTree(params['file'],
@@ -646,15 +647,11 @@ function replaceArrayWithString(ar) {
 }
 
 function replaceStringWithArray(s) {
-    ar = s.split("\n");
-    ar = ar.filter(function(el) {
-        return el.length > 0;
-    });
     retVal = {};
-    for (let arname in ar) {
-        if (ar[arname].indexOf(":") != 0) {
-            nam = ar[arname].substring(0, ar[arname].indexOf(":"));
-            val = ar[arname].substring(ar[arname].indexOf(":") + 1);
+    for (let arname in s) {
+        if (s[arname].indexOf(":") != 0) {
+            nam = s[arname].substring(0, s[arname].indexOf(":"));
+            val = s[arname].substring(s[arname].indexOf(":") + 1);
             if (retVal[nam] && !Array.isArray(retVal[nam])) {
                 x = retVal.val;
                 retVal[nam] = [];
@@ -750,9 +747,16 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                     continue;
                 }
                 let lines = tc.input;
+                    console.log('1');
+                    console.log(step.headers);
                 if (params['method']) {
                     step.method = params['method'];
-                    step.headers = replaceStringWithArray(decodeURIComponent(params['headers']));
+                    xxxx = decodeURIComponent(params['headers']);
+                    xxxx = xxxx.split("\n");
+                    step.headers = [];
+                    for (xyz in xxxx) step.headers.push(xxxx[xyz]);
+                    console.log('2');
+                    console.log(step.headers);
                     step.body = decodeURIComponent(params['body']);
                     step.ignoreWrongSSL = params['ssl'] == "true";
                     step.conLen = params['conlen'] == "true";
@@ -761,7 +765,11 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 runpath = ts.name + "/" + tc.name + "/" + step.name;
 
                 if (lines.length == 0) {
-                    sss = await executeRequestAndSaveResults(step, res, times, params['file'], runpath, -1, dt);
+                    var stepcopy = JSON.parse(JSON.stringify(step));
+                    stepcopy.headers =  replaceStringWithArray(stepcopy.headers);
+                    console.log('4');
+                    console.log(stepcopy.headers);
+                    sss = await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, -1, dt);
                     times.push(sss.datetime);
                 } else {
                     let iteration = 1;
@@ -780,6 +788,9 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                             i++;
                         });
                         var stepcopy = JSON.parse(JSON.stringify(step));
+                        stepcopy.headers =  replaceStringWithArray(stepcopy.headers);
+                    console.log('3');
+                    console.log(stepcopy.headers);
                         for (let d in arra) {
                             stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
                             stepcopy.body = stepcopy.body.replace("{{" + d + "}}", arra[d]);
@@ -795,8 +806,8 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                                 }
                             }
                         }
-                        sss = await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt);
-                        times.push(sss.datetime);
+
+                        times.push((await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt)).datetime);
 
                         iteration++;
                         step.dbid = stepcopy.dbid;
@@ -809,11 +820,14 @@ async function parsePOSTRun(req, params, res, jsonObj) {
         var x1_after = await createTSTree(params['file'], ts);
         updateFolderStatus(params['file'], p[0], x1_before.status, x1_after.status);
     }
+
     s = {};
     s['file'] = params['file'];
     s['info'] = "";
     sendCallback(params['file'], "runner", JSON.stringify(s));
+
     sendCallback("null", "mainrunner", "");
+
     jsonObj.modified = true;
     if (req != null) sendPlain(req, res, JSON.stringify(sss));
 }
@@ -910,48 +924,9 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
 }
 
 async function parsePOSTGetStep(req, params, res, jsonObj) {
-    for (let tsnumber in jsonObj.testsuites) {
-        var ts = jsonObj.testsuites[tsnumber];
-        let path = ts.name;
-        for (let tcnumber in ts.children) {
-            var tc = ts.children[tcnumber];
-            let lines = tc.input;
-            if (lines.length == 0) {
-                for (let stepnumber in tc.children) {
-                    var step = tc.children[stepnumber];
-                    if (path + "/" + tc.name + "/" + step.name === params['path']) {
-                        var stepcopy = JSON.parse(JSON.stringify(step));
-                        sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
-                        return;
-                    }
-                }
-            } else {
-                //fixme
-                let headers = []
-                for (let index2 in lines) {
-                    let l = lines[index2];
-                    if (headers.length == 0) {
-                        headers = l.split(",");
-                        continue;
-                    }
-                    let ll = l.split(",");
-                    let i = 0;
-                    let arra = [];
-                    headers.forEach(function(h) {
-                        arra[h] = ll[i];
-                        i++;
-                    });
-                    for (let stepnumber in tc.children) {
-                        var step = tc.children[stepnumber];
-                        if (path + "/" + tc.name + "/" + step.name === params['path']) {
-                            var stepcopy = JSON.parse(JSON.stringify(step));
-                            sendPlain(req, res, "{" + await getJSON(stepcopy.dbid, params['dt'], params['file']) + "}");
-                            return;
-                        }
-                    }
-                }
-            }
-        }
+    el = findElement(jsonObj, params, params['path']);
+    if (el != null && el.type==='step') {
+         sendPlain(req, res, "{" + await getJSON(el.obj.dbid, params['dt'], params['file']) + "}");
     }
 }
 
@@ -1194,6 +1169,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
             if (el.obj.urlprefix) object = object.replace("<!--URLPREFIX-->", el.obj.urlprefix);
             var xxxx = "";
             first = true;
+            console.log(el.obj.headers);
             for (var headernumber in el.obj.headers) {
                 if (!first) xxxx += "\n";
                 first = false;
