@@ -1226,14 +1226,14 @@ const onRequestHandler = async (req, res) => {
             });
             return;
         }
-        var l = ["split.min.js", "split.min.js.map", "tabulator.min.js", "tabulator.min.js.map", "tabulator_midnight.min.css.map","tabulator_midnight.min.css"];
+        var l = ["split.min.js", "split.min.js.map", "tabulator.min.js", "tabulator.min.js.map", "tabulator_midnight.min.css.map", "tabulator_midnight.min.css"];
         for (u in l) {
-            if (req.url == "/external/"+l[u]) {
-		if (l[u].endsWith("min.css")) {
-        	    sendCSS(req, res, readFileContentSync("/external/"+l[u]));
-		} else {
-            	    sendJS(req, res, readFileContentSync("/external/"+l[u]));
-		}
+            if (req.url == "/external/" + l[u]) {
+                if (l[u].endsWith("min.css")) {
+                    sendCSS(req, res, readFileContentSync("/external/" + l[u]));
+                } else {
+                    sendJS(req, res, readFileContentSync("/external/" + l[u]));
+                }
                 return;
             }
         }
