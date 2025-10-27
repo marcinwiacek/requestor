@@ -657,7 +657,7 @@ function replaceStringWithArray(s) {
         if (ar[arname].indexOf(":") != 0) {
             nam = ar[arname].substring(0, ar[arname].indexOf(":"));
             val = ar[arname].substring(ar[arname].indexOf(":") + 1);
-            if (retVal[nam] && !Array.isArray(retval[nam])) {
+            if (retVal[nam] && !Array.isArray(retVal[nam])) {
                 x = retVal.val;
                 retVal[nam] = [];
                 retVal[nam].push(x);
@@ -1173,64 +1173,49 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         return;
     }
 
-    // return internal/proj_ts.txt or proj_tc.txt or proj_step.txt
-    let elpath = params['path'].split("/");
-    var obiekt = "";
-    for (let tsnumber in jsonObj[params['file']].testsuites) {
-        var suite = jsonObj[params['file']].testsuites[tsnumber];
-        let path = suite.name;
-        if (elpath.length == 1 && suite.name == elpath[0]) {
+    el = findElement(jsonObj[params['file']], params, params['path']);
+        console.log(jsonObj);
+    console.log(jsonObj.testsuites);
+    console.log(el);
+    if (el != null) {
+	if (el.type==='suite') {
             sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt")
-                .replace("<!--NAME-->", suite.name));
+                .replace("<!--NAME-->", el.obj.name));
             return;
-        }
-
-        for (let tcnumber in suite.children) {
-            var tc = suite.children[tcnumber];
-            if (elpath.length == 2 && suite.name == elpath[0] && tc.name == elpath[1]) {
-                obiekt = readFileContentSync("/internal/proj_tc.txt").replace("<!--NAME-->", tc.name);
-                var xxxx = "<script>var csvData =`";
-                for (var inputnumber in tc.input) {
-                    xxxx += tc.input[inputnumber] + "\n";
-                }
-                path += "/" + tc.name;
-                xxxx += "`;</script>";
-                sendPlain(req, res, obiekt.replace("<!--DATA-->", xxxx));
-                return;
+        } else if (el.type==='tc') {
+            var xxxx = "<script>var csvData =`";
+            for (var inputnumber in el.obj.input) {
+            	xxxx += el.obj.input[inputnumber] + "\n";
             }
-            for (let stepnumber in tc.children) {
-                var step = tc.children[stepnumber];
-                if (elpath.length == 3 && suite.name == elpath[0] && tc.name == elpath[1] && step.name == elpath[2]) {} else {
-                    continue;
-                }
-                var stepcopy = JSON.parse(JSON.stringify(step));
-                path += "/" + tc.name + "/" + step.name;
-
-                obiekt = readFileContentSync("/internal/proj_step.txt").replace("<!--NAME-->",
-                    stepcopy.name);
-                if (stepcopy.urlprefix) obiekt = obiekt.replace("<!--URLPREFIX-->", stepcopy.urlprefix);
-                obiekt = obiekt.replace("<!--URL-->", stepcopy.url);
+            xxxx += "`;</script>";
+            sendPlain(req, res, readFileContentSync("/internal/proj_tc.txt")
+                  .replace("<!--NAME-->", el.obj.name)
+                  .replace("<!--DATA-->", xxxx));
+            return;
+        } else if (el.type==='step') {
+                object = readFileContentSync("/internal/proj_step.txt")
+                   .replace("<!--NAME-->",el.obj.name)
+                   .replace("<!--URL-->", el.obj.url);
+                if (el.obj.urlprefix) object = object.replace("<!--URLPREFIX-->", el.obj.urlprefix);
                 var xxxx = "";
                 first = true;
-                for (var headernumber in stepcopy.headers) {
+                for (var headernumber in el.obj.headers) {
                     if (!first) xxxx += "\n";
                     first = false;
-                    xxxx += stepcopy.headers[headernumber];
+                    xxxx += el.obj.headers[headernumber];
                 }
-                obiekt = obiekt.replace("<!--HEADER-->", xxxx);
+                object = object.replace("<!--HEADER-->", xxxx);
                 var xxxx = "";
-                first = true;
-                for (var bodynumber in stepcopy.body) {
-                    first = false;
-                    xxxx += stepcopy.body[bodynumber];
+                for (var bodynumber in el.obj.body) {
+                    xxxx += el.obj.body[bodynumber];
                 }
-                obiekt = obiekt.replace("<!--BODY-->", xxxx)
-                    .replace("<!--SSLIGNORE-->", stepcopy.ignoreWrongSSL ? "checked" : "")
-                    .replace("<!--CONLENGTH-->", stepcopy.conLen ? "checked" : "")
-                    .replace("<!--METHOD-->", stepcopy.method);
+                object = object.replace("<!--BODY-->", xxxx)
+                    .replace("<!--SSLIGNORE-->", el.obj.ignoreWrongSSL ? "checked" : "")
+                    .replace("<!--CONLENGTH-->", el.obj.conLen ? "checked" : "")
+                    .replace("<!--METHOD-->", el.obj.method);
                 var xxxx = "";
-                if (stepcopy.dbid) {
-                    let rows = await db_all(params['file'], "SELECT dt from requests where dbid =\"" + stepcopy.dbid + "\" order by dt desc");
+                if (el.obj.dbid) {
+                    let rows = await db_all(params['file'], "SELECT dt from requests where dbid =\"" + el.obj.dbid + "\" order by dt desc");
                     var num = 0;
                     var del = "";
                     for (let row in rows) {
@@ -1243,13 +1228,12 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                         }
                     }
                     if (del != "") {
-                        await db_all(params['file'], "DELETE from requests where dbid  =\"" + stepcopy.dbid + "\" and dt in (" + del + ")");
+                        await db_all(params['file'], "DELETE from requests where dbid  =\"" + el.obj.dbid + "\" and dt in (" + del + ")");
                     }
-                    obiekt = obiekt.replace("<!--WHENLAST-->", xxxx);
+                    object = object.replace("<!--WHENLAST-->", xxxx);
                 }
-                sendPlain(req, res, obiekt);
+                sendPlain(req, res, object);
                 return;
-            }
         }
     }
     sendPlain(req, res, "");
