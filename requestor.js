@@ -72,13 +72,13 @@ function getDateString(dt) {
 }
 
 function getEmptyResponse(errorInfo) {
-        var resp = {}
-        resp.body = '';
-        resp.headers = [];
-        resp.code = 0;
-        resp.error = errorInfo;
-        resp.certinfo = "";
-        return resp;
+    var resp = {}
+    resp.body = '';
+    resp.headers = [];
+    resp.code = 0;
+    resp.error = errorInfo;
+    resp.certinfo = "";
+    return resp;
 }
 
 async function executeRequest(req) {
@@ -114,7 +114,7 @@ async function executeRequest(req) {
     if (method2 == null) {
         if (resperror) resperror += "\n";
         resperror += "Error parsing url, supported http: and https: in this moment";
-	return getEmptyResponse(resperror);
+        return getEmptyResponse(resperror);
     }
     options.method = req.method;
     options.timeout = 3000;
@@ -157,7 +157,7 @@ async function executeRequest(req) {
                 var s = e.errors + " ";
                 if (resperror) resperror += "\n";
                 resperror += (s == 'undefined ' ? e.message : s);
-		resolve(getEmptyResponse(resperror));
+                resolve(getEmptyResponse(resperror));
             });
             if (req.method == "post") {
                 r.write(req.body);
@@ -167,7 +167,7 @@ async function executeRequest(req) {
             var s = e.errors + " ";
             if (resperror) resperror += "\n";
             resperror += (s == 'undefined ' ? e.message : s);
-	    resolve(getEmptyResponse(resperror));
+            resolve(getEmptyResponse(resperror));
         }
     });
 }
@@ -598,16 +598,14 @@ async function parsePOSTSaveFile(params, jsonObj) {
         path.normalize(__dirname + '/projects/' + params['file']),
         path.normalize(__dirname + '/projects/' + params['file'] +
             getDateString(lm).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "")),
-        function(err) {
-        });
+        function(err) {});
 
     delete jsonObj.modified;
     jsonObj.format = "Created with Requestor " + version + " on " + getDateString(lm);
     fs.writeFile(path.normalize(__dirname + '/projects/' + params['file']),
         JSON.stringify(jsonObj, null, 2),
         function(err) {
-            if (err) {
-            }
+            if (err) {}
         });
 
     x = {};
@@ -1174,66 +1172,63 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     }
 
     el = findElement(jsonObj[params['file']], params, params['path']);
-        console.log(jsonObj);
-    console.log(jsonObj.testsuites);
-    console.log(el);
     if (el != null) {
-	if (el.type==='suite') {
+        if (el.type === 'suite') {
             sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt")
                 .replace("<!--NAME-->", el.obj.name));
             return;
-        } else if (el.type==='tc') {
+        } else if (el.type === 'tc') {
             var xxxx = "<script>var csvData =`";
             for (var inputnumber in el.obj.input) {
-            	xxxx += el.obj.input[inputnumber] + "\n";
+                xxxx += el.obj.input[inputnumber] + "\n";
             }
             xxxx += "`;</script>";
             sendPlain(req, res, readFileContentSync("/internal/proj_tc.txt")
-                  .replace("<!--NAME-->", el.obj.name)
-                  .replace("<!--DATA-->", xxxx));
+                .replace("<!--NAME-->", el.obj.name)
+                .replace("<!--DATA-->", xxxx));
             return;
-        } else if (el.type==='step') {
-                object = readFileContentSync("/internal/proj_step.txt")
-                   .replace("<!--NAME-->",el.obj.name)
-                   .replace("<!--URL-->", el.obj.url);
-                if (el.obj.urlprefix) object = object.replace("<!--URLPREFIX-->", el.obj.urlprefix);
-                var xxxx = "";
-                first = true;
-                for (var headernumber in el.obj.headers) {
-                    if (!first) xxxx += "\n";
-                    first = false;
-                    xxxx += el.obj.headers[headernumber];
-                }
-                object = object.replace("<!--HEADER-->", xxxx);
-                var xxxx = "";
-                for (var bodynumber in el.obj.body) {
-                    xxxx += el.obj.body[bodynumber];
-                }
-                object = object.replace("<!--BODY-->", xxxx)
-                    .replace("<!--SSLIGNORE-->", el.obj.ignoreWrongSSL ? "checked" : "")
-                    .replace("<!--CONLENGTH-->", el.obj.conLen ? "checked" : "")
-                    .replace("<!--METHOD-->", el.obj.method);
-                var xxxx = "";
-                if (el.obj.dbid) {
-                    let rows = await db_all(params['file'], "SELECT dt from requests where dbid =\"" + el.obj.dbid + "\" order by dt desc");
-                    var num = 0;
-                    var del = "";
-                    for (let row in rows) {
-                        xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
-                        if (num == maxDBResultsPerRequest) {
-                            if (del != "") del += ",";
-                            del += "'" + rows[row].dt + "'";
-                        } else {
-                            num++;
-                        }
+        } else if (el.type === 'step') {
+            object = readFileContentSync("/internal/proj_step.txt")
+                .replace("<!--NAME-->", el.obj.name)
+                .replace("<!--URL-->", el.obj.url);
+            if (el.obj.urlprefix) object = object.replace("<!--URLPREFIX-->", el.obj.urlprefix);
+            var xxxx = "";
+            first = true;
+            for (var headernumber in el.obj.headers) {
+                if (!first) xxxx += "\n";
+                first = false;
+                xxxx += el.obj.headers[headernumber];
+            }
+            object = object.replace("<!--HEADER-->", xxxx);
+            var xxxx = "";
+            for (var bodynumber in el.obj.body) {
+                xxxx += el.obj.body[bodynumber];
+            }
+            object = object.replace("<!--BODY-->", xxxx)
+                .replace("<!--SSLIGNORE-->", el.obj.ignoreWrongSSL ? "checked" : "")
+                .replace("<!--CONLENGTH-->", el.obj.conLen ? "checked" : "")
+                .replace("<!--METHOD-->", el.obj.method);
+            var xxxx = "";
+            if (el.obj.dbid) {
+                let rows = await db_all(params['file'], "SELECT dt from requests where dbid =\"" + el.obj.dbid + "\" order by dt desc");
+                var num = 0;
+                var del = "";
+                for (let row in rows) {
+                    xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
+                    if (num == maxDBResultsPerRequest) {
+                        if (del != "") del += ",";
+                        del += "'" + rows[row].dt + "'";
+                    } else {
+                        num++;
                     }
-                    if (del != "") {
-                        await db_all(params['file'], "DELETE from requests where dbid  =\"" + el.obj.dbid + "\" and dt in (" + del + ")");
-                    }
-                    object = object.replace("<!--WHENLAST-->", xxxx);
                 }
-                sendPlain(req, res, object);
-                return;
+                if (del != "") {
+                    await db_all(params['file'], "DELETE from requests where dbid  =\"" + el.obj.dbid + "\" and dt in (" + del + ")");
+                }
+                object = object.replace("<!--WHENLAST-->", xxxx);
+            }
+            sendPlain(req, res, object);
+            return;
         }
     }
     sendPlain(req, res, "");
