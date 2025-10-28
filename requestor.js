@@ -1105,6 +1105,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     executed = true;
     if (params["op"] == "run") {
         return parsePOSTRun(req, params, res, jsonObj[params['file']]);
+    } else if (params["op"] == "getstep" && params["dt"]) {
+        return parsePOSTGetStep(req, params, res, jsonObj[params['file']]);
     } else if (params["op"] == "import") {
         return parsePOSTImport(req, params, res, jsonObj[params['file']]);
     } else if (params["op"] == "savefile") {
@@ -1125,8 +1127,6 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         parsePOSTDeleteElement(params, jsonObj[params['file']]);
     } else if (params["op"] == "setdata" && params["data"]) {
         parsePOSTSetData(params, jsonObj[params['file']]);
-    } else if (params["op"] == "getstep" && params["dt"]) {
-        return parsePOSTGetStep(req, params, res, jsonObj[params['file']]);
     } else {
         executed = false;
     }
@@ -1134,7 +1134,6 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         sendPlain(req, res, "");
         return;
     }
-
     el = findElement(jsonObj[params['file']], params['path']);
     if (el == null) {
         sendPlain(req, res, "");
@@ -1276,15 +1275,14 @@ const onRequestHandler = async (req, res) => {
                 }
                 dbObj[params['file']].run(`delete from requests where dbid not in (` + alldbid + `)`,
                     err => {
-                        //                        console.log("error " + err)
                     });
             }
             sendHTML(req, res, readFileContentSync("/internal/proj.txt")
-                .replace("<!--VERSION-->", version + " (GPLv3)")
                 .replace("<!--JSLIB-->",
                     readFileContentSync("/internal/libjs.txt"))
                 .replace("<!--FOLDERS_MENU-->",
                     readFileContentSync("/internal/proj_folder.txt"))
+                .replace("<!--VERSION-->", version + " (GPLv3)")
                 .replace("<!--TC-->", "<script>tree = " + JSON.stringify(tree) + ";</script>")
                 .replace("<!--NAME-->", params['file']));
             return;
