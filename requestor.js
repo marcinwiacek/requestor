@@ -454,7 +454,7 @@ async function getJSON(dbid, dt, file) {
         s += "\"body\":\"\",";
         s += "\"headers_res\":\"\","
         s += "\"body_res\":\"\"";
-        return "{"+s+"}";
+        return "{" + s + "}";
     }
 
     let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
@@ -469,7 +469,7 @@ async function getJSON(dbid, dt, file) {
     s += "\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
     s += "\"headers_res\":\"" + encodeURIComponent(rows[0]["headers_res"]) + "\",";
     s += "\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
-    return "{"+s+"}";
+    return "{" + s + "}";
 }
 
 function updateFolderStatus(file, path, oldstatus, newstatus) {
@@ -1137,64 +1137,64 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 
     el = findElement(jsonObj[params['file']], params['path']);
     if (el == null) {
-       sendPlain(req, res, "");
-       return;
+        sendPlain(req, res, "");
+        return;
     }
-        if (el.type === 'suite') {
-            sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt")
-                .replace("<!--NAME-->", el.obj.name));
-        } else if (el.type === 'tc') {
-            var xxxx = "<script>var csvData =`";
-            for (var inputnumber in el.obj.input) {
-                xxxx += el.obj.input[inputnumber] + "\n";
-            }
-            xxxx += "`;</script>";
-            sendPlain(req, res, readFileContentSync("/internal/proj_tc.txt")
-                .replace("<!--NAME-->", el.obj.name)
-                .replace("<!--DATA-->", xxxx));
-        } else if (el.type === 'step') {
-            object = readFileContentSync("/internal/proj_step.txt")
-                .replace("<!--NAME-->", el.obj.name)
-                .replace("<!--URL-->", el.obj.url);
-            if (el.obj.urlprefix) object = object.replace("<!--URLPREFIX-->", el.obj.urlprefix);
-            var xxxx = "";
-            first = true;
-            console.log(el.obj.headers);
-            for (var headernumber in el.obj.headers) {
-                if (!first) xxxx += "\n";
-                first = false;
-                xxxx += el.obj.headers[headernumber];
-            }
-            object = object.replace("<!--HEADER-->", xxxx);
-            var xxxx = "";
-            for (var bodynumber in el.obj.body) {
-                xxxx += el.obj.body[bodynumber];
-            }
-            object = object.replace("<!--BODY-->", xxxx)
-                .replace("<!--SSLIGNORE-->", el.obj.ignoreWrongSSL ? "checked" : "")
-                .replace("<!--CONLENGTH-->", el.obj.conLen ? "checked" : "")
-                .replace("<!--METHOD-->", el.obj.method);
-            var xxxx = "";
-            if (el.obj.dbid) {
-                let rows = await db_all(params['file'], "SELECT dt from requests where dbid =\"" + el.obj.dbid + "\" order by dt desc");
-                var num = 0;
-                var del = "";
-                for (let row in rows) {
-                    xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
-                    if (num == maxDBResultsPerRequest) {
-                        if (del != "") del += ",";
-                        del += "'" + rows[row].dt + "'";
-                    } else {
-                        num++;
-                    }
-                }
-                if (del != "") {
-                    await db_all(params['file'], "DELETE from requests where dbid  =\"" + el.obj.dbid + "\" and dt in (" + del + ")");
-                }
-                object = object.replace("<!--WHENLAST-->", xxxx);
-            }
-            sendPlain(req, res, object);
+    if (el.type === 'suite') {
+        sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt")
+            .replace("<!--NAME-->", el.obj.name));
+    } else if (el.type === 'tc') {
+        var xxxx = "<script>var csvData =`";
+        for (var inputnumber in el.obj.input) {
+            xxxx += el.obj.input[inputnumber] + "\n";
         }
+        xxxx += "`;</script>";
+        sendPlain(req, res, readFileContentSync("/internal/proj_tc.txt")
+            .replace("<!--NAME-->", el.obj.name)
+            .replace("<!--DATA-->", xxxx));
+    } else if (el.type === 'step') {
+        object = readFileContentSync("/internal/proj_step.txt")
+            .replace("<!--NAME-->", el.obj.name)
+            .replace("<!--URL-->", el.obj.url);
+        if (el.obj.urlprefix) object = object.replace("<!--URLPREFIX-->", el.obj.urlprefix);
+        var xxxx = "";
+        first = true;
+        console.log(el.obj.headers);
+        for (var headernumber in el.obj.headers) {
+            if (!first) xxxx += "\n";
+            first = false;
+            xxxx += el.obj.headers[headernumber];
+        }
+        object = object.replace("<!--HEADER-->", xxxx);
+        var xxxx = "";
+        for (var bodynumber in el.obj.body) {
+            xxxx += el.obj.body[bodynumber];
+        }
+        object = object.replace("<!--BODY-->", xxxx)
+            .replace("<!--SSLIGNORE-->", el.obj.ignoreWrongSSL ? "checked" : "")
+            .replace("<!--CONLENGTH-->", el.obj.conLen ? "checked" : "")
+            .replace("<!--METHOD-->", el.obj.method);
+        var xxxx = "";
+        if (el.obj.dbid) {
+            let rows = await db_all(params['file'], "SELECT dt from requests where dbid =\"" + el.obj.dbid + "\" order by dt desc");
+            var num = 0;
+            var del = "";
+            for (let row in rows) {
+                xxxx += "<option value=\"" + rows[row].dt + "\">" + rows[row].dt + "</option>";
+                if (num == maxDBResultsPerRequest) {
+                    if (del != "") del += ",";
+                    del += "'" + rows[row].dt + "'";
+                } else {
+                    num++;
+                }
+            }
+            if (del != "") {
+                await db_all(params['file'], "DELETE from requests where dbid  =\"" + el.obj.dbid + "\" and dt in (" + del + ")");
+            }
+            object = object.replace("<!--WHENLAST-->", xxxx);
+        }
+        sendPlain(req, res, object);
+    }
 }
 
 const onRequestHandler = async (req, res) => {
