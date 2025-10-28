@@ -1,5 +1,5 @@
 {
-  "format": "Created with Requestor 20251023 on 2025-10-21 22:21:07 464",
+  "format": "Created with Requestor 20251023 on 2025-10-27 22:43:40 640",
   "name": "x",
   "functions": [
     "function f(p) {",
@@ -72,7 +72,7 @@
                 "Content-Type:charset=UTF-8",
                 "test:test"
               ],
-              "body": "",
+              "body": "1\n2\n3\n4",
               "outputs": [
                 {
                   "type": "regular",
