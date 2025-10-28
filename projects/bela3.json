@@ -1,5 +1,5 @@
 {
-  "format": "Created with Requestor 20251023 on 2025-10-27 22:43:40 640",
+  "format": "Created with Requestor 20251023 on 2025-10-28 23:28:14 765",
   "name": "x",
   "functions": [
     "function f(p) {",
@@ -63,28 +63,6 @@
             "duckduckgo.com/?q=,test"
           ],
           "children": [
-            {
-              "name": "step2(copy)",
-              "method": "get",
-              "conLen": true,
-              "url": "https://{{engine}}{{word}}",
-              "headers": [
-                "Content-Type:charset=UTF-8",
-                "test:test"
-              ],
-              "body": "1\n2\n3\n4",
-              "outputs": [
-                {
-                  "type": "regular",
-                  "value": "*"
-                }
-              ],
-              "asserts": {
-                "code": "200"
-              },
-              "ignoreWrongSSL": false,
-              "dbid": "2024-03-02 21:55:35 975"
-            },
             {
               "name": "st",
               "method": "POST",
@@ -195,6 +173,28 @@
             "duckduckgo.com/?q=,test"
           ],
           "children": [
+            {
+              "name": "step2(copy)",
+              "method": "get",
+              "conLen": true,
+              "url": "https://{{engine}}{{word}}",
+              "headers": [
+                "Content-Type:charset=UTF-8",
+                "test:test"
+              ],
+              "body": "1\n2\n3\n4",
+              "outputs": [
+                {
+                  "type": "regular",
+                  "value": "*"
+                }
+              ],
+              "asserts": {
+                "code": "200"
+              },
+              "ignoreWrongSSL": false,
+              "dbid": "2024-03-02 21:55:35 975"
+            },
             {
               "name": "st",
               "method": "POST",

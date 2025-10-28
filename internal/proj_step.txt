@@ -261,13 +261,13 @@ function onInput(x) {
             <td>
                 <div>Headers</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows=7 oninput=onInput(this) id="header"><!--HEADER--></textarea>
+                    <textarea style='flex:4' rows=6 oninput=onInput(this) id="header"><!--HEADER--></textarea>
                 </div>
             </td>
             <td>
                 <div>Headers</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows=7 oninput=onInput(this)  id="lastrequestheaders"></textarea>
+                    <textarea style='flex:4' rows=6 oninput=onInput(this)  id="lastrequestheaders"></textarea>
                 </div>
             </td>
         </tr>
@@ -285,6 +285,21 @@ function onInput(x) {
                     <textarea style='flex:4' rows=10 oninput=onInput(this) id="lastrequestbody"></textarea>
                 </div>
 
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div>Notes</div>
+                <div style='display:flex'>
+                    <textarea style='flex:4' rows=3 oninput=onInput(this) id="notes"><!--INPUT--></textarea>
+                </div>
+            </td>
+            <td>
+                <div>
+                    Notes</div>
+                <div style='display:flex'>
+                    <textarea style='flex:4' rows=3 oninput=onInput(this) id="lastnotes"></textarea>
+                </div>
             </td>
         </tr>
         <tr>

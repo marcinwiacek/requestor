@@ -728,13 +728,13 @@ async function parsePOSTRun(req, params, res, jsonObj) {
     }
     for (let tsnumber in jsonObj.testsuites) {
         var ts = jsonObj.testsuites[tsnumber];
-        if (params['path'] == "" || ts.name.localeCompare(p[0]) == 0) {} else {
+        if (params['path'] != "" && ts.name.localeCompare(p[0]) != 0) {
             continue;
         }
         var x1_before = await createTSTree(params['file'], ts);
         for (let tcnumber in ts.children) {
             var tc = ts.children[tcnumber];
-            if (params['path'] != "" && p.length == 1 || (p.length > 1 && tc.name.localeCompare(p[1]) == 0)) {} else {
+            if (params['path'] != "" && (p.length > 1 && tc.name.localeCompare(p[1]) != 0)) {
                 continue;
             }
             var x2_before = await createTCTree(params['file'], tc);
@@ -743,7 +743,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 if (tc.disabled && tc.disabled == true) {
                     continue;
                 }
-                if (params['path'] == "" || p.length < 3 || (p.length == 3 && step.name.localeCompare(p[2]) == 0)) {} else {
+                if (params['path'] != "" && (p.length == 3 && step.name.localeCompare(p[2]) != 0)) {
                     continue;
                 }
                 let lines = tc.input;
