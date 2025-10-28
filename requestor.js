@@ -454,7 +454,7 @@ async function getJSON(dbid, dt, file) {
         s += "\"body\":\"\",";
         s += "\"headers_res\":\"\","
         s += "\"body_res\":\"\"";
-        return s;
+        return "{"+s+"}";
     }
 
     let s = "\"datetime\":\"" + decodeURIComponent(dt) + "\",";
@@ -469,7 +469,7 @@ async function getJSON(dbid, dt, file) {
     s += "\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
     s += "\"headers_res\":\"" + encodeURIComponent(rows[0]["headers_res"]) + "\",";
     s += "\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
-    return s;
+    return "{"+s+"}";
 }
 
 function updateFolderStatus(file, path, oldstatus, newstatus) {
@@ -678,7 +678,7 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
         response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
         err => {});
 
-    retVal = JSON.parse("{" + await getJSON(req.dbid, curDT, filename) + "}");
+    retVal = JSON.parse(await getJSON(req.dbid, curDT, filename));
     retVal.oldtimes = times;
 
     s = {};
@@ -916,7 +916,7 @@ async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
 async function parsePOSTGetStep(req, params, res, jsonObj) {
     el = findElement(jsonObj, params['path']);
     if (el != null && el.type === 'step') {
-        sendPlain(req, res, "{" + await getJSON(el.obj.dbid, params['dt'], params['file']) + "}");
+        sendPlain(req, res, await getJSON(el.obj.dbid, params['dt'], params['file']));
     }
 }
 
@@ -1080,7 +1080,6 @@ async function parsePOSTImport(req, params, res, jsonObj) {
     }
 }
 
-// return values from sub functions are ignored.
 async function parsePOSTforms(req, params, res, jsonObj) {
     if (consoleLog) console.log(JSON.parse(JSON.stringify(params)));
     if (params["reportpage"]) {
@@ -1137,11 +1136,13 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     }
 
     el = findElement(jsonObj[params['file']], params['path']);
-    if (el != null) {
+    if (el == null) {
+       sendPlain(req, res, "");
+       return;
+    }
         if (el.type === 'suite') {
             sendPlain(req, res, readFileContentSync("/internal/proj_ts.txt")
                 .replace("<!--NAME-->", el.obj.name));
-            return;
         } else if (el.type === 'tc') {
             var xxxx = "<script>var csvData =`";
             for (var inputnumber in el.obj.input) {
@@ -1151,7 +1152,6 @@ async function parsePOSTforms(req, params, res, jsonObj) {
             sendPlain(req, res, readFileContentSync("/internal/proj_tc.txt")
                 .replace("<!--NAME-->", el.obj.name)
                 .replace("<!--DATA-->", xxxx));
-            return;
         } else if (el.type === 'step') {
             object = readFileContentSync("/internal/proj_step.txt")
                 .replace("<!--NAME-->", el.obj.name)
@@ -1194,10 +1194,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
                 object = object.replace("<!--WHENLAST-->", xxxx);
             }
             sendPlain(req, res, object);
-            return;
         }
-    }
-    sendPlain(req, res, "");
 }
 
 const onRequestHandler = async (req, res) => {
