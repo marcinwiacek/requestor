@@ -476,6 +476,7 @@ async function getJSON(dbid, dt, file) {
 }
 
 function updateFolderStatus(file, path, oldstatus, newstatus) {
+    console.log(path +" "+oldstatus+" "+newstatus);
     if (oldstatus != newstatus) {
         s = {};
         s['file'] = file;
@@ -817,10 +818,10 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 step.dbid = stepcopy.dbid;
             }
             var x2_after = await createTCTree(params['file'], tc);
-            updateFolderStatus(params['file'], p[0] + "/" + p[1], x2_before.status, x2_after.status);
+            updateFolderStatus(params['file'], ts.name + "/" + tc.name, x2_before.status, x2_after.status);
         }
         var x1_after = await createTSTree(params['file'], ts);
-        updateFolderStatus(params['file'], p[0], x1_before.status, x1_after.status);
+        updateFolderStatus(params['file'], ts.name, x1_before.status, x1_after.status);
     }
 
     s = {};
