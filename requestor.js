@@ -667,7 +667,7 @@ function replaceStringArrayWithArray(s) {
     return retVal;
 }
 
-async function executeRequestAndSaveResults(req, res, times, filename, runpath, iteration, dt0) {
+async function executeRequestAndSaveResults(req, res, times, filename, runpath, iteration, dt0, isLast) {
     let dt = new Date();
     let curDT = getDateString(dt);
     var response = await executeRequest(req);
@@ -687,9 +687,11 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
     s['status'] = retVal.errors.length == 0 ? 'ok' : 'nok';
     sendCallback(filename, "updatefilestatus", JSON.stringify(s));
 
-    retVal.path = runpath;
-    retVal.file = filename;
-    sendCallback(filename, "runstep", JSON.stringify(retVal));
+    if (isLast) {
+        retVal.path = runpath;
+        retVal.file = filename;
+        sendCallback(filename, "runstep", JSON.stringify(retVal));
+    }
 
     s = {};
     s['file'] = filename;
@@ -763,8 +765,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                 if (lines.length == 0) {
                     var stepcopy = JSON.parse(JSON.stringify(step));
                     stepcopy.headers = replaceStringArrayWithArray(stepcopy.headers);
-                    sss = await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, -1, dt);
-                    times.push(sss.datetime);
+                    times.push((await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, -1, dt, true)).datetime);
                 } else {
                     let iteration = 1;
                     let headers = []
@@ -783,22 +784,27 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                         });
                         var stepcopy = JSON.parse(JSON.stringify(step));
                         stepcopy.headers = replaceStringArrayWithArray(stepcopy.headers);
+			var replaced = false;
                         for (let d in arra) {
-                            stepcopy.url = stepcopy.url.replace("{{" + d + "}}", arra[d]);
-                            stepcopy.body = stepcopy.body.replace("{{" + d + "}}", arra[d]);
+			    if (stepcopy.url.includes("{{" + d + "}}") || stepcopy.body.includes("{{"+d+"}}")) replaced = true;
+                            stepcopy.url = stepcopy.url.replaceAll("{{" + d + "}}", arra[d]);
+                            stepcopy.body = stepcopy.body.replaceAll("{{" + d + "}}", arra[d]);
                             for (let headername in stepcopy.headers) {
                                 if (Array.isArray(stepcopy.headers[headername])) {
                                     for (let arx in stepcopy.headers[headername]) {
+					if (stepcopy.headers[headername][arx].includes("{{" + d + "}}")) replaced = true;
                                         stepcopy.headers[headername][arx] =
-                                            stepcopy.headers[headername][arx].replace("{{" + d + "}}", arra[d]);
+                                            stepcopy.headers[headername][arx].replaceAll("{{" + d + "}}", arra[d]);
                                     }
                                 } else {
+				    if (stepcopy.headers[headername].includes("{{" + d + "}}")) replaced = true;
                                     stepcopy.headers[headername] =
-                                        stepcopy.headers[headername].replace("{{" + d + "}}", arra[d]);
+                                        stepcopy.headers[headername].replaceAll("{{" + d + "}}", arra[d]);
                                 }
                             }
                         }
-                        times.push((await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt)).datetime);
+                        times.push((await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt, iteration == lines.length-1)).datetime);
+			if (!replaced) break; //don't run more iterations, when we don't have params
                         iteration++;
                     }
                 }
