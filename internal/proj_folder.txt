@@ -177,7 +177,9 @@
 
     function elementDelete() {
         document.getElementById(popupMenuName).classList.toggle("show");
-        executePOST("op=deleteelement&path=" + popupMenuID);
+	if (confirm("Do you want to delete "+popupMenuID+"?")) {
+            executePOST("op=deleteelement&path=" + popupMenuID);
+	}
     }
 
     function elementCopy() {

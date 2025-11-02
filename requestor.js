@@ -1081,6 +1081,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             newStep.headers = ["content-type: application/json"];
             newStep.body = body == null ? "" : JSON.stringify(body, null, 2);
             newStep.ignoreWrongSSL = true;
+	    newStep.notes = (TC.summary?TC.summary:"")+"\n"+(TC.description && TC.description!=TC.summary?TC.description:"");
             newStep.conLen = true;
             newStep.url = YAMLobj.servers.url + pathIndex;
             newTC.children.push(newStep);
