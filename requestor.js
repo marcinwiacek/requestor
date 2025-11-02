@@ -476,7 +476,7 @@ async function getJSON(dbid, dt, file) {
 }
 
 function updateFolderStatus(file, path, oldstatus, newstatus) {
-    console.log(path +" "+oldstatus+" "+newstatus);
+    console.log(path + " " + oldstatus + " " + newstatus);
     if (oldstatus != newstatus) {
         s = {};
         s['file'] = file;
@@ -681,7 +681,9 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
     dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,notes,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         curDT, req.dbid, req.url, replaceArrayWithString(req.headers), req.body, req.notes, replaceArrayWithString(response.headers),
         response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
-        err => {console.log(err)});
+        err => {
+            console.log(err)
+        });
 
     retVal = JSON.parse(await getJSON(req.dbid, curDT, filename));
     retVal.oldtimes = times;
@@ -764,9 +766,9 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                     step.ignoreWrongSSL = params['ssl'] == "true";
                     step.conLen = params['conlen'] == "true";
                     step.url = decodeURIComponent(params['url']);
-		    step.notes = decodeURIComponent(params['notes']);
+                    step.notes = decodeURIComponent(params['notes']);
                 }
-		if (step.notes==null) step.notes = "";
+                if (step.notes == null) step.notes = "";
                 runpath = ts.name + "/" + tc.name + "/" + step.name;
 
                 if (lines.length == 0) {
