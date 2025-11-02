@@ -408,6 +408,7 @@ async function loadDB(name) {
     url text not null,
     headers text not null,
     body text not null,
+    notes text not null,
     ssl_ignore smallint not null,
     cert_res text not null,
     error_res text,
@@ -452,6 +453,7 @@ async function getJSON(dbid, dt, file) {
         s += "\"method\":\"GET\",";
         s += "\"headers\":\"\",";
         s += "\"body\":\"\",";
+        s += "\"notes\":\"\",";
         s += "\"headers_res\":\"\","
         s += "\"body_res\":\"\"";
         return "{" + s + "}";
@@ -467,6 +469,7 @@ async function getJSON(dbid, dt, file) {
     s += "\"method\":\"" + rows[0]["method"] + "\",";
     s += "\"headers\":\"" + encodeURIComponent(rows[0]["headers"]) + "\",";
     s += "\"body\":\"" + encodeURIComponent(rows[0]["body"]) + "\",";
+    s += "\"notes\":\"" + encodeURIComponent(rows[0]["notes"]) + "\",";
     s += "\"headers_res\":\"" + encodeURIComponent(rows[0]["headers_res"]) + "\",";
     s += "\"body_res\":\"" + encodeURIComponent(rows[0]["body_res"]) + "\"";
     return "{" + s + "}";
@@ -673,10 +676,11 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
     var response = await executeRequest(req);
     let curDT2 = getDateString(new Date());
     if (!req.dbid) req.dbid = getDateString(dt);
-    dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-        curDT, req.dbid, req.url, replaceArrayWithString(req.headers), req.body, replaceArrayWithString(response.headers),
+
+    dbObj[filename].run(`insert into requests (dt, dbid, url, headers,body,notes,headers_res,body_res,method,ssl_ignore,code_res,cert_res,dt_res,error_res) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        curDT, req.dbid, req.url, replaceArrayWithString(req.headers), req.body, req.notes, replaceArrayWithString(response.headers),
         response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
-        err => {});
+        err => {console.log(err)});
 
     retVal = JSON.parse(await getJSON(req.dbid, curDT, filename));
     retVal.oldtimes = times;
@@ -759,7 +763,9 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                     step.ignoreWrongSSL = params['ssl'] == "true";
                     step.conLen = params['conlen'] == "true";
                     step.url = decodeURIComponent(params['url']);
+		    step.notes = decodeURIComponent(params['notes']);
                 }
+		if (step.notes==null) step.notes = "";
                 runpath = ts.name + "/" + tc.name + "/" + step.name;
 
                 if (lines.length == 0) {
@@ -1175,7 +1181,12 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         for (var bodynumber in el.obj.body) {
             xxxx += el.obj.body[bodynumber];
         }
-        object = object.replace("<!--BODY-->", xxxx)
+        object = object.replace("<!--BODY-->", xxxx);
+        var xxxx = "";
+        for (var notesnumber in el.obj.notes) {
+            xxxx += el.obj.notes[notesnumber];
+        }
+        object = object.replace("<!--NOTES-->", xxxx)
             .replace("<!--SSLIGNORE-->", el.obj.ignoreWrongSSL ? "checked" : "")
             .replace("<!--CONLENGTH-->", el.obj.conLen ? "checked" : "")
             .replace("<!--METHOD-->", el.obj.method);

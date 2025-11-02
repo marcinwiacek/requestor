@@ -98,6 +98,9 @@ function setupLast(obj) {
     document.getElementById("lastrequestbody").value = decodeURIComponent(
         obj.body,
     );
+    document.getElementById("lastrequestnotes").value = decodeURIComponent(
+        obj.notes,
+    );
     document.getElementById("lastresponseheaders").value = "";
     document.getElementById("lastresponseheaders").value =
         decodeURIComponent(obj.headers_res);
@@ -142,9 +145,13 @@ function sendRunStep() {
         }
     }
 
-    executePOST("op=run&path=" + document.getElementById("id").value + "&headers=" + encodeURIComponent(document.getElementById("header").value) +
-        "&body=" + encodeURIComponent(document.getElementById("body").value) + "&url=" + encodeURIComponent(document.getElementById("url").value) +
-        "&ssl=" + document.getElementById("ignorewrongssl").checked + "&conlen=" + document.getElementById("addcontentlength").checked +
+    executePOST("op=run&path=" + document.getElementById("id").value + 
+        "&headers=" + encodeURIComponent(document.getElementById("header").value) +
+        "&body=" + encodeURIComponent(document.getElementById("body").value) + 
+        "&notes=" + encodeURIComponent(document.getElementById("notes").value) + 
+        "&url=" + encodeURIComponent(document.getElementById("url").value) +
+        "&ssl=" + document.getElementById("ignorewrongssl").checked + 
+        "&conlen=" + document.getElementById("addcontentlength").checked +
         "&method=" + method,
         function(...args) {
             document.getElementById("run").disabled = false;
@@ -284,21 +291,19 @@ function onInput(x) {
                 <div style='display:flex'>
                     <textarea style='flex:4' rows=10 oninput=onInput(this) id="lastrequestbody"></textarea>
                 </div>
-
             </td>
         </tr>
         <tr>
             <td>
                 <div>Notes</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows=3 oninput=onInput(this) id="notes"><!--INPUT--></textarea>
+                    <textarea style='flex:4' rows=3 oninput=onInput(this) id="notes"><!--NOTES--></textarea>
                 </div>
             </td>
             <td>
-                <div>
-                    Notes</div>
+                <div>Notes</div>
                 <div style='display:flex'>
-                    <textarea style='flex:4' rows=3 oninput=onInput(this) id="lastnotes"></textarea>
+                    <textarea style='flex:4' rows=3 oninput=onInput(this) id="lastrequestnotes"></textarea>
                 </div>
             </td>
         </tr>

@@ -200,7 +200,7 @@ function setupSSE() {
             document.getElementById("emptymenu").style.display = 'inline';
         }
         setSaveFile(false);
-        document.getElementById("two").innerHTML = ""; //fixme       
+        document.getElementById("two").innerHTML = ""; //fixme
     });
     source.addEventListener("setenabledisablesave", function(event) {
         var obj = JSON.parse(event.data);
