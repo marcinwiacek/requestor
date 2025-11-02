@@ -803,7 +803,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                                 }
                             }
                         }
-                        times.push((await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt, iteration == lines.length-1)).datetime);
+                        times.push((await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt, iteration == lines.length-1 || !replaced)).datetime);
 			if (!replaced) break; //don't run more iterations, when we don't have params
                         iteration++;
                     }
