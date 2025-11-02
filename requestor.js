@@ -784,27 +784,27 @@ async function parsePOSTRun(req, params, res, jsonObj) {
                         });
                         var stepcopy = JSON.parse(JSON.stringify(step));
                         stepcopy.headers = replaceStringArrayWithArray(stepcopy.headers);
-			var replaced = false;
+                        var replaced = false;
                         for (let d in arra) {
-			    if (stepcopy.url.includes("{{" + d + "}}") || stepcopy.body.includes("{{"+d+"}}")) replaced = true;
+                            if (stepcopy.url.includes("{{" + d + "}}") || stepcopy.body.includes("{{" + d + "}}")) replaced = true;
                             stepcopy.url = stepcopy.url.replaceAll("{{" + d + "}}", arra[d]);
                             stepcopy.body = stepcopy.body.replaceAll("{{" + d + "}}", arra[d]);
                             for (let headername in stepcopy.headers) {
                                 if (Array.isArray(stepcopy.headers[headername])) {
                                     for (let arx in stepcopy.headers[headername]) {
-					if (stepcopy.headers[headername][arx].includes("{{" + d + "}}")) replaced = true;
+                                        if (stepcopy.headers[headername][arx].includes("{{" + d + "}}")) replaced = true;
                                         stepcopy.headers[headername][arx] =
                                             stepcopy.headers[headername][arx].replaceAll("{{" + d + "}}", arra[d]);
                                     }
                                 } else {
-				    if (stepcopy.headers[headername].includes("{{" + d + "}}")) replaced = true;
+                                    if (stepcopy.headers[headername].includes("{{" + d + "}}")) replaced = true;
                                     stepcopy.headers[headername] =
                                         stepcopy.headers[headername].replaceAll("{{" + d + "}}", arra[d]);
                                 }
                             }
                         }
-                        times.push((await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt, iteration == lines.length-1 || !replaced)).datetime);
-			if (!replaced) break; //don't run more iterations, when we don't have params
+                        times.push((await executeRequestAndSaveResults(stepcopy, res, times, params['file'], runpath, iteration, dt, iteration == lines.length - 1 || !replaced)).datetime);
+                        if (!replaced) break; //don't run more iterations, when we don't have params
                         iteration++;
                     }
                 }
@@ -1280,8 +1280,7 @@ const onRequestHandler = async (req, res) => {
                     }
                 }
                 dbObj[params['file']].run(`delete from requests where dbid not in (` + alldbid + `)`,
-                    err => {
-                    });
+                    err => {});
             }
             sendHTML(req, res, readFileContentSync("/internal/proj.txt")
                 .replace("<!--JSLIB-->",
