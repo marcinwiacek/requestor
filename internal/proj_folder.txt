@@ -294,6 +294,9 @@
     }
 
     function getFileElement(name, disabled, id, status) {
+	let divel = document.createElement('span');
+	divel.innerHTML=getStatusHTML(status);
+
         let alel = document.createElement("a");
         alel.text = name;
         alel.setAttribute("id", id);
@@ -309,14 +312,11 @@
         alel.addEventListener("drop", dropEnd);
         alel.addEventListener("dragenter", cancelDefault);
         alel.addEventListener("dragover", cancelDefault);
+        alel.prepend(divel);
         updatePopupMenu(alel, "step");
-
-	let divel = document.createElement('span');
-	divel.innerHTML=getStatusHTML(status);
 
         let liel = document.createElement("li");
         liel.setAttribute("class", "file");
-        liel.appendChild(divel);
         liel.appendChild(alel);
 
         return liel;
