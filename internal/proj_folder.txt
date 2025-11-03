@@ -280,8 +280,8 @@
         alel.addEventListener("drop", dropEnd);
         alel.addEventListener("dragenter", cancelDefault);
         alel.addEventListener("dragover", cancelDefault);
-        updatePopupMenu(alel, "folder");
         alel.prepend(divel);
+        updatePopupMenu(alel, "folder");
 
         let ulel = document.createElement("ul");
 
@@ -374,7 +374,8 @@
             } else {
                 document.getElementById("foldermenu").classList.remove("show");
             }
-            popupMenuID = e.target.id;
+
+            popupMenuID = toggler.id;
             popupMenuName = name + "menu";
             document.getElementById(popupMenuName).addEventListener("contextmenu", (e) => {
                 e.preventDefault();
