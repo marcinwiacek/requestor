@@ -82,7 +82,17 @@ function getEmptyResponse(errorInfo) {
 }
 
 async function executeRequest(req) {
-    var q = new URL(req.url);
+    resperror = "";
+    try {
+        var q = new URL(req.url);
+        } catch (e) {
+    return new Promise((resolve, reject) => {
+            var s = e.errors + " ";
+            if (resperror) resperror += "\n";
+            resperror += (s == 'undefined ' ? e.message : s);
+            resolve(getEmptyResponse(resperror));
+});
+        }
     console.log(q);
     var certinfo = '';
     const options = {
@@ -107,7 +117,6 @@ async function executeRequest(req) {
         method2 = req.method == "get" ? https.get : https.request;
         if (req.ignoreWrongSSL) options.rejectUnauthorized = false;
     }
-    resperror = "";
     //fixme
     if (req.url.includes("{{") && req.url.includes("}}")) {
         resperror = "Unresolved params in url";
@@ -491,7 +500,7 @@ async function getJSON(dbid, dt, file) {
 function updateFolderStatus(file, path, oldstatus, newstatus) {
     console.log(path + " " + oldstatus + " " + newstatus);
     if (oldstatus != newstatus) {
-        s = new urlSearchParams();
+        s = new URLSearchParams();
         s.set('file', file);
         s.set('path', path);
         s.set('status', newstatus);
@@ -626,7 +635,7 @@ async function parsePOSTSaveFile(params, jsonObj) {
             if (err) {}
         });
 
-    x = new urlSearchParams();
+    x = new URLSearchParams();
     x.set('file', params.get('file'));
     x.set('modified', false);
     sendCallback(params.get('file'), "setenabledisablesave", x);
@@ -701,25 +710,25 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
     retVal = JSON.parse(await getJSON(req.dbid, curDT, filename));
     retVal.oldtimes = times;
 
-    s = new urlSearchParams();
+    s = new URLSearchParams();
     s.set('file', filename);
     s.set('path', runpath);
     s.set('status', retVal.errors.length == 0 ? 'ok' : 'nok');
     sendCallback(filename, "updatefilestatus", s);
 
     if (isLast) {
-        s = new urlSearchParams();
+        s = new URLSearchParams();
         for (indexx in retVal) {
             s.set(indexx, retVal[indexx]);
         }
-        s.set(path, runpath);
-        s.set(file, filename);
+        s.set('path', runpath);
+        s.set('file', filename);
         sendCallback(filename, "runstep", s);
-        retVal[path] = runpath;
-        retVal[file] = filename;
+        retVal.path = runpath;
+        retVal.file = filename;
     }
 
-    s = new urlSearchParams();
+    s = new URLSearchParams();
     s.set('file', filename);
     s.set('info', "Executing " + runpath + (iteration == -1 ? "" : " iteration " + iteration));
     sendCallback(filename, "runner", s);
@@ -845,7 +854,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
         updateFolderStatus(params.get('file'), ts.name, x1_before.status, x1_after.status);
     }
 
-    s = new urlSearchParams();
+    s = new URLSearchParams();
     s.set('file', params.get('file'));
     s.set('info', "");
     sendCallback(params.get('file'), "runner", s);
@@ -1252,7 +1261,7 @@ const onRequestHandler = async (req, res) => {
             //                        console.log("registering SSE " + x);
             callback[session] = x;
             if (params.get('file') != null && jsonObj[params.get('file')]) {
-                x = new urlSearchParams();
+                x = new URLSearchParams();
                 x.set('file', params.get('file'));
                 x.set('modified', jsonObj[params.get('file')].modified ? true : false);
                 sendCallback(params.get('file'), "setenabledisablesave", x);
@@ -1334,7 +1343,7 @@ const onRequestHandler = async (req, res) => {
         });
         req.on('end', function() {
             console.log(req);
-            parsePOSTforms(req, (new URL("/?" + body)).search, res, jsonObj);
+            parsePOSTforms(req, (new URL(req.scheme+"://"+req.authority+req.url+"/?" + body)).searchParams, res, jsonObj);
         });
         return;
     }
