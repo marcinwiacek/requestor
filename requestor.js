@@ -83,7 +83,7 @@ function getEmptyResponse(errorInfo) {
 
 async function executeRequest(req) {
     var q = new URL(req.url);
-console.log(q);
+    console.log(q);
     var certinfo = '';
     const options = {
         // hostname:q.hostname,
@@ -120,16 +120,16 @@ console.log(q);
     options.method = req.method;
     options.timeout = 3000;
     options.headers = req.headers;
-console.log("starting tc");
+    console.log("starting tc");
     return new Promise((resolve, reject) => {
         try {
-console.log("tc run");
+            console.log("tc run");
             const r = method2(req.url, options, (response) => {
                 const chunk = []
-console.log("tc run 2");
+                console.log("tc run 2");
                 try {
                     var cipher = r.socket.getCipher();
-console.log("tc run 3");
+                    console.log("tc run 3");
                     certinfo += "Cipher\n  " + cipher.standardName + ", " + cipher.version + "\n\n";
                     var cert = r.socket.getPeerCertificate(true);
                     if (cert != undefined && cert.subject) {
@@ -147,7 +147,7 @@ console.log("tc run 3");
                 } catch (e) {
                     certinfo = "Not possible to get certificate"
                 }
-console.log("tc run 3");
+                console.log("tc run 3");
                 response.on('data', (fragments) => {
                     chunk.push(fragments);
                 });
@@ -161,7 +161,7 @@ console.log("tc run 3");
                     resolve(resp);
                 });
             }).on('error', (e) => {
-console.log("tc run error 1");
+                console.log("tc run error 1");
                 var s = e.errors + " ";
                 if (resperror) resperror += "\n";
                 resperror += (s == 'undefined ' ? e.message : s);
@@ -172,7 +172,7 @@ console.log("tc run error 1");
                 r.end();
             }
         } catch (e) {
-console.log("tc run error 2");
+            console.log("tc run error 2");
             var s = e.errors + " ";
             if (resperror) resperror += "\n";
             resperror += (s == 'undefined ' ? e.message : s);
@@ -296,10 +296,10 @@ async function sendCallback(file, type, msg) {
         //console.log("   callback "+callback[i].file+" "+file);
         if (callback[i].file == file) {
             //console.log("   running callback "+callback[i].file+" "+type+" "+msg);
-	    x = {}
-	    for (const [name, value] of msg) {
-		x[name] = value;
-	    }
+            x = {}
+            for (const [name, value] of msg) {
+                x[name] = value;
+            }
             callback[i].res.write("event: " + type + "\n");
             callback[i].res.write("data: " + JSON.stringify(x) + "\n\n");
         }
@@ -708,15 +708,15 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
     sendCallback(filename, "updatefilestatus", s);
 
     if (isLast) {
-	s = new urlSearchParams();
-	for (indexx in retVal) {
-	    s.set(indexx,retVal[indexx]);
-	}
+        s = new urlSearchParams();
+        for (indexx in retVal) {
+            s.set(indexx, retVal[indexx]);
+        }
         s.set(path, runpath);
         s.set(file, filename);
         sendCallback(filename, "runstep", s);
-        retVal[path]= runpath;
-        retVal[file] =filename;
+        retVal[path] = runpath;
+        retVal[file] = filename;
     }
 
     s = new urlSearchParams();
@@ -1053,7 +1053,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
     let YAMLobj = prepareJSONFromYAML(info, 0, 0).yaml;
     console.log(YAMLobj);
 
-    params.set("path",jsonObj.testsuites[0].name);
+    params.set("path", jsonObj.testsuites[0].name);
     params.set('new', "new testsuite");
     params.set("newElementPath", "new testsuite");
     params.set("elplen", "1");
@@ -1100,13 +1100,13 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             newStep.headers = ["content-type: application/json"];
             newStep.body = body == null ? "" : JSON.stringify(body, null, 2);
             newStep.ignoreWrongSSL = true;
-	    newStep.notes = (TC.summary?TC.summary:"")+"\n"+(TC.description && TC.description!=TC.summary?TC.description:"");
+            newStep.notes = (TC.summary ? TC.summary : "") + "\n" + (TC.description && TC.description != TC.summary ? TC.description : "");
             newStep.conLen = true;
             newStep.url = YAMLobj.servers.url + pathIndex;
             newTC.children.push(newStep);
             params.set('new', TC.operationId);
             params.set("path", "new testsuite/" + TC.operationId);
-            params.set("newElementPath", "new testsuite/" +                TC.operationId + "/" + TC.operationId);
+            params.set("newElementPath", "new testsuite/" + TC.operationId + "/" + TC.operationId);
             params.set("elplen", "2");
             params.set("op", "newelementinside");
             sendCallback(params.get('file'), "newelementinside", params);
@@ -1237,8 +1237,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
-console.log(req);
-        const params = (new URL(req.scheme+'://'+req.authority+req.url)).searchParams;
+        console.log(req);
+        const params = (new URL(req.scheme + '://' + req.authority + req.url)).searchParams;
         if (consoleLog) console.log(JSON.parse(JSON.stringify(params)));
         if (params.get("sse")) { // PUSH functionality
             res.writeHead(200, {
@@ -1333,7 +1333,7 @@ console.log(req);
             if (body.length > 1e6 * 6) req.connection.destroy(); // 6 MB
         });
         req.on('end', function() {
-console.log(req);
+            console.log(req);
             parsePOSTforms(req, (new URL("/?" + body)).search, res, jsonObj);
         });
         return;
