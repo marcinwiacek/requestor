@@ -85,14 +85,14 @@ async function executeRequest(req) {
     resperror = "";
     try {
         var q = new URL(req.url);
-        } catch (e) {
-    return new Promise((resolve, reject) => {
+    } catch (e) {
+        return new Promise((resolve, reject) => {
             var s = e.errors + " ";
             if (resperror) resperror += "\n";
             resperror += (s == 'undefined ' ? e.message : s);
             resolve(getEmptyResponse(resperror));
-});
-        }
+        });
+    }
     console.log(q);
     var certinfo = '';
     const options = {
@@ -1343,7 +1343,7 @@ const onRequestHandler = async (req, res) => {
         });
         req.on('end', function() {
             console.log(req);
-            parsePOSTforms(req, (new URL(req.scheme+"://"+req.authority+req.url+"/?" + body)).searchParams, res, jsonObj);
+            parsePOSTforms(req, (new URL(req.scheme + "://" + req.authority + req.url + "/?" + body)).searchParams, res, jsonObj);
         });
         return;
     }
