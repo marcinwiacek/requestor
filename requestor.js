@@ -9,7 +9,6 @@ const http2 = require('http2');
 const path = require('path');
 const sqlite3 = require('sqlite3');
 const tls = require('node:tls');
-//const url = require('url');
 const zlib = require('zlib');
 
 const version = "20251023";
@@ -127,7 +126,7 @@ async function executeRequest(req) {
         return getEmptyResponse(resperror);
     }
     options.method = req.method;
-    options.timeout = 3000;
+    options.timeout = 5000;
     options.headers = req.headers;
     console.log("starting tc");
     return new Promise((resolve, reject) => {
@@ -175,7 +174,10 @@ async function executeRequest(req) {
                 if (resperror) resperror += "\n";
                 resperror += (s == 'undefined ' ? e.message : s);
                 resolve(getEmptyResponse(resperror));
-            });
+            }).on('timeout', () => {
+                resperror += "Timeout "+options.timeout+"ms";
+                resolve(getEmptyResponse(resperror));
+	    });
             if (req.method == "post") {
                 r.write(req.body);
                 r.end();
@@ -1124,7 +1126,8 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 }
 
 async function parsePOSTforms(req, params, res, jsonObj) {
-    if (consoleLog) console.log(JSON.parse(JSON.stringify(params)));
+        if (consoleLog) process.stdout.write("POST ");
+        if (consoleLog) console.log(params);
     if (params.get("reportpage")) {
         sendPlain(req, res, await getReportPage(parseInt(params.get('reportpage'))));
         return;
@@ -1201,7 +1204,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         if (el.obj.urlprefix) object = object.replace("<!--URLPREFIX-->", el.obj.urlprefix);
         var xxxx = "";
         first = true;
-        console.log(el.obj.headers);
+//        console.log(el.obj.headers);
         for (var headernumber in el.obj.headers) {
             if (!first) xxxx += "\n";
             first = false;
@@ -1246,9 +1249,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
-        console.log(req);
         const params = (new URL(req.scheme + '://' + req.authority + req.url)).searchParams;
-        if (consoleLog) console.log(JSON.parse(JSON.stringify(params)));
+        if (consoleLog) console.log("GET "+req.url);
         if (params.get("sse")) { // PUSH functionality
             res.writeHead(200, {
                 'Cache-Control': 'no-cache',
@@ -1342,7 +1344,7 @@ const onRequestHandler = async (req, res) => {
             if (body.length > 1e6 * 6) req.connection.destroy(); // 6 MB
         });
         req.on('end', function() {
-            console.log(req);
+//            console.log(req);
             parsePOSTforms(req, (new URL(req.scheme + "://" + req.authority + req.url + "/?" + body)).searchParams, res, jsonObj);
         });
         return;
@@ -1406,6 +1408,7 @@ function showbox(arr, pagenum, prefix) {
                 " (" + getDateString(arr[arrnumber].mtime) + ")</a><br>";
             if (i > pagenum * 10 + 9) break;
         }
+	out+="Page ";
         for (j = 0; j < number; j++) {
             out += "<a onclick='loadBoxPart(\"" + prefix + "page=" + j + "\",\"" + prefix + "\");return false;'>" + j + "</a> ";
         }
