@@ -92,7 +92,7 @@ async function executeRequest(req) {
             resolve(getEmptyResponse(resperror));
         });
     }
-    console.log(q);
+    if (consoleLog) console.log(q);
     var certinfo = '';
     const options = {
         // hostname:q.hostname,
@@ -128,16 +128,12 @@ async function executeRequest(req) {
     options.method = req.method;
     options.timeout = 5000;
     options.headers = req.headers;
-    console.log("starting tc");
     return new Promise((resolve, reject) => {
         try {
-            console.log("tc run");
             const r = method2(req.url, options, (response) => {
                 const chunk = []
-                console.log("tc run 2");
                 try {
                     var cipher = r.socket.getCipher();
-                    console.log("tc run 3");
                     certinfo += "Cipher\n  " + cipher.standardName + ", " + cipher.version + "\n\n";
                     var cert = r.socket.getPeerCertificate(true);
                     if (cert != undefined && cert.subject) {
@@ -155,7 +151,6 @@ async function executeRequest(req) {
                 } catch (e) {
                     certinfo = "Not possible to get certificate"
                 }
-                console.log("tc run 3");
                 response.on('data', (fragments) => {
                     chunk.push(fragments);
                 });
@@ -169,7 +164,6 @@ async function executeRequest(req) {
                     resolve(resp);
                 });
             }).on('error', (e) => {
-                console.log("tc run error 1");
                 var s = e.errors + " ";
                 if (resperror) resperror += "\n";
                 resperror += (s == 'undefined ' ? e.message : s);
@@ -183,7 +177,6 @@ async function executeRequest(req) {
                 r.end();
             }
         } catch (e) {
-            console.log("tc run error 2");
             var s = e.errors + " ";
             if (resperror) resperror += "\n";
             resperror += (s == 'undefined ' ? e.message : s);
@@ -191,7 +184,6 @@ async function executeRequest(req) {
         }
     });
 }
-
 
 /*
 const ls = child_process('ls', ['/usr']);
@@ -861,7 +853,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
     s.set('info', "");
     sendCallback(params.get('file'), "runner", s);
 
-    sendCallback("null", "mainrunner", null);
+//    sendCallback("null", "mainrunner", null);
 
     jsonObj.modified = true;
     if (req != null) sendPlain(req, res, JSON.stringify(sss));
@@ -1204,7 +1196,6 @@ async function parsePOSTforms(req, params, res, jsonObj) {
         if (el.obj.urlprefix) object = object.replace("<!--URLPREFIX-->", el.obj.urlprefix);
         var xxxx = "";
         first = true;
-//        console.log(el.obj.headers);
         for (var headernumber in el.obj.headers) {
             if (!first) xxxx += "\n";
             first = false;
@@ -1426,8 +1417,8 @@ if (process.argv.length === 3 || process.argv.length === 4) {
     loadProjectFile(process.argv[2]);
     loadDB(process.argv[2]);
     params = new URLSearchParams();
-    params.append('file', process.argv[2]);
-    params.append('path', process.argv.length === 4 ? process.argv[3] : "");
+    params.set('file', process.argv[2]);
+    params.set('path', process.argv.length === 4 ? process.argv[3] : "");
     parsePOSTRun(null, params, null, jsonObj[process.argv[2]]);
 } else if (process.argv.length === 2) {
     http2.createSecureServer({

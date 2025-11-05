@@ -135,6 +135,7 @@ function selectLastDate() {
 
 function sendRunStep() {
     document.getElementById("run").disabled = true;
+    document.getElementById("run").innerHTML = "Running step";
 
     var method = "";
     var selObj = document.getElementById("type");
@@ -155,6 +156,7 @@ function sendRunStep() {
         "&method=" + method,
         function(...args) {
             document.getElementById("run").disabled = false;
+	    document.getElementById("run").innerHTML = "Run step";
             //processed with sse
         }
     );

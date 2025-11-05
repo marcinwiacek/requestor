@@ -17,7 +17,7 @@
 <div id="data-table"></div>
 <!--DATA-->
 
-<p><button onclick='return runPath(false);'>Run testcase</button>
+<p><button id=run onclick='return runPath(false);'>Run testcase</button>
 
     <script>
         var headerContextMenu = [{

@@ -1,5 +1,5 @@
 <br>
 <form>
     Name <input type="text" id="name" name="name" value="<!--NAME-->">
-    <p><button onclick='return runPath(false);'>Run testsuite</button>
+    <p><button id=run onclick='return runPath(false);'>Run testsuite</button>
 </form>

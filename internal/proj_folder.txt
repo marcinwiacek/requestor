@@ -369,11 +369,11 @@
             if (!e) e = window.event;
             document.getElementById(name + "menu").style.top = e.pageY + "px";
             document.getElementById(name + "menu").style.left = e.pageX + "px";
-            if (name === "folder") {
+//            if (name === "folder") {
                 document.getElementById("stepmenu").classList.remove("show");
-            } else {
+//            } else {
                 document.getElementById("foldermenu").classList.remove("show");
-            }
+//            }
 
             popupMenuID = toggler.id;
             popupMenuName = name + "menu";

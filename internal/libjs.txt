@@ -2,6 +2,7 @@
 const debug = true;
 
 function runPath(emptypath) {
+    document.getElementById('run').disabled = true;
     executePOST("op=run&path=" + (emptypath == true ? "" : document.getElementById('id').value));
     return false;
 }
@@ -63,19 +64,21 @@ function setupSSE() {
             setupSSE();
         }, 5000); // 5 seconds
     };
-    source.addEventListener("mainrunner", function(event) {
-        params = new URLSearchParams(window.location.search);
-        if (!params.get('file')) {
-            if (debug) console.log("SSE mainrunner with " + event.data);
-            window.location.reload();
-        }
-    });
+//    source.addEventListener("mainrunner", function(event) {
+//        params = new URLSearchParams(window.location.search);
+//        if (!params.get('file')) {
+//            if (debug) console.log("SSE mainrunner with " + event.data);
+//            window.location.reload();
+//        }
+//	document.getElementById('run').disabled = false;
+//    });
     source.addEventListener("runner", function(event) {
         var obj = JSON.parse(event.data);
         params = new URLSearchParams(window.location.search);
         if (!params.get('file') || params.get('file').localeCompare(obj.file) != 0) return;
         if (debug) console.log("SSE runner with " + event.data);
         document.getElementById('runner').innerHTML = obj.info;
+	if (obj.info==="") document.getElementById('run').disabled = false;
     });
     source.addEventListener("runstep", function(event) {
         var obj = JSON.parse(event.data);
