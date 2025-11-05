@@ -698,7 +698,7 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
         curDT, req.dbid, req.url, replaceArrayWithString(req.headers), req.body, req.notes, replaceArrayWithString(response.headers),
         response.body, req.method, req.ignoreWrongSSL, response.code, response.certinfo, curDT2, response.error,
         err => {
-            console.log(err)
+            if (err) console.log(err)
         });
 
     retVal = JSON.parse(await getJSON(req.dbid, curDT, filename));
