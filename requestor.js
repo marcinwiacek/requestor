@@ -169,9 +169,9 @@ async function executeRequest(req) {
                 resperror += (s == 'undefined ' ? e.message : s);
                 resolve(getEmptyResponse(resperror));
             }).on('timeout', () => {
-                resperror += "Timeout "+options.timeout+"ms";
+                resperror += "Timeout " + options.timeout + "ms";
                 resolve(getEmptyResponse(resperror));
-	    });
+            });
             if (req.method == "post") {
                 r.write(req.body);
                 r.end();
@@ -853,7 +853,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
     s.set('info', "");
     sendCallback(params.get('file'), "runner", s);
 
-//    sendCallback("null", "mainrunner", null);
+    //    sendCallback("null", "mainrunner", null);
 
     jsonObj.modified = true;
     if (req != null) sendPlain(req, res, JSON.stringify(sss));
@@ -1118,8 +1118,8 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 }
 
 async function parsePOSTforms(req, params, res, jsonObj) {
-        if (consoleLog) process.stdout.write("POST "+(new URL(req.scheme + '://' + req.authority + req.url)).pathname+" ");
-        if (consoleLog) console.log(params);
+    if (consoleLog) process.stdout.write("POST " + (new URL(req.scheme + '://' + req.authority + req.url)).pathname + " ");
+    if (consoleLog) console.log(params);
     if (params.get("reportpage")) {
         sendPlain(req, res, await getReportPage(parseInt(params.get('reportpage'))));
         return;
@@ -1241,7 +1241,7 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
         const params = (new URL(req.scheme + '://' + req.authority + req.url)).searchParams;
-        if (consoleLog) process.stdout.write("GET "+(new URL(req.scheme + '://' + req.authority + req.url)).pathname+" ");
+        if (consoleLog) process.stdout.write("GET " + (new URL(req.scheme + '://' + req.authority + req.url)).pathname + " ");
         if (consoleLog) console.log(params);
         if (params.get("sse")) { // PUSH functionality
             res.writeHead(200, {
@@ -1399,7 +1399,7 @@ function showbox(arr, pagenum, prefix) {
                 " (" + getDateString(arr[arrnumber].mtime) + ")</a><br>";
             if (i > pagenum * 10 + 9) break;
         }
-	out+="Page ";
+        out += "Page ";
         for (j = 0; j < number; j++) {
             out += "<a onclick='loadBoxPart(\"" + prefix + "page=" + j + "\",\"" + prefix + "\");return false;'>" + j + "</a> ";
         }
