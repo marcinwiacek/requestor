@@ -1126,7 +1126,7 @@ async function parsePOSTImport(req, params, res, jsonObj) {
 }
 
 async function parsePOSTforms(req, params, res, jsonObj) {
-        if (consoleLog) process.stdout.write("POST ");
+        if (consoleLog) process.stdout.write("POST "+(new URL(req.scheme + '://' + req.authority + req.url)).pathname+" ");
         if (consoleLog) console.log(params);
     if (params.get("reportpage")) {
         sendPlain(req, res, await getReportPage(parseInt(params.get('reportpage'))));
@@ -1250,7 +1250,8 @@ async function parsePOSTforms(req, params, res, jsonObj) {
 const onRequestHandler = async (req, res) => {
     if (req.method === 'GET') {
         const params = (new URL(req.scheme + '://' + req.authority + req.url)).searchParams;
-        if (consoleLog) console.log("GET "+req.url);
+        if (consoleLog) process.stdout.write("GET "+(new URL(req.scheme + '://' + req.authority + req.url)).pathname+" ");
+        if (consoleLog) console.log(params);
         if (params.get("sse")) { // PUSH functionality
             res.writeHead(200, {
                 'Cache-Control': 'no-cache',
@@ -1344,7 +1345,6 @@ const onRequestHandler = async (req, res) => {
             if (body.length > 1e6 * 6) req.connection.destroy(); // 6 MB
         });
         req.on('end', function() {
-//            console.log(req);
             parsePOSTforms(req, (new URL(req.scheme + "://" + req.authority + req.url + "/?" + body)).searchParams, res, jsonObj);
         });
         return;
