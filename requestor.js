@@ -857,7 +857,7 @@ async function parsePOSTRun(req, params, res, jsonObj) {
     if (req != null) sendPlain(req, res, JSON.stringify(sss));
 }
 
-async function PasteElement(params, jsonObj, deleteDB, deleteOriginal) {
+async function parsePOSTPasteElement(params, jsonObj, deleteDB, deleteOriginal) {
     let elpath = params.get('path').split("/"); //old path
     let elpath2 = params.get('newpath').split("/"); //new parent path
 
@@ -1149,9 +1149,9 @@ async function parsePOSTforms(req, params, res, jsonObj) {
     } else if (params.get('op') == "newelementinside") {
         parsePOSTNewElement(params, jsonObj[params.get('file')], true);
     } else if (params.get('op') == "pasteelement") {
-        PasteElement(params, jsonObj[params.get('file')], true, false);
+        parsePOSTPasteElement(params, jsonObj[params.get('file')], true, false);
     } else if (params.get('op') == "dropelement") {
-        PasteElement(params, jsonObj[params.get('file')], false, true);
+        parsePOSTPasteElement(params, jsonObj[params.get('file')], false, true);
     } else if (params.get('op') == "renameelement") {
         parsePOSTRenameElement(params, jsonObj[params.get('file')]);
     } else if (params.get('op') == "enabledisableelement") {
