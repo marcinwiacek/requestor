@@ -295,17 +295,11 @@ async function addToRunReportHTML(file, p, answer) {
 }
 
 async function sendCallback(file, type, msg) {
-    for (let i in callback) {
-        if (callback[i].file == file) {
-            x = {}
-            for (const [name, value] of msg) {
-                x[name] = value;
-            }
-            callback[i].res.write("event: " + type + "\n");
-            callback[i].res.write("data: " + JSON.stringify(x) + "\n\n");
-	    break;
-        }
+    x = {}
+    for (const [name, value] of msg) {
+        x[name] = value;
     }
+    sendCallbackJSON(file,type,x);
 }
 
 async function sendCallbackJSON(file, type, msg) {
