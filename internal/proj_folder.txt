@@ -410,7 +410,7 @@
 
     updateAllFolders();
 
-    document.getElementById("menu").addEventListener("contextmenu", (e) => {
+    document.addEventListener("contextmenu", (e) => {
         if (Date.now() - timenow > 100) {
             document.getElementById("foldermenu").classList.remove("show");
             document.getElementById("stepmenu").classList.remove("show");

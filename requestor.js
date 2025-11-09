@@ -296,9 +296,7 @@ async function addToRunReportHTML(file, p, answer) {
 
 async function sendCallback(file, type, msg) {
     for (let i in callback) {
-        //console.log("   callback "+callback[i].file+" "+file);
         if (callback[i].file == file) {
-            //console.log("   running callback "+callback[i].file+" "+type+" "+msg);
             x = {}
             for (const [name, value] of msg) {
                 x[name] = value;
