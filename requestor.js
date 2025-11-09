@@ -497,11 +497,11 @@ async function getJSON(dbid, dt, file) {
 function updateFolderStatus(file, path, oldstatus, newstatus) {
     console.log(path + " " + oldstatus + " " + newstatus);
     if (oldstatus != newstatus) {
-        s = new URLSearchParams();
-        s.set('file', file);
-        s.set('path', path);
-        s.set('status', newstatus);
-        sendCallback(file, "updatefolderstatus", s);
+        s = {};
+        s.file = file;
+        s.path = path;
+        s.status = newstatus;
+        sendCallbackJSON(file, "updatefolderstatus", s);
     }
 }
 
@@ -632,10 +632,10 @@ async function parsePOSTSaveFile(params, jsonObj) {
             if (err) {}
         });
 
-    x = new URLSearchParams();
-    x.set('file', params.get('file'));
-    x.set('modified', false);
-    sendCallback(params.get('file'), "setenabledisablesave", x);
+    x = {};
+    x.file = params.get('file');
+    x.modified = false;
+    sendCallbackJSON(params.get('file'), "setenabledisablesave", x);
 }
 
 async function parsePOSTNewFile(req, filename, res) {
@@ -707,24 +707,22 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
     retVal = JSON.parse(await getJSON(req.dbid, curDT, filename));
     retVal.oldtimes = times;
 
-    s = new URLSearchParams();
-    s.set('file', filename);
-    s.set('path', runpath);
-    s.set('status', retVal.errors.length == 0 ? 'ok' : 'nok');
-    sendCallback(filename, "updatefilestatus", s);
+    s = {};
+    s.file = filename;
+    s.path = runpath;
+    s.status = retVal.errors.length == 0 ? 'ok' : 'nok';
+    sendCallbackJSON(filename, "updatefilestatus", s);
 
     if (isLast) {
         retVal.path = runpath;
         retVal.file = filename;
         sendCallbackJSON(filename, "runstep", retVal);
-        retVal.path = runpath;
-        retVal.file = filename;
     }
 
-    s = new URLSearchParams();
-    s.set('file', filename);
-    s.set('info', "Executing " + runpath + (iteration == -1 ? "" : " iteration " + iteration));
-    sendCallback(filename, "runner", s);
+    s = {};
+    s.file = filename;
+    s.info = "Executing " + runpath + (iteration == -1 ? "" : " iteration " + iteration);
+    sendCallbackJSON(filename, "runner", s);
 
     addToRunReport(filename + dt0, runpath, retVal);
     addToRunReportHTML(filename + dt0, runpath, retVal);
@@ -847,12 +845,10 @@ async function parsePOSTRun(req, params, res, jsonObj) {
         updateFolderStatus(params.get('file'), ts.name, x1_before.status, x1_after.status);
     }
 
-    s = new URLSearchParams();
-    s.set('file', params.get('file'));
-    s.set('info', "");
-    sendCallback(params.get('file'), "runner", s);
-
-    //    sendCallback("null", "mainrunner", null);
+    s = {};
+    s.file = params.get('file');
+    s.info = "";
+    sendCallbackJSON(params.get('file'), "runner", s);
 
     jsonObj.modified = true;
     if (req != null) sendPlain(req, res, JSON.stringify(sss));
@@ -1251,10 +1247,10 @@ const onRequestHandler = async (req, res) => {
             //                        console.log("registering SSE " + x);
             callback[session] = x;
             if (params.get('file') != null && jsonObj[params.get('file')]) {
-                x = new URLSearchParams();
-                x.set('file', params.get('file'));
-                x.set('modified', jsonObj[params.get('file')].modified ? true : false);
-                sendCallback(params.get('file'), "setenabledisablesave", x);
+                x = {};
+                x.file = params.get('file');
+                x.modified = jsonObj[params.get('file')].modified ? true : false;
+                sendCallbackJSON(params.get('file'), "setenabledisablesave", x);
             }
             res.on('close', function() {
                 delete callback[session];
