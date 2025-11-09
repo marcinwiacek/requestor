@@ -1057,7 +1057,6 @@ async function parsePOSTImport(req, params, res, jsonObj) {
     params.set("path", jsonObj.testsuites[0].name);
     params.set('new', "new testsuite");
     params.set("newElementPath", "new testsuite");
-    params.set("elplen", "1");
     params.set("op", "newelement");
     let newTS = {};
     newTS.name = "new testsuite";
@@ -1079,7 +1078,6 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             params.set('new', TC.operationId);
             params.set("path", "new testsuite");
             params.set("newElementPath", "new testsuite/" + TC.operationId);
-            params.set("elplen", "1");
             sendCallback(params.get('file'), "newelementinside", params);
 
             let body = null;
@@ -1108,7 +1106,6 @@ async function parsePOSTImport(req, params, res, jsonObj) {
             params.set('new', TC.operationId);
             params.set("path", "new testsuite/" + TC.operationId);
             params.set("newElementPath", "new testsuite/" + TC.operationId + "/" + TC.operationId);
-            params.set("elplen", "2");
             params.set("op", "newelementinside");
             sendCallback(params.get('file'), "newelementinside", params);
         }
