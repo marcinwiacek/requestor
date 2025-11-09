@@ -308,6 +308,16 @@ async function sendCallback(file, type, msg) {
     }
 }
 
+async function sendCallbackJSON(file, type, msg) {
+    for (let i in callback) {
+        if (callback[i].file == file) {
+            callback[i].res.write("event: " + type + "\n");
+            callback[i].res.write("data: " + JSON.stringify(msg) + "\n\n");
+	    break;
+        }
+    }
+}
+
 function findElement(jsonObj, pathString) {
     let elpath = pathString.split("/");
     let objobj = jsonObj.testsuites;
@@ -710,13 +720,9 @@ async function executeRequestAndSaveResults(req, res, times, filename, runpath, 
     sendCallback(filename, "updatefilestatus", s);
 
     if (isLast) {
-        s = new URLSearchParams();
-        for (indexx in retVal) {
-            s.set(indexx, retVal[indexx]);
-        }
-        s.set('path', runpath);
-        s.set('file', filename);
-        sendCallback(filename, "runstep", s);
+        retVal.path = runpath;
+        retVal.file = filename;
+        sendCallbackJSON(filename, "runstep", retVal);
         retVal.path = runpath;
         retVal.file = filename;
     }
