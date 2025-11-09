@@ -303,6 +303,7 @@ async function sendCallback(file, type, msg) {
             }
             callback[i].res.write("event: " + type + "\n");
             callback[i].res.write("data: " + JSON.stringify(x) + "\n\n");
+	    break;
         }
     }
 }
